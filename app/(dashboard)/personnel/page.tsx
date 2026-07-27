@@ -3,21 +3,19 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, Pencil, Eye, Search } from "lucide-react";
-import { usePersonnel } from "@/lib/data/store";
 import { useIsAdmin } from "@/components/auth/role-store";
 import { Personnel, personnelStatusLabels } from "@/lib/data/types";
 import { Avatar } from "@/components/dashboard/avatar";
-import { deletePersonnel } from "@/lib/data/store";
 import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
 import { PersonnelDialog } from "@/components/dashboard/personnel-dialog";
 import { ExportButton } from "@/components/dashboard/export-button";
 import { MobileCard, MobileCardList } from "@/components/dashboard/mobile-card-list";
 import { useToast } from "@/components/ui/toast";
+import { apiFetch } from "@/lib/api";
 import Link from "next/link";
 
 
 export default function PersonnelPage() {
-  const personnel = usePersonnel();
   const isAdmin = useIsAdmin();
   const router = useRouter();
   const toast = useToast();
@@ -31,8 +29,35 @@ export default function PersonnelPage() {
     if (!isAdmin) router.replace("/");
   }, [isAdmin, router]);
 
+  const [personnelList, setPersonnelList] = useState<Personnel[]>([]);
+
+  const fetchPersonnel = () => {
+    apiFetch<any[]>("/personnel")
+      .then((data) => {
+        const mapped: Personnel[] = data.map((item) => ({
+          id: String(item.id),
+          name: item.name,
+          department: item.department ? item.department.name : "Genel",
+          departmentId: String(item.department_id),
+          phone: item.phone || "-",
+          status: item.status || "active",
+          startDate: item.start_date || "",
+          avatarUrl: item.avatar_url || "",
+          email: item.user?.email || "",
+        }));
+        setPersonnelList(mapped);
+      })
+      .catch(() => {
+        toast.error("Personel listesi yüklenemedi");
+      });
+  };
+
+  useEffect(() => {
+    fetchPersonnel();
+  }, []);
+
   const filteredPersonnel = useMemo(() => {
-    return personnel.filter((p) => {
+    return personnelList.filter((p) => {
       const query = searchQuery.toLowerCase().trim();
       if (!query) return true;
       return (
@@ -41,7 +66,7 @@ export default function PersonnelPage() {
         p.phone.includes(query)
       );
     });
-  }, [personnel, searchQuery]);
+  }, [personnelList, searchQuery]);
 
 
 
@@ -87,7 +112,7 @@ export default function PersonnelPage() {
           </div>
         </div>
 
-        {personnel.length === 0 ? (
+        {personnelList.length === 0 ? (
           <div className="flex min-h-[200px] flex-col items-center justify-center text-center p-6 glass-panel rounded-xl my-6 md:min-h-[300px] md:p-12">
             <p className="font-sans text-lg text-on-surface-variant max-w-md">
               Sistemde henüz personel kaydı bulunamadı. Listeyi oluşturmak için sağ üstteki &quot;Yeni Personel&quot; butonuna tıklayınız.
@@ -278,6 +303,7 @@ export default function PersonnelPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         personnel={editing}
+        onSaved={fetchPersonnel}
       />
 
       {/* Silme Onaylama Penceresi */}
@@ -286,11 +312,16 @@ export default function PersonnelPage() {
         onOpenChange={(o) => !o && setToDelete(null)}
         title="Personeli Sil"
         description="Bu personeli silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve bu personele ait tüm izin talepleri de silinecektir."
-        onConfirm={() => {
+        onConfirm={async () => {
           if (toDelete) {
-            deletePersonnel(toDelete.id);
+            try {
+              await apiFetch(`/personnel/${toDelete.id}`, { method: "DELETE" });
+              toast.success("Personel silindi");
+              fetchPersonnel();
+            } catch {
+              toast.error("Personel silinemedi");
+            }
             setToDelete(null);
-            toast.success("Personel silindi");
           }
         }}
       />

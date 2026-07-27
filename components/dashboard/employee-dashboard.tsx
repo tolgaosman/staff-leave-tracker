@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CalendarCheck,
   CalendarMinus,
@@ -21,8 +21,9 @@ import { LeaveUsageGauge } from "@/components/dashboard/leave-usage-gauge";
 import { MobileCard, MobileCardList } from "@/components/dashboard/mobile-card-list";
 import { ViewReasonDialog } from "@/components/dashboard/view-reason-dialog";
 import { StatCard, type Stat } from "@/components/dashboard/stat-card";
-import { useLeaveRequests, usePersonnelBalance } from "@/lib/data/store";
-import { leaveTypeLabels } from "@/lib/data/types";
+import { apiFetch } from "@/lib/api";
+import { computeLeaveBalance } from "@/lib/data/balance";
+import { leaveTypeLabels, type LeaveRequest, type LeaveType } from "@/lib/data/types";
 import { publicHolidays2026 } from "@/lib/date/holidays";
 import { parseLocalDate, workingDayCount } from "@/lib/date/business-days";
 
@@ -50,6 +51,21 @@ function tenureYears(startDate?: string): number {
   if (Number.isNaN(start)) return 0;
   const ms = Date.now() - start;
   return ms > 0 ? Math.floor(ms / (365.25 * MS_DAY)) : 0;
+}
+
+/** Ham API izin satırını domain `LeaveRequest`'e çevirir. */
+function mapLeave(it: any, personnelId: string): LeaveRequest {
+  return {
+    id: String(it.id),
+    personnelId,
+    type: (it.leave_type?.slug as LeaveType) ?? "annual",
+    startDate: it.start_date ? String(it.start_date).slice(0, 10) : "",
+    endDate: it.end_date ? String(it.end_date).slice(0, 10) : "",
+    status: it.status ?? "pending",
+    note: it.note ?? "",
+    rejectionReason: it.rejection_reason ?? undefined,
+    createdAt: it.created_at ?? "",
+  };
 }
 
 /* Genel bilgi — kimliğe bağlı değil; her iki durumda da gösterilir. */
@@ -104,16 +120,33 @@ function UpcomingHolidays() {
 
 export function EmployeeDashboard() {
   const { user } = useAuth();
-  const me = useCurrentEmployee();
-  const allLeaves = useLeaveRequests();
-  const balance = usePersonnelBalance(me?.id ?? "");
+  const { me, loading: meLoading } = useCurrentEmployee();
+  const [myLeaves, setMyLeaves] = useState<LeaveRequest[]>([]);
   const [requestOpen, setRequestOpen] = useState(false);
 
   const today = todayIso();
 
-  const myLeaves = useMemo(
-    () => (me ? allLeaves.filter((l) => l.personnelId === me.id) : []),
-    [allLeaves, me]
+  // "Ben"in izinleri: GET /personnel/:id yanıtı izin geçmişini de taşır.
+  const fetchMyLeaves = useCallback(() => {
+    if (!me) return;
+    apiFetch<any>(`/personnel/${me.id}`)
+      .then((d) => {
+        const leaves: LeaveRequest[] = (d.leave_requests ?? []).map((it: any) =>
+          mapLeave(it, me.id)
+        );
+        setMyLeaves(leaves);
+      })
+      .catch(() => setMyLeaves([]));
+  }, [me]);
+
+  useEffect(() => {
+    fetchMyLeaves();
+  }, [fetchMyLeaves]);
+
+  // Bakiye artık store yerine API izinlerinden türetilir.
+  const balance = useMemo(
+    () => (me ? computeLeaveBalance(me, myLeaves) : undefined),
+    [me, myLeaves]
   );
 
   const sortedMyLeaves = useMemo(
@@ -132,6 +165,15 @@ export function EmployeeDashboard() {
     const active = approved.find((l) => l.startDate <= today && l.endDate >= today);
     return { leave: active ?? approved[0], active: Boolean(active) };
   }, [myLeaves, today]);
+
+  // ── "Ben" kaydı henüz yükleniyor ──
+  if (meLoading) {
+    return (
+      <div className="flex min-h-[300px] items-center justify-center">
+        <p className="font-sans text-sm text-on-surface-variant">Yükleniyor…</p>
+      </div>
+    );
+  }
 
   // ── Eşleşen personel kaydı yoksa ──
   if (!me) {
@@ -346,6 +388,7 @@ export function EmployeeDashboard() {
         onOpenChange={setRequestOpen}
         defaultPersonnelId={me.id}
         lockPersonnel
+        onSaved={fetchMyLeaves}
       />
     </>
   );

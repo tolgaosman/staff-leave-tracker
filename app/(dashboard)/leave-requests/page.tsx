@@ -5,12 +5,6 @@ import { useRouter } from "next/navigation";
 import { Plus, Check, X, Trash2, CalendarClock, Search } from "lucide-react";
 
 import {
-  useLeaveRequests,
-  usePersonnel,
-  deleteLeaveRequest,
-  setLeaveStatus,
-} from "@/lib/data/store";
-import {
   LeaveRequest,
   LeaveType,
   attachmentConfig,
@@ -21,6 +15,7 @@ import {
 import { workingDayCount } from "@/lib/date/business-days";
 import { useIsAdmin } from "@/components/auth/role-store";
 import { useToast } from "@/components/ui/toast";
+import { apiFetch } from "@/lib/api";
 
 import { Avatar } from "@/components/dashboard/avatar";
 import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
@@ -36,8 +31,6 @@ const filterSelectClasses =
   "w-full min-w-0 rounded-lg border border-outline-variant/30 bg-surface-1 px-3 py-2 font-sans text-sm text-on-surface outline-none transition-colors focus:border-accent-cyan cursor-pointer sm:w-auto";
 
 export default function LeaveRequestsPage() {
-  const requests = useLeaveRequests();
-  const personnel = usePersonnel();
   const isAdmin = useIsAdmin();
   const router = useRouter();
   const toast = useToast();
@@ -59,24 +52,71 @@ export default function LeaveRequestsPage() {
     type: "all" | LeaveType;
   }>({ period: "all", department: "all", type: "all" });
 
+  const [requestsList, setRequestsList] = useState<LeaveRequest[]>([]);
+  const [personnelList, setPersonnelList] = useState<any[]>([]);
+
+  const fetchData = () => {
+    Promise.all([
+      apiFetch<any[]>("/leave-requests"),
+      apiFetch<any[]>("/personnel"),
+    ])
+      .then(([reqsData, persData]) => {
+        setPersonnelList(persData);
+        const mapped: LeaveRequest[] = reqsData.map((item) => {
+          let typeStr: LeaveType = "annual";
+          if (item.leave_type) {
+            typeStr = (item.leave_type.slug as LeaveType) || "annual";
+          }
+          return {
+            id: String(item.id),
+            personnelId: String(item.personnel_id),
+            type: typeStr,
+            startDate: item.start_date ? item.start_date.slice(0, 10) : "",
+            endDate: item.end_date ? item.end_date.slice(0, 10) : "",
+            status: item.status || "pending",
+            note: item.note || "",
+            rejectionReason: item.rejection_reason || undefined,
+            createdAt: item.created_at || new Date().toISOString(),
+          };
+        });
+        setRequestsList(mapped);
+      })
+      .catch(() => {
+        toast.error("İzin talepleri yüklenemedi");
+      });
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const personnelMap = useMemo(() => {
-    return new Map(personnel.map((p) => [p.id, p]));
-  }, [personnel]);
+    return new Map(
+      personnelList.map((p) => [
+        String(p.id),
+        {
+          id: String(p.id),
+          name: p.name,
+          department: p.department ? p.department.name : "Genel",
+          avatarUrl: p.avatar_url,
+        },
+      ])
+    );
+  }, [personnelList]);
 
   // Filtre açılır menüsü için benzersiz departman listesi (mevcut personelden).
   const departments = useMemo(
-    () => Array.from(new Set(personnel.map((p) => p.department))).sort(),
-    [personnel]
+    () => Array.from(new Set(personnelList.map((p) => p.department?.name || "Genel"))).sort(),
+    [personnelList]
   );
 
   const sortedRequests = useMemo(() => {
-    return [...requests].sort(
+    return [...requestsList].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
-  }, [requests]);
+  }, [requestsList]);
 
   const filteredRequests = useMemo(() => {
-    // İçinde bulunduğumuz ve bir önceki ayın (yıl, ay) anahtarları.
     const now = new Date();
     const thisKey = `${now.getFullYear()}-${now.getMonth()}`;
     const lastRef = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -93,7 +133,7 @@ export default function LeaveRequestsPage() {
         const matches =
           person.name.toLowerCase().includes(query) ||
           person.department.toLowerCase().includes(query) ||
-          leaveTypeLabels[r.type].toLowerCase().includes(query);
+          (leaveTypeLabels[r.type] || "").toLowerCase().includes(query);
         if (!matches) return false;
       }
 
@@ -110,7 +150,7 @@ export default function LeaveRequestsPage() {
       // 4) Dönem (izin başlangıç tarihine göre)
       if (filters.period !== "all") {
         const [y, m] = r.startDate.split("-").map(Number);
-        const key = `${y}-${m - 1}`; // ay 0-index'e çevrildi
+        const key = `${y}-${m - 1}`;
         if (filters.period === "this-month" && key !== thisKey) return false;
         if (filters.period === "last-month" && key !== lastKey) return false;
       }
@@ -174,7 +214,7 @@ export default function LeaveRequestsPage() {
           </div>
         </div>
 
-        {requests.length === 0 ? (
+        {requestsList.length === 0 ? (
           <div className="flex min-h-[200px] flex-col items-center justify-center text-center p-6 glass-panel rounded-xl my-6 md:min-h-[300px] md:p-12">
             <p className="font-sans text-lg text-on-surface-variant max-w-md">
               Sistemde henüz izin talebi bulunamadı. Listeyi oluşturmak için sağ üstteki &quot;Yeni İzin Talebi&quot; butonuna tıklayınız.
@@ -322,9 +362,14 @@ export default function LeaveRequestsPage() {
                             {r.status === "pending" && (
                               <>
                                 <button
-                                  onClick={() => {
-                                    setLeaveStatus(r.id, "approved");
-                                    toast.success("Talep onaylandı");
+                                  onClick={async () => {
+                                    try {
+                                      await apiFetch(`/leave-requests/${r.id}/approve`, { method: "PATCH" });
+                                      toast.success("Talep onaylandı");
+                                      fetchData();
+                                    } catch {
+                                      toast.error("İşlem başarısız");
+                                    }
                                   }}
                                   title="Onayla"
                                   className="flex size-9 items-center justify-center rounded-md border border-green-600/30 bg-green-500/10 text-green-700 active:scale-95"
@@ -449,9 +494,14 @@ export default function LeaveRequestsPage() {
                                 {r.status === "pending" && (
                                   <>
                                     <button
-                                      onClick={() => {
-                                        setLeaveStatus(r.id, "approved");
-                                        toast.success("Talep onaylandı");
+                                      onClick={async () => {
+                                        try {
+                                          await apiFetch(`/leave-requests/${r.id}/approve`, { method: "PATCH" });
+                                          toast.success("Talep onaylandı");
+                                          fetchData();
+                                        } catch {
+                                          toast.error("İşlem başarısız");
+                                        }
                                       }}
                                       title="Onayla"
                                       className="flex size-8 items-center justify-center rounded-md border border-green-600/30 bg-green-500/10 text-green-700 hover:bg-green-500/20 active:scale-95 cursor-pointer"
@@ -507,6 +557,7 @@ export default function LeaveRequestsPage() {
           if (!o) setEditing(null);
         }}
         leave={editing || undefined}
+        onSaved={fetchData}
       />
 
       <ConfirmDialog
@@ -516,11 +567,16 @@ export default function LeaveRequestsPage() {
         description="Bu izin talebini silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
         confirmLabel="Sil"
         cancelLabel="Vazgeç"
-        onConfirm={() => {
+        onConfirm={async () => {
           if (toDelete) {
-            deleteLeaveRequest(toDelete.id);
+            try {
+              await apiFetch(`/leave-requests/${toDelete.id}`, { method: "DELETE" });
+              toast.success("Talep silindi");
+              fetchData();
+            } catch {
+              toast.error("Silme başarısız");
+            }
             setToDelete(null);
-            toast.success("Talep silindi");
           }
         }}
       />
@@ -528,11 +584,19 @@ export default function LeaveRequestsPage() {
       <RejectDialog
         open={toReject !== null}
         onOpenChange={(o) => !o && setToReject(null)}
-        onConfirm={(reason) => {
+        onConfirm={async (reason) => {
           if (toReject) {
-            setLeaveStatus(toReject.id, "rejected", reason);
+            try {
+              await apiFetch(`/leave-requests/${toReject.id}/reject`, {
+                method: "PATCH",
+                body: JSON.stringify({ rejection_reason: reason }),
+              });
+              toast.error("Talep reddedildi");
+              fetchData();
+            } catch {
+              toast.error("İşlem başarısız");
+            }
             setToReject(null);
-            toast.error("Talep reddedildi");
           }
         }}
       />

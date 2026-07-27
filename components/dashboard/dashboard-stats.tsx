@@ -1,17 +1,38 @@
 "use client";
 
-import { CalendarClock, CircleCheckBig, CircleX, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CalendarClock, CircleCheckBig, Building2, Users } from "lucide-react";
 
 import { StatCard, type Stat } from "@/components/dashboard/stat-card";
-import { useDashboardStats } from "@/lib/data/store";
+import { apiFetch } from "@/lib/api";
+
+type ApiStats = {
+  total_personnel: number;
+  active_leaves: number;
+  pending_requests: number;
+  departments_count: number;
+};
 
 export function DashboardStats() {
-  const { totalPersonnel, pending, approved, rejected } = useDashboardStats();
+  const [data, setData] = useState<ApiStats>({
+    total_personnel: 0,
+    active_leaves: 0,
+    pending_requests: 0,
+    departments_count: 0,
+  });
+
+  useEffect(() => {
+    apiFetch<ApiStats>("/dashboard")
+      .then((res) => setData(res))
+      .catch(() => {
+        // Fallback or handle error quietly
+      });
+  }, []);
 
   const stats: Stat[] = [
     {
       label: "TOPLAM PERSONEL",
-      value: String(totalPersonnel),
+      value: String(data.total_personnel),
       icon: Users,
       accent: "cyan",
       caption: "Kayıtlı Çalışan Sayısı",
@@ -19,26 +40,26 @@ export function DashboardStats() {
     },
     {
       label: "BEKLEYEN TALEPLER",
-      value: String(pending),
+      value: String(data.pending_requests),
       icon: CalendarClock,
       accent: "cyan",
       action: "Şimdi İncele",
       actionHref: "/leave-requests",
-      highlight: true,
+      highlight: data.pending_requests > 0,
     },
     {
-      label: "ONAYLANAN İZİNLER",
-      value: String(approved),
+      label: "GÜNCEL İZİNLİLER",
+      value: String(data.active_leaves),
       icon: CircleCheckBig,
       accent: "violet",
-      caption: "Güncel İzinli Sayısı",
+      caption: "Şu An İzinli Personel",
     },
     {
-      label: "REDDEDİLEN TALEPLER",
-      value: String(rejected),
-      icon: CircleX,
+      label: "DEPARTMAN SAYISI",
+      value: String(data.departments_count),
+      icon: Building2,
       accent: "neutral",
-      caption: "Reddedilen İzin Talepleri",
+      caption: "Aktif Departman Sayısı",
     },
   ];
 

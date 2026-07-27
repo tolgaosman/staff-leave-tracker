@@ -1,12 +1,14 @@
 "use client";
 
 import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
+import { apiFetch } from "@/lib/api";
 
 const STORAGE_KEY = "izin-takip-auth";
 
 export type User = {
   name: string;
   email: string;
+  is_admin?: boolean;
   avatarUrl?: string;
   /* ── Kişisel profil alanları (tamamı isteğe bağlı, /profile'dan düzenlenir) ── */
   /** Ünvan / görev tanımı, ör. "Kıdemli Yazılım Geliştirici" */
@@ -79,28 +81,71 @@ function nameFromEmail(email: string): string {
 
 type AuthContextValue = {
   user: User | null;
-  login: (email: string, password?: string, name?: string) => void;
-  signup: (name: string, email: string, password?: string) => void;
-  logout: () => void;
-  updateUser: (patch: Partial<User>) => void;
-};
-
-const actions = {
-  login: (email: string, _password?: string, name?: string) =>
-    setUser({ name: name?.trim() || nameFromEmail(email), email }),
-  signup: (name: string, email: string) =>
-    setUser({ name: name.trim() || nameFromEmail(email), email }),
-  logout: () => setUser(null),
-  updateUser: (patch: Partial<User>) =>
-    setUser(currentUser ? { ...currentUser, ...patch } : currentUser),
+  login: (email: string, password?: string) => Promise<void>;
+  signup: (name: string, email: string, password?: string) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: (patch: Partial<User>) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const user = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const value = useMemo<AuthContextValue>(() => ({ user, ...actions }), [user]);
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+
+  const loginAction = async (email: string, password?: string) => {
+    const data = await apiFetch<{ token: string; user: User }>("/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem("token", data.token);
+    }
+    setUser(data.user);
+  };
+
+  const signupAction = async (name: string, email: string, password?: string) => {
+    const data = await apiFetch<{ token: string; user: User }>("/register", {
+      method: "POST",
+      body: JSON.stringify({ name, email, password: password || "password123" }),
+    });
+    if (typeof window !== "undefined") {
+      localStorage.setItem("token", data.token);
+    }
+    setUser(data.user);
+  };
+
+  const logoutAction = async () => {
+    try {
+      await apiFetch("/logout", { method: "POST" });
+    } catch {
+      // ignore network errors on logout
+    }
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+    }
+    setUser(null);
+  };
+
+  const updateUserAction = async (patch: Partial<User>) => {
+    const updated = await apiFetch<User>("/me", {
+      method: "PUT",
+      body: JSON.stringify(patch),
+    });
+    setUser(updated);
+  };
+
+  const actions = useMemo(
+    () => ({
+      login: loginAction,
+      signup: signupAction,
+      logout: logoutAction,
+      updateUser: updateUserAction,
+    }),
+    [user]
+  );
+
+  return <AuthContext.Provider value={{ user, ...actions }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextValue {

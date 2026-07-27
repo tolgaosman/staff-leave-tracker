@@ -7,15 +7,9 @@ import Link from "next/link";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { useIsAdmin } from "@/components/auth/role-store";
-import { useCurrentEmployee } from "@/components/auth/use-current-employee";
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { RoleSwitcher } from "@/components/dashboard/role-switcher";
 import { ThemeToggle } from "@/components/dashboard/theme-toggle";
-import {
-  useLeaveRequests,
-  usePersonnel,
-} from "@/lib/data/store";
-import { leaveTypeLabels } from "@/lib/data/types";
 
 function relativeTime(iso: string): string {
   const then = new Date(iso).getTime();
@@ -39,10 +33,7 @@ const popupClasses =
 
 export function TopNav() {
   const { user } = useAuth();
-  const requests = useLeaveRequests();
-  const personnel = usePersonnel();
   const isAdmin = useIsAdmin();
-  const me = useCurrentEmployee();
 
   return (
     <header

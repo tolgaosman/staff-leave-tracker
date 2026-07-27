@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 export function NewRequestDialog() {
   const [open, setOpen] = useState(false);
   const isAdmin = useIsAdmin();
-  const me = useCurrentEmployee();
+  const { me } = useCurrentEmployee();
 
   // Çalışan, personel kaydı e-postayla eşleşmiyorsa talep oluşturamaz.
   const disabled = !isAdmin && !me;

@@ -4,8 +4,7 @@ import { useMemo } from "react";
 
 import { Avatar } from "@/components/dashboard/avatar";
 import { CardMenu } from "@/components/dashboard/card-menu";
-import { usePersonnel, useLeaveRequests } from "@/lib/data/store";
-import { leaveTypeLabels } from "@/lib/data/types";
+import { leaveTypeLabels, type LeaveRequest, type Personnel } from "@/lib/data/types";
 
 function relativeTime(iso: string): string {
   const then = new Date(iso).getTime();
@@ -27,10 +26,13 @@ const statusVerb = {
   rejected: "reddedildi",
 } as const;
 
-export function RecentActivity() {
-  const requests = useLeaveRequests();
-  const personnel = usePersonnel();
-
+export function RecentActivity({
+  requests,
+  personnel,
+}: {
+  requests: LeaveRequest[];
+  personnel: Personnel[];
+}) {
   const activities = useMemo(() => {
     const byId = new Map(personnel.map((p) => [p.id, p]));
     // Onay/red olayı, oluşturulma değil karar zamanına göre öne çıksın.

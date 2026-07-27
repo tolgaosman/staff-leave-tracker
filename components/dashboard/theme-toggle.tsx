@@ -10,9 +10,11 @@ export function ThemeToggle() {
     // Component yüklendiğinde localStorage'ı kontrol et
     const stored = localStorage.getItem("theme");
     if (stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsDark(true);
       document.documentElement.classList.add("dark");
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsDark(false);
       document.documentElement.classList.remove("dark");
     }
@@ -32,6 +34,7 @@ export function ThemeToggle() {
 
   // Hydration hatasını önlemek için ilk render'da duruma göre mount state
   const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {

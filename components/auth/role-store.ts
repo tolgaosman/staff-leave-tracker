@@ -1,10 +1,10 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { useAuth } from "@/components/auth/auth-provider";
 
-/* Rol bazlı görünüm kontrolü. Modül düzeyli, useSyncExternalStore ile senkron
-   (hidrasyon güvenli) — lib/data/store.ts ile aynı desen. Kimlik doğrulama
-   yapmaz; yalnız hangi aksiyonların gösterileceğini belirler. */
+/* Rol bazlı görünüm kontrolü. Giriş yapan kullanıcının is_admin alanından
+   türetilir; geriye dönük uyumluluk için modül deposunu da yedek olarak destekler. */
 
 export type Role = "admin" | "employee";
 
@@ -52,7 +52,10 @@ export function setRole(next: Role) {
 }
 
 export function useRole(): Role {
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const { user } = useAuth();
+  const storeRole = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  if (!user) return storeRole;
+  return user.is_admin !== false ? "admin" : "employee";
 }
 
 export function useIsAdmin(): boolean {

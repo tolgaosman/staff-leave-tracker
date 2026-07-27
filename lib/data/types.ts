@@ -8,6 +8,9 @@ export type Personnel = {
   id: string;
   name: string;
   department: string;
+  /** Backend department FK (as string). Set when data comes from the API;
+      used to submit updates without re-resolving the department by name. */
+  departmentId?: string;
   phone: string;
   status: PersonnelStatus;
   email?: string;

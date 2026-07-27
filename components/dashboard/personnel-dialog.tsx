@@ -2,14 +2,14 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { Avatar } from "@/components/dashboard/avatar";
 import { ImageCropper } from "@/components/dashboard/image-cropper";
 import { readFile } from "@/lib/image";
-import { addPersonnel, updatePersonnel } from "@/lib/data/store";
+import { apiFetch, getDepartments, type ApiDepartment } from "@/lib/api";
 import {
   personnelStatusLabels,
   type Personnel,
@@ -32,39 +32,82 @@ const statusOptions = Object.entries(personnelStatusLabels) as [
 function PersonnelForm({
   personnel,
   onClose,
+  onSaved,
 }: {
   personnel: Personnel | null;
   onClose: () => void;
+  onSaved?: () => void;
 }) {
   const isEdit = Boolean(personnel);
   const toast = useToast();
   const [name, setName] = useState(personnel?.name ?? "");
-  const [department, setDepartment] = useState(personnel?.department ?? "");
   const [phone, setPhone] = useState(personnel?.phone ?? "");
-  const [email, setEmail] = useState(personnel?.email ?? "");
   const [avatarUrl, setAvatarUrl] = useState(personnel?.avatarUrl ?? "");
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [status, setStatus] = useState<PersonnelStatus>(
     personnel?.status ?? "active"
   );
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  // Departmanlar API'den gelir; seçici bu listeden beslenir.
+  const [departments, setDepartments] = useState<ApiDepartment[]>([]);
+  const [departmentId, setDepartmentId] = useState(personnel?.departmentId ?? "");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    getDepartments()
+      .then((list) => {
+        setDepartments(list);
+        // Yeni kayıtta ilk departmanı varsayılan seç.
+        setDepartmentId((current) =>
+          current || (list[0] ? String(list[0].id) : "")
+        );
+      })
+      .catch(() => toast.error("Departmanlar yüklenemedi"));
+    // toast kimliği sabit; yalnızca ilk açılışta çalışsın.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const data = {
-      name: name.trim(),
-      department: department.trim(),
-      phone: phone.trim(),
-      email: email.trim() || undefined,
-      avatarUrl: avatarUrl.trim() || undefined,
-      status,
-    };
-    if (personnel) {
-      updatePersonnel(personnel.id, data);
-    } else {
-      addPersonnel({ ...data, startDate: new Date().toISOString().slice(0, 10) });
+    if (!departmentId) {
+      toast.error("Lütfen bir departman seçin");
+      return;
     }
-    toast.success(isEdit ? "Personel güncellendi" : "Personel eklendi");
-    onClose();
+    setSaving(true);
+    try {
+      const payload = {
+        name: name.trim(),
+        department_id: Number(departmentId),
+        phone: phone.trim(),
+        status,
+        avatar_url: avatarUrl || null,
+      };
+      if (personnel) {
+        // Düzenleme (PUT /api/personnel/{id})
+        await apiFetch(`/personnel/${personnel.id}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        });
+        toast.success("Personel güncellendi");
+      } else {
+        // Yeni Ekleme (POST /api/personnel)
+        await apiFetch("/personnel", {
+          method: "POST",
+          body: JSON.stringify({
+            ...payload,
+            start_date: new Date().toISOString().slice(0, 10),
+          }),
+        });
+        toast.success("Personel eklendi");
+      }
+      onSaved?.();
+      onClose();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "İşlem başarısız";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
   }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,11 +144,11 @@ function PersonnelForm({
 
       <div className="mb-6 flex justify-center">
         <label className="relative cursor-pointer group">
-          <input 
-            type="file" 
-            accept="image/*" 
-            className="hidden" 
-            onChange={handleFileChange} 
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
           />
           <Avatar
             name={name || "Yeni Personel"}
@@ -138,14 +181,22 @@ function PersonnelForm({
             <label htmlFor="p-dept" className={labelClasses}>
               Departman
             </label>
-            <input
+            <select
               id="p-dept"
               required
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-              placeholder="Departman"
+              value={departmentId}
+              onChange={(e) => setDepartmentId(e.target.value)}
               className={fieldClasses}
-            />
+            >
+              {departments.length === 0 && (
+                <option value="">Yükleniyor…</option>
+              )}
+              {departments.map((d) => (
+                <option key={d.id} value={String(d.id)}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="space-y-1.5">
             <label htmlFor="p-phone" className={labelClasses}>
@@ -161,22 +212,6 @@ function PersonnelForm({
             />
           </div>
         </div>
-
-        <div className="space-y-1.5">
-          <label htmlFor="p-email" className={labelClasses}>
-            E-posta (opsiyonel)
-          </label>
-          <input
-            id="p-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="ornek@sirket.com"
-            className={fieldClasses}
-          />
-        </div>
-
-
 
         <div className="space-y-1.5">
           <label htmlFor="p-status" className={labelClasses}>
@@ -200,6 +235,7 @@ function PersonnelForm({
           <Dialog.Close render={<Button variant="outline" />}>İptal</Dialog.Close>
           <Button
             type="submit"
+            disabled={saving}
             className="bg-accent-cyan text-white hover:bg-accent-cyan/90"
           >
             {isEdit ? "Kaydet" : "Ekle"}
@@ -227,9 +263,11 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   /** When provided, the dialog edits this record; otherwise it creates one. */
   personnel?: Personnel | null;
+  /** Called after a successful create/update so the caller can refresh its list. */
+  onSaved?: () => void;
 };
 
-export function PersonnelDialog({ open, onOpenChange, personnel }: Props) {
+export function PersonnelDialog({ open, onOpenChange, personnel, onSaved }: Props) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -239,6 +277,7 @@ export function PersonnelDialog({ open, onOpenChange, personnel }: Props) {
             key={personnel?.id ?? "new"}
             personnel={personnel ?? null}
             onClose={() => onOpenChange(false)}
+            onSaved={onSaved}
           />
         </Dialog.Popup>
       </Dialog.Portal>

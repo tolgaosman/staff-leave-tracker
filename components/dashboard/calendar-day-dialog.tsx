@@ -104,9 +104,9 @@ export function CalendarDayDialog({
                       </dd>
                     </div>
                     <div className="flex items-center justify-between gap-3">
-                      <dt className={labelClasses}>Kalan Günler</dt>
+                      <dt className={labelClasses}>İzin Süresi</dt>
                       <dd className="font-bold text-secondary">
-                        {remaining > 0 ? `${remaining} iş günü` : "Sona erdi"}
+                        {workingDayCount(leave.startDate, leave.endDate)} iş günü
                       </dd>
                     </div>
                   </dl>

@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
   assetPrefix: basePath ? `${basePath}/` : undefined,
   env: {
     NEXT_PUBLIC_BASE_PATH: basePath,
+    // Backend API kök adresi. Yerelde varsayılan localhost:8000; canlı (GitHub
+    // Pages) derlemede gerçek backend URL'i CI ortam değişkeni olarak verilmeli,
+    // yoksa lib/api.ts localhost'a düşer ve yayınlanan site API'ye ulaşamaz.
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
   images: {
     unoptimized: true,

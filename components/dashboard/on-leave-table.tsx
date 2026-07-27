@@ -4,8 +4,12 @@ import { useMemo } from "react";
 import { Avatar } from "@/components/dashboard/avatar";
 import { AttachmentDialog } from "@/components/dashboard/attachment-dialog";
 import { MobileCard, MobileCardList } from "@/components/dashboard/mobile-card-list";
-import { usePersonnel, useLeaveRequests } from "@/lib/data/store";
-import { attachmentConfig, leaveTypeLabels } from "@/lib/data/types";
+import {
+  attachmentConfig,
+  leaveTypeLabels,
+  type LeaveRequest,
+  type Personnel,
+} from "@/lib/data/types";
 import { workingDayCount } from "@/lib/date/business-days";
 
 /** Bugünün tarihini yerel bileşenlerden "yyyy-mm-dd" üretir (toISOString UTC'ye
@@ -19,10 +23,13 @@ function todayIso(): string {
 
 const fmt = (iso: string) => new Date(iso + "T00:00:00").toLocaleDateString("tr-TR");
 
-export function OnLeaveTable() {
-  const allPersonnel = usePersonnel();
-  const allRequests = useLeaveRequests();
-
+export function OnLeaveTable({
+  personnel: allPersonnel,
+  requests: allRequests,
+}: {
+  personnel: Personnel[];
+  requests: LeaveRequest[];
+}) {
   // Doğrudan onaylı izinlerden hesaplanır (p.status'e bağlı değil) → her zaman
   // güncel. Bitmemiş (endDate >= bugün) onaylı izinler; kişi başına aktif izni,
   // yoksa en yakın yaklaşan izni seçilir.

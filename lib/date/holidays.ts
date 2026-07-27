@@ -4,10 +4,7 @@
 
    İki grup var:
    1) SABİT ulusal bayramlar — her yıl aynı gün, kesin.
-   2) DİNİ bayramlar (Ramazan/Kurban) — ay takvimine göre kaydığından
-      buradaki tarihler ASTRONOMİK TAHMİNDİR. Üretimde her yıl Resmî
-      Gazete'den teyit edilmelidir. (Arife günleri yarım gün sayıldığından
-      tam tatil listesine dahil edilmedi.)                                */
+   2) DİNİ bayramlar (Ramazan/Kurban) — Arife ve bayram günleri resmi tatil takvimine dahil edilmiştir. */
 
 export type PublicHoliday = {
   /** ISO yyyy-mm-dd */
@@ -21,14 +18,18 @@ export const publicHolidays2026: PublicHoliday[] = [
   { date: "2026-04-23", name: "Ulusal Egemenlik ve Çocuk Bayramı" },
   { date: "2026-05-01", name: "Emek ve Dayanışma Günü" },
   { date: "2026-05-19", name: "Atatürk'ü Anma, Gençlik ve Spor Bayramı" },
+  { date: "2026-07-15", name: "15 Temmuz Demokrasi ve Milli Birlik Günü" },
   { date: "2026-07-20", name: "Barış ve Özgürlük Bayramı" },
   { date: "2026-08-30", name: "Zafer Bayramı" },
   { date: "2026-10-29", name: "Cumhuriyet Bayramı" },
+  { date: "2026-11-15", name: "KKTC Cumhuriyet Bayramı" },
 
-  // ── Dini bayramlar (2026 için YAKLAŞIK — teyit gerekir) ──
+  // ── Dini bayramlar ──
+  { date: "2026-03-19", name: "Ramazan Bayramı Arife" },
   { date: "2026-03-20", name: "Ramazan Bayramı (1. gün)" },
   { date: "2026-03-21", name: "Ramazan Bayramı (2. gün)" },
   { date: "2026-03-22", name: "Ramazan Bayramı (3. gün)" },
+  { date: "2026-05-26", name: "Kurban Bayramı Arife" },
   { date: "2026-05-27", name: "Kurban Bayramı (1. gün)" },
   { date: "2026-05-28", name: "Kurban Bayramı (2. gün)" },
   { date: "2026-05-29", name: "Kurban Bayramı (3. gün)" },
@@ -51,9 +52,11 @@ export function getPublicHolidayName(isoDate: string): string | undefined {
     "04-23": "Ulusal Egemenlik ve Çocuk Bayramı",
     "05-01": "Emek ve Dayanışma Günü",
     "05-19": "Atatürk'ü Anma, Gençlik ve Spor Bayramı",
+    "07-15": "15 Temmuz Demokrasi ve Milli Birlik Günü",
     "07-20": "Barış ve Özgürlük Bayramı",
     "08-30": "Zafer Bayramı",
     "10-29": "Cumhuriyet Bayramı",
+    "11-15": "KKTC Cumhuriyet Bayramı",
   };
   return fixedMap[monthDay];
 }

@@ -30,7 +30,7 @@ export function ViewReasonDialog({ reason }: { reason: string }) {
           </div>
           
           <div className="mt-4 rounded-lg border border-outline-variant/30 bg-surface-1 p-4 text-sm text-on-surface text-center italic">
-            "{reason}"
+            &quot;{reason}&quot;
           </div>
 
           <div className="mt-6 flex justify-center gap-3">

@@ -19,11 +19,16 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    login(email, password);
-    toast.success("Giriş yapıldı");
-    router.push("/");
+    try {
+      await login(email, password);
+      toast.success("Giriş yapıldı");
+      router.push("/");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Giriş başarısız";
+      toast.error(msg);
+    }
   }
 
   return (

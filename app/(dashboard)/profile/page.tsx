@@ -140,7 +140,7 @@ export default function ProfilePage() {
 function ProfileEditor({ user }: { user: User }) {
   const { updateUser } = useAuth();
   const role = useRole();
-  const me = useCurrentEmployee();
+  const { me } = useCurrentEmployee();
   const toast = useToast();
 
   const [form, setForm] = useState<ProfileForm>(() => formFromUser(user));
@@ -155,24 +155,28 @@ function ProfileEditor({ user }: { user: User }) {
     (k) => form[k] !== initial[k]
   );
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const clean = (v: string) => v.trim() || undefined;
-    updateUser({
-      name: form.name.trim() || user.name,
-      title: clean(form.title),
-      phone: clean(form.phone),
-      birthDate: clean(form.birthDate),
-      location: clean(form.location),
-      bio: clean(form.bio),
-      emergencyName: clean(form.emergencyName),
-      emergencyRelation: clean(form.emergencyRelation),
-      emergencyPhone: clean(form.emergencyPhone),
-      avatarUrl: clean(form.avatarUrl),
-    });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
-    toast.success("Profil güncellendi");
+    try {
+      await updateUser({
+        name: form.name.trim() || user.name,
+        title: clean(form.title),
+        phone: clean(form.phone),
+        birthDate: clean(form.birthDate),
+        location: clean(form.location),
+        bio: clean(form.bio),
+        emergencyName: clean(form.emergencyName),
+        emergencyRelation: clean(form.emergencyRelation),
+        emergencyPhone: clean(form.emergencyPhone),
+        avatarUrl: clean(form.avatarUrl),
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+      toast.success("Profil güncellendi");
+    } catch (err: any) {
+      toast.error(err.message || "Profil güncellenemedi");
+    }
   }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

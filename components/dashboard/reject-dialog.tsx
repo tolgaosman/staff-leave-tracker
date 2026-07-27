@@ -17,11 +17,6 @@ export function RejectDialog({
 }) {
   const [reason, setReason] = useState("");
 
-  useEffect(() => {
-    if (open) {
-      setReason("");
-    }
-  }, [open]);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -60,6 +55,7 @@ export function RejectDialog({
               onClick={() => {
                 onConfirm(reason);
                 onOpenChange(false);
+                setTimeout(() => setReason(""), 300);
               }}
             >
               Reddet

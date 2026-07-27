@@ -3,8 +3,9 @@
 import { ArrowLeft, Briefcase, CalendarDays, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo } from "react";
-
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { apiFetch } from "@/lib/api";
+import { Personnel, LeaveRequest, leaveTypeLabels } from "@/lib/data/types";
 import { useIsAdmin } from "@/components/auth/role-store";
 import { Avatar } from "@/components/dashboard/avatar";
 import {
@@ -12,8 +13,6 @@ import {
   PersonnelStatusBadge,
 } from "@/components/dashboard/badges";
 import { MobileCard, MobileCardList } from "@/components/dashboard/mobile-card-list";
-import { usePersonnel, useLeaveRequests, usePersonnelBalance } from "@/lib/data/store";
-import { leaveTypeLabels } from "@/lib/data/types";
 import { workingDayCount } from "@/lib/date/business-days";
 
 function formatDate(iso: string) {
@@ -24,28 +23,53 @@ function formatDate(iso: string) {
 function PersonnelDetail() {
   const params = useSearchParams();
   const id = params.get("id") ?? "";
-  const personnel = usePersonnel();
-  const leaves = useLeaveRequests();
-  const balance = usePersonnelBalance(id);
   const isAdmin = useIsAdmin();
   const router = useRouter();
+
+  const [person, setPerson] = useState<Personnel | null>(null);
+  const [personLeaves, setPersonLeaves] = useState<LeaveRequest[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Çalışan rolü başka personelin detayını göremez → Genel Bakış'a yönlendir.
   useEffect(() => {
     if (!isAdmin) router.replace("/");
   }, [isAdmin, router]);
 
-  const person = useMemo(
-    () => personnel.find((p) => p.id === id),
-    [personnel, id]
-  );
-  const personLeaves = useMemo(
-    () =>
-      leaves
-        .filter((l) => l.personnelId === id)
-        .sort((a, b) => (a.startDate < b.startDate ? 1 : -1)),
-    [leaves, id]
-  );
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    apiFetch<any>(`/personnel/${id}`)
+      .then((data) => {
+        setPerson({
+          id: String(data.id),
+          name: data.name,
+          department: data.department ? data.department.name : "Genel",
+          phone: data.phone || "-",
+          status: data.status || "active",
+          startDate: data.start_date || "",
+          avatarUrl: data.avatar_url || "",
+          email: data.user?.email || "",
+        });
+
+        if (Array.isArray(data.leave_requests)) {
+          const mappedLeaves: LeaveRequest[] = data.leave_requests.map((item: any) => ({
+            id: String(item.id),
+            personnelId: String(data.id),
+            type: (item.leave_type?.slug as any) || "annual",
+            startDate: item.start_date ? item.start_date.slice(0, 10) : "",
+            endDate: item.end_date ? item.end_date.slice(0, 10) : "",
+            status: item.status || "pending",
+            note: item.note || "",
+            createdAt: item.created_at || new Date().toISOString(),
+          }));
+          setPersonLeaves(mappedLeaves);
+        }
+      })
+      .catch(() => {
+        setPerson(null);
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
 
   if (!isAdmin) return null;
 
@@ -120,44 +144,7 @@ function PersonnelDetail() {
         </div>
       </div>
 
-      {/* Yıllık izin bakiyesi kartları (kıdemden türetilir) */}
-      {balance && (
-        <div className="mb-6 grid grid-cols-3 gap-2 sm:gap-4">
-          {[
-            {
-              label: "Hak Edilen",
-              value: balance.entitled,
-              accent: "text-accent-cyan",
-              hint: "Kıdeme göre yıllık",
-            },
-            {
-              label: "Kullanılan",
-              value: balance.used,
-              accent: "text-primary",
-              hint: `${balance.pending} gün onay bekliyor`,
-            },
-            {
-              label: "Kalan",
-              value: balance.remaining,
-              accent: "text-green-600",
-              hint: "Kullanılabilir bakiye",
-            },
-          ].map((card) => (
-            <div key={card.label} className="glass-panel rounded-xl p-3 sm:p-6">
-              <p className="font-label-mono text-[10px] uppercase leading-tight tracking-wider text-on-surface-variant sm:text-xs">
-                {card.label}
-              </p>
-              <p className={`mt-1 font-serif text-2xl font-bold sm:text-3xl lg:text-4xl ${card.accent}`}>
-                {card.value}
-                <span className="ml-1 text-base font-normal text-on-surface-variant">
-                  gün
-                </span>
-              </p>
-              <p className="mt-1 text-xs text-on-surface-variant/70">{card.hint}</p>
-            </div>
-          ))}
-        </div>
-      )}
+
 
       {/* Leave history */}
       <div className="glass-panel overflow-hidden rounded-xl">

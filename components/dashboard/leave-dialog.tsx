@@ -2,23 +2,23 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import {
-  addLeaveRequest,
-  getLeaveBalance,
-  updateLeaveRequest,
-  usePersonnel,
-} from "@/lib/data/store";
+  apiFetch,
+  getLeaveTypes,
+  type ApiLeaveType,
+} from "@/lib/api";
+import { computeLeaveBalance } from "@/lib/data/balance";
 import {
   attachmentConfig,
-  leaveStatusLabels,
   leaveTypeLabels,
+  type LeaveBalance,
   type LeaveRequest,
-  type LeaveStatus,
   type LeaveType,
+  type Personnel,
 } from "@/lib/data/types";
 import { workingDayCount } from "@/lib/date/business-days";
 import { readFile } from "@/lib/image";
@@ -31,10 +31,33 @@ const labelClasses =
   "font-label-mono text-xs uppercase tracking-wider text-on-surface-variant";
 
 const typeOptions = Object.entries(leaveTypeLabels) as [LeaveType, string][];
-const statusOptions = Object.entries(leaveStatusLabels) as [
-  LeaveStatus,
-  string
-][];
+
+type PersonOption = { id: string; name: string; department: string };
+
+/** Bir personelin API detayını (izin geçmişiyle) alıp bakiye hesaplar. */
+async function fetchBalance(personnelId: string): Promise<LeaveBalance | undefined> {
+  const d = await apiFetch<any>(`/personnel/${personnelId}`);
+  const person: Personnel = {
+    id: String(d.id),
+    name: d.name,
+    department: d.department?.name ?? "",
+    departmentId: d.department_id != null ? String(d.department_id) : undefined,
+    phone: d.phone ?? "",
+    status: d.status ?? "active",
+    startDate: d.start_date ? String(d.start_date).slice(0, 10) : "",
+    avatarUrl: d.avatar_url ?? "",
+  };
+  const leaves: LeaveRequest[] = (d.leave_requests ?? []).map((it: any) => ({
+    id: String(it.id),
+    personnelId: String(it.personnel_id),
+    type: (it.leave_type?.slug as LeaveType) ?? "annual",
+    startDate: it.start_date ? String(it.start_date).slice(0, 10) : "",
+    endDate: it.end_date ? String(it.end_date).slice(0, 10) : "",
+    status: it.status ?? "pending",
+    createdAt: it.created_at ?? "",
+  }));
+  return computeLeaveBalance(person, leaves);
+}
 
 /* Inner form remounts (via key) each time the dialog opens, so useState
    initializers seed the fields — no reset effect required. */
@@ -43,36 +66,127 @@ function LeaveForm({
   defaultPersonnelId,
   lockPersonnel,
   onClose,
+  onSaved,
 }: {
   leave: LeaveRequest | null;
   defaultPersonnelId?: string;
   lockPersonnel?: boolean;
   onClose: () => void;
+  onSaved?: () => void;
 }) {
-  const personnel = usePersonnel();
   const toast = useToast();
   const isEdit = Boolean(leave);
 
+  const [personnel, setPersonnel] = useState<PersonOption[]>([]);
+  const [leaveTypes, setLeaveTypes] = useState<ApiLeaveType[]>([]);
+
   const [personnelId, setPersonnelId] = useState(
-    () =>
-      leave?.personnelId ??
-      defaultPersonnelId ??
-      personnel[0]?.id ??
-      ""
+    () => leave?.personnelId ?? defaultPersonnelId ?? ""
   );
   const [type, setType] = useState<LeaveType>(leave?.type ?? "annual");
-  const [status, setStatus] = useState<LeaveStatus>(leave?.status ?? "pending");
   const [start, setStart] = useState(leave?.startDate ?? "");
   const [end, setEnd] = useState(leave?.endDate ?? "");
   const [note, setNote] = useState(leave?.note ?? "");
   const [attachmentName, setAttachmentName] = useState(leave?.attachmentName ?? "");
   const [attachmentUrl, setAttachmentUrl] = useState(leave?.attachmentUrl ?? "");
+  const [balance, setBalance] = useState<LeaveBalance | undefined>(undefined);
+  const [saving, setSaving] = useState(false);
 
-  // Seçili aralığın İŞ GÜNÜ maliyeti + yıllık izinde kişinin kalan bakiyesi.
-  // (Canlı bilgi + submit kontrolü için; getLeaveBalance daima tam veriyle çalışır.)
+  // Personel ve izin türü listelerini yükle (formdaki seçiciler + slug→id eşlemesi).
+  useEffect(() => {
+    apiFetch<any[]>("/personnel")
+      .then((rows) => {
+        const opts: PersonOption[] = rows.map((p) => ({
+          id: String(p.id),
+          name: p.name,
+          department: p.department?.name ?? "Genel",
+        }));
+        setPersonnel(opts);
+        // Kilitli değilse ve henüz seçim yoksa ilk personeli varsayılan yap.
+        setPersonnelId((current) => current || (opts[0]?.id ?? ""));
+      })
+      .catch(() => toast.error("Personel listesi yüklenemedi"));
+
+    getLeaveTypes()
+      .then(setLeaveTypes)
+      .catch(() => toast.error("İzin türleri yüklenemedi"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Yıllık izinde seçili personelin kalan bakiyesini API'den türet.
+  // (Yıllık olmayan türlerde bakiye okunmaz; eski değeri sıfırlamaya gerek yok —
+  //  effect gövdesinde senkron setState kuralı bunu yasaklıyor.)
+  useEffect(() => {
+    if (type !== "annual" || !personnelId) return;
+    let cancelled = false;
+    fetchBalance(personnelId)
+      .then((b) => {
+        if (!cancelled) setBalance(b);
+      })
+      .catch(() => {
+        if (!cancelled) setBalance(undefined);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [type, personnelId]);
+
   const requestedDays = start && end ? workingDayCount(start, end) : 0;
-  const balance =
-    type === "annual" && personnelId ? getLeaveBalance(personnelId) : undefined;
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!personnelId) return;
+
+    const totalDays = workingDayCount(start, end);
+
+    // Bakiye kontrolü: yeni bir YILLIK talep bakiyeyi aşamaz.
+    if (!leave && type === "annual" && balance && totalDays > balance.remaining) {
+      toast.error(
+        "Yetersiz izin bakiyesi",
+        `Kalan ${balance.remaining} iş günü, bu talep ${totalDays} iş günü. Talep kaydedilmedi.`
+      );
+      return;
+    }
+
+    const leaveTypeId = leaveTypes.find((t) => t.slug === type)?.id;
+    if (!leaveTypeId) {
+      toast.error("İzin türü çözümlenemedi");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const body = {
+        leave_type_id: leaveTypeId,
+        start_date: start,
+        end_date: end,
+        total_days: totalDays,
+        note: note.trim() || null,
+        attachment_url: attachmentUrl || null,
+      };
+      if (leave) {
+        // Düzenleme — personel ve durum değiştirilmez (durum onay/red ile yönetilir).
+        await apiFetch(`/leave-requests/${leave.id}`, {
+          method: "PUT",
+          body: JSON.stringify(body),
+        });
+        toast.success("İzin talebi güncellendi");
+      } else {
+        await apiFetch("/leave-requests", {
+          method: "POST",
+          body: JSON.stringify({ ...body, personnel_id: Number(personnelId) }),
+        });
+        toast.success("İzin talebi oluşturuldu");
+      }
+      onSaved?.();
+      onClose();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "İşlem başarısız";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -80,43 +194,6 @@ function LeaveForm({
       setAttachmentName(file.name);
       setAttachmentUrl(await readFile(file));
     }
-  }
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!personnelId) return;
-
-    // Bakiye kontrolü: yeni bir YILLIK talep bakiyeyi aşamaz.
-    if (!leave && type === "annual") {
-      const days = workingDayCount(start, end);
-      const bal = getLeaveBalance(personnelId);
-      if (bal && days > bal.remaining) {
-        toast.error(
-          "Yetersiz izin bakiyesi",
-          `Kalan ${bal.remaining} iş günü, bu talep ${days} iş günü. Talep kaydedilmedi.`
-        );
-        return; // form gönderimi engellenir
-      }
-    }
-
-    const data = {
-      personnelId,
-      type,
-      startDate: start,
-      endDate: end,
-      note: note.trim() || undefined,
-      attachmentName: attachmentName || undefined,
-      attachmentUrl: attachmentUrl || undefined,
-    };
-    if (leave) {
-      updateLeaveRequest(leave.id, { ...data, status });
-    } else {
-      addLeaveRequest({ ...data, status });
-    }
-    toast.success(
-      isEdit ? "İzin talebi güncellendi" : "İzin talebi oluşturuldu"
-    );
-    onClose();
   }
 
   return (
@@ -148,10 +225,11 @@ function LeaveForm({
               id="l-personnel"
               required
               value={personnelId}
+              disabled={isEdit}
               onChange={(e) => setPersonnelId(e.target.value)}
               className={fieldClasses}
             >
-              {personnel.length === 0 && <option value="">Personel yok</option>}
+              {personnel.length === 0 && <option value="">Yükleniyor…</option>}
               {personnel.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} — {p.department}
@@ -229,25 +307,6 @@ function LeaveForm({
           </div>
         )}
 
-        {isEdit && (
-          <div className="space-y-1.5">
-            <label htmlFor="l-status" className={labelClasses}>
-              Durum
-            </label>
-            <select
-              id="l-status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as LeaveStatus)}
-              className={fieldClasses}
-            >
-              {statusOptions.map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
         {attachmentConfig[type] && (
           <div className="space-y-1.5">
             <label htmlFor="l-file" className={labelClasses}>
@@ -291,7 +350,7 @@ function LeaveForm({
           <Dialog.Close render={<Button variant="outline" />}>İptal</Dialog.Close>
           <Button
             type="submit"
-            disabled={personnel.length === 0}
+            disabled={saving || personnel.length === 0}
             className="bg-accent-cyan text-white hover:bg-accent-cyan/90"
           >
             {isEdit ? "Kaydet" : "Talebi Gönder"}
@@ -311,6 +370,8 @@ type Props = {
   defaultPersonnelId?: string;
   /** Personel seçiciyi gizle ve defaultPersonnelId'ye sabitle (çalışan kendine talep). */
   lockPersonnel?: boolean;
+  /** Called after a successful create/update so the caller can refresh its list. */
+  onSaved?: () => void;
 };
 
 export function LeaveDialog({
@@ -319,6 +380,7 @@ export function LeaveDialog({
   leave,
   defaultPersonnelId,
   lockPersonnel,
+  onSaved,
 }: Props) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -331,6 +393,7 @@ export function LeaveDialog({
             defaultPersonnelId={defaultPersonnelId}
             lockPersonnel={lockPersonnel}
             onClose={() => onOpenChange(false)}
+            onSaved={onSaved}
           />
         </Dialog.Popup>
       </Dialog.Portal>

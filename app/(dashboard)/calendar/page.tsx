@@ -3,19 +3,17 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useLeaveRequests, usePersonnel } from "@/lib/data/store";
 import { useIsAdmin } from "@/components/auth/role-store";
-import type { Personnel } from "@/lib/data/types";
+import type { LeaveRequest, LeaveType, Personnel } from "@/lib/data/types";
 import {
   CalendarDayDialog,
   type CalendarDayEntry,
 } from "@/components/dashboard/calendar-day-dialog";
 
 import { getPublicHolidayName } from "@/lib/date/holidays";
+import { apiFetch } from "@/lib/api";
 
 export default function CalendarPage() {
-  const requests = useLeaveRequests();
-  const personnel = usePersonnel();
   const isAdmin = useIsAdmin();
   const router = useRouter();
 
@@ -38,17 +36,55 @@ export default function CalendarPage() {
   const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
+  const [requestsList, setRequestsList] = useState<any[]>([]);
+  const [personnelList, setPersonnelList] = useState<Personnel[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      apiFetch<any[]>("/leave-requests"),
+      apiFetch<any[]>("/personnel"),
+    ])
+      .then(([reqsData, persData]) => {
+        setRequestsList(reqsData);
+        const mappedPers: Personnel[] = persData.map((p) => ({
+          id: String(p.id),
+          name: p.name,
+          department: p.department ? p.department.name : "Genel",
+          departmentId: String(p.department_id),
+          phone: p.phone || "-",
+          status: p.status || "active",
+          startDate: p.start_date || "",
+          avatarUrl: p.avatar_url || "",
+          email: p.user?.email || "",
+        }));
+        setPersonnelList(mappedPers);
+      })
+      .catch(() => {
+        // quiet error
+      });
+  }, []);
+
   const personnelMap = useMemo(() => {
     const map = new Map<string, Personnel>();
-    personnel.forEach((p) => map.set(p.id, p));
+    personnelList.forEach((p) => map.set(p.id, p));
     return map;
-  }, [personnel]);
+  }, [personnelList]);
 
   // Takvimde gösterilecek izinler: onaylı + bekleyen (reddedilenler hariç).
-  const visibleLeaves = useMemo(
-    () => requests.filter((r) => r.status === "approved" || r.status === "pending"),
-    [requests]
-  );
+  const visibleLeaves = useMemo<LeaveRequest[]>(() => {
+    return requestsList
+      .filter((r) => r.status === "approved" || r.status === "pending")
+      .map((item) => ({
+        id: String(item.id),
+        personnelId: String(item.personnel_id),
+        type: (item.leave_type?.slug as LeaveType) || "annual",
+        startDate: item.start_date ? item.start_date.slice(0, 10) : "",
+        endDate: item.end_date ? item.end_date.slice(0, 10) : "",
+        status: item.status || "pending",
+        note: item.note || "",
+        createdAt: item.created_at || "",
+      }));
+  }, [requestsList]);
 
   const renderCells = () => {
     const cells = [];

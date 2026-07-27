@@ -12,8 +12,7 @@ import {
   Cell,
 } from "recharts";
 
-import { useLeaveRequests } from "@/lib/data/store";
-import { leaveDayCount, leaveTypeLabels, type LeaveType } from "@/lib/data/types";
+import { leaveDayCount, leaveTypeLabels, type LeaveRequest, type LeaveType } from "@/lib/data/types";
 import { cn } from "@/lib/utils";
 import { parseLocalDate } from "@/lib/date/business-days";
 
@@ -141,8 +140,7 @@ function CustomTooltip({ active, payload, label, colors }: any) {
   );
 }
 
-export function LeaveDistributionChart() {
-  const requests = useLeaveRequests();
+export function LeaveDistributionChart({ requests }: { requests: LeaveRequest[] }) {
   const [active, setActive] = useState<FilterType>("all");
   const isDark = useIsDark();
   const c = isDark ? DARK : LIGHT;
