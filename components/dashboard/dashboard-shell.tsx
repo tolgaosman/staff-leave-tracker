@@ -1,6 +1,6 @@
 "use client";
 
-import { useIsAdmin } from "@/components/auth/role-store";
+import { useHasDashboardAccess } from "@/components/auth/role-store";
 import { MobileTopBar } from "@/components/dashboard/mobile-nav";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { TopNav } from "@/components/dashboard/top-nav";
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
    çalışanda sol menü tamamen kaldırılır ve içerik tam genişlik olur
    (logo/başlık TopNav'ın sol üstüne taşınır). */
 export function DashboardShell({ children }: { children: React.ReactNode }) {
-  const isAdmin = useIsAdmin();
+  const hasAccess = useHasDashboardAccess();
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-on-surface">
@@ -20,14 +20,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div className="absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-accent-cyan/20 blur-[100px]" />
       </div>
 
-      {isAdmin && <Sidebar />}
+      {hasAccess && <Sidebar />}
       <MobileTopBar />
       <TopNav />
 
       <main
         className={cn(
           "relative z-10 min-h-screen px-3 pb-10 pt-20 sm:px-4 md:px-10 md:pt-32",
-          isAdmin && "md:ml-64"
+          hasAccess && "md:ml-64"
         )}
       >
         <div className="space-y-4">{children}</div>

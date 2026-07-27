@@ -13,7 +13,7 @@ import {
   leaveDayCount,
 } from "@/lib/data/types";
 import { workingDayCount } from "@/lib/date/business-days";
-import { useIsAdmin } from "@/components/auth/role-store";
+import { useHasDashboardAccess, useRoleStore, useRole } from "@/components/auth/role-store";
 import { useToast } from "@/components/ui/toast";
 import { apiFetch } from "@/lib/api";
 
@@ -31,14 +31,16 @@ const filterSelectClasses =
   "w-full min-w-0 rounded-lg border border-outline-variant/30 bg-surface-1 px-3 py-2 font-sans text-sm text-on-surface outline-none transition-colors focus:border-accent-cyan cursor-pointer sm:w-auto";
 
 export default function LeaveRequestsPage() {
-  const isAdmin = useIsAdmin();
+  const hasAccess = useHasDashboardAccess();
+  const role = useRole();
+  const { simulatedRole } = useRoleStore();
   const router = useRouter();
   const toast = useToast();
 
   // Çalışan rolü bu sayfayı göremez → Genel Bakış'a yönlendir.
   useEffect(() => {
-    if (!isAdmin) router.replace("/");
-  }, [isAdmin, router]);
+    if (!hasAccess) router.replace("/");
+  }, [hasAccess, router]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<LeaveRequest | null>(null);
@@ -77,6 +79,8 @@ export default function LeaveRequestsPage() {
             note: item.note || "",
             rejectionReason: item.rejection_reason || undefined,
             createdAt: item.created_at || new Date().toISOString(),
+            attachmentUrl: item.attachment_url || undefined,
+            attachmentName: item.attachment_name || undefined,
           };
         });
         setRequestsList(mapped);
@@ -98,7 +102,8 @@ export default function LeaveRequestsPage() {
           id: String(p.id),
           name: p.name,
           department: p.department ? p.department.name : "Genel",
-          avatarUrl: p.avatar_url,
+          departmentId: String(p.department_id),
+          avatarUrl: p.user?.avatar_url || p.avatar_url || "",
         },
       ])
     );
@@ -155,11 +160,17 @@ export default function LeaveRequestsPage() {
         if (filters.period === "last-month" && key !== lastKey) return false;
       }
 
+      // 5) Simüle edilen Manager rolü filtresi
+      if (simulatedRole && simulatedRole.startsWith("manager:")) {
+        const simulatedDeptId = simulatedRole.split(":")[1];
+        if (person.departmentId !== simulatedDeptId) return false;
+      }
+
       return true;
     });
-  }, [sortedRequests, personnelMap, searchQuery, filters]);
+  }, [sortedRequests, personnelMap, searchQuery, filters, simulatedRole]);
 
-  if (!isAdmin) return null;
+  if (!hasAccess) return null;
 
   return (
     <>
@@ -251,21 +262,23 @@ export default function LeaveRequestsPage() {
                 <option value="last-month">Geçen Ay</option>
               </select>
 
-              <select
-                aria-label="Departman"
-                value={filters.department}
-                onChange={(e) =>
-                  setFilters((f) => ({ ...f, department: e.target.value }))
-                }
-                className={filterSelectClasses}
-              >
-                <option value="all">Tüm Departmanlar</option>
-                {departments.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
+              {role === "super_admin" && (
+                <select
+                  aria-label="Departman"
+                  value={filters.department}
+                  onChange={(e) =>
+                    setFilters((f) => ({ ...f, department: e.target.value }))
+                  }
+                  className={filterSelectClasses}
+                >
+                  <option value="all">Tüm Departmanlar</option>
+                  {departments.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              )}
 
               <select
                 aria-label="İzin Türü"
@@ -357,7 +370,7 @@ export default function LeaveRequestsPage() {
                         },
                       ]}
                       actions={
-                        isAdmin ? (
+                        hasAccess ? (
                           <>
                             {r.status === "pending" && (
                               <>
@@ -421,7 +434,7 @@ export default function LeaveRequestsPage() {
                         <th className="px-6 py-4 font-bold">Tarih Aralığı</th>
                         <th className="px-6 py-4 font-bold">Süre</th>
                         <th className="px-6 py-4 font-bold">Durum</th>
-                        {isAdmin && (
+                        {hasAccess && (
                           <th className="px-6 py-4 text-right font-bold">İşlemler</th>
                         )}
                       </tr>
@@ -488,7 +501,7 @@ export default function LeaveRequestsPage() {
                             </td>
 
                             {/* İşlemler (Onay/Red/Düzenle/Sil) — yalnız admin */}
-                            {isAdmin && (
+                            {hasAccess && (
                             <td className="px-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-2">
                                 {r.status === "pending" && (

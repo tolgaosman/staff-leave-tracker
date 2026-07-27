@@ -3,7 +3,7 @@
 import { Menu } from "@base-ui/react/menu";
 import { LogIn, LogOut, User } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
-import { useIsAdmin } from "@/components/auth/role-store";
+import { useHasDashboardAccess } from "@/components/auth/role-store";
 import { Avatar } from "@/components/dashboard/avatar";
 
 import Link from "next/link";
@@ -16,7 +16,19 @@ const itemClasses =
 
 export function UserMenu() {
   const { user, logout } = useAuth();
-  const isAdmin = useIsAdmin();
+  const hasAccess = useHasDashboardAccess();
+
+  if (hasAccess) {
+    return (
+      <button
+        onClick={logout}
+        className="flex size-8 sm:size-9 md:size-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-destructive/10 hover:text-destructive"
+        title="Çıkış Yap"
+      >
+        <LogOut className="size-4 sm:size-5" />
+      </button>
+    );
+  }
 
   return (
     <Menu.Root>
@@ -24,7 +36,7 @@ export function UserMenu() {
         aria-label="User menu"
         className="rounded-full outline-none transition-transform active:scale-95 data-[popup-open]:ring-2 data-[popup-open]:ring-accent-cyan/50"
       >
-        {user && isAdmin ? (
+        {user && hasAccess ? (
           <Avatar name={user.name} url={user.avatarUrl} className="size-8 sm:size-9 md:size-10 border border-accent-cyan/30" />
         ) : (
           <span className="flex size-8 sm:size-9 md:size-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-black/5 hover:text-primary data-[popup-open]:bg-black/5 data-[popup-open]:text-primary">

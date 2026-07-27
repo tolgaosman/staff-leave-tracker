@@ -35,8 +35,10 @@ const typeOptions = Object.entries(leaveTypeLabels) as [LeaveType, string][];
 type PersonOption = { id: string; name: string; department: string };
 
 /** Bir personelin API detayını (izin geçmişiyle) alıp bakiye hesaplar. */
-async function fetchBalance(personnelId: string): Promise<LeaveBalance | undefined> {
-  const d = await apiFetch<any>(`/personnel/${personnelId}`);
+async function fetchBalance(personnelId: string, isEmployee: boolean = false): Promise<LeaveBalance | undefined> {
+  const res = await apiFetch<any>(isEmployee ? "/me" : `/personnel/${personnelId}`);
+  const d = isEmployee ? res.personnel : res;
+  if (!d) return undefined;
   const person: Personnel = {
     id: String(d.id),
     name: d.name,
@@ -45,7 +47,9 @@ async function fetchBalance(personnelId: string): Promise<LeaveBalance | undefin
     phone: d.phone ?? "",
     status: d.status ?? "active",
     startDate: d.start_date ? String(d.start_date).slice(0, 10) : "",
-    avatarUrl: d.avatar_url ?? "",
+    avatarUrl: d.user?.avatar_url || d.avatar_url || "",
+    email: d.user?.email || "",
+    role: d.user?.role || "employee",
   };
   const leaves: LeaveRequest[] = (d.leave_requests ?? []).map((it: any) => ({
     id: String(it.id),
@@ -94,18 +98,20 @@ function LeaveForm({
 
   // Personel ve izin türü listelerini yükle (formdaki seçiciler + slug→id eşlemesi).
   useEffect(() => {
-    apiFetch<any[]>("/personnel")
-      .then((rows) => {
-        const opts: PersonOption[] = rows.map((p) => ({
-          id: String(p.id),
-          name: p.name,
-          department: p.department?.name ?? "Genel",
-        }));
-        setPersonnel(opts);
-        // Kilitli değilse ve henüz seçim yoksa ilk personeli varsayılan yap.
-        setPersonnelId((current) => current || (opts[0]?.id ?? ""));
-      })
-      .catch(() => toast.error("Personel listesi yüklenemedi"));
+    if (!lockPersonnel) {
+      apiFetch<any[]>("/personnel")
+        .then((rows) => {
+          const opts: PersonOption[] = rows.map((p) => ({
+            id: String(p.id),
+            name: p.name,
+            department: p.department?.name ?? "Genel",
+          }));
+          setPersonnel(opts);
+          // Kilitli değilse ve henüz seçim yoksa ilk personeli varsayılan yap.
+          setPersonnelId((current) => current || (opts[0]?.id ?? ""));
+        })
+        .catch(() => toast.error("Personel listesi yüklenemedi"));
+    }
 
     getLeaveTypes()
       .then(setLeaveTypes)
@@ -113,13 +119,20 @@ function LeaveForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Kullanıcı profili asenkron yüklendiği için defaultPersonnelId sonradan gelebilir
+  useEffect(() => {
+    if (defaultPersonnelId && !personnelId) {
+      setPersonnelId(defaultPersonnelId);
+    }
+  }, [defaultPersonnelId, personnelId]);
+
   // Yıllık izinde seçili personelin kalan bakiyesini API'den türet.
   // (Yıllık olmayan türlerde bakiye okunmaz; eski değeri sıfırlamaya gerek yok —
   //  effect gövdesinde senkron setState kuralı bunu yasaklıyor.)
   useEffect(() => {
     if (type !== "annual" || !personnelId) return;
     let cancelled = false;
-    fetchBalance(personnelId)
+    fetchBalance(personnelId, Boolean(lockPersonnel))
       .then((b) => {
         if (!cancelled) setBalance(b);
       })
@@ -350,8 +363,13 @@ function LeaveForm({
           <Dialog.Close render={<Button variant="outline" />}>İptal</Dialog.Close>
           <Button
             type="submit"
-            disabled={saving || personnel.length === 0}
-            className="bg-accent-cyan text-white hover:bg-accent-cyan/90"
+            disabled={
+              saving ||
+              (!lockPersonnel && personnel.length === 0) ||
+              !personnelId ||
+              (type === "annual" && (!balance || requestedDays > balance.remaining))
+            }
+            className="bg-accent-cyan text-white hover:bg-accent-cyan/90 disabled:opacity-50"
           >
             {isEdit ? "Kaydet" : "Talebi Gönder"}
           </Button>

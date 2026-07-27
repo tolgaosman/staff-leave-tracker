@@ -3,15 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { useIsAdmin } from "@/components/auth/role-store";
+import { useHasDashboardAccess } from "@/components/auth/role-store";
 import { isNavItemActive, navItems } from "@/components/dashboard/nav-items";
 import { NewRequestDialog } from "@/components/dashboard/new-request-dialog";
 import { cn } from "@/lib/utils";
 
 export function Sidebar() {
   const pathname = usePathname();
-  const isAdmin = useIsAdmin();
-  const visibleItems = navItems.filter((item) => isAdmin || !item.adminOnly);
+  const hasAccess = useHasDashboardAccess();
+  const visibleItems = navItems.filter((item) => hasAccess || !item.adminOnly);
 
   return (
     <nav className="fixed left-0 top-0 z-40 hidden h-screen w-64 flex-col border-r border-outline-variant/30 bg-sidebar p-6 shadow-[40px_0_40px_0px_rgba(23,30,30,0.02)] md:flex">
@@ -60,7 +60,7 @@ export function Sidebar() {
         })}
       </div>
 
-      {!isAdmin && (
+      {!hasAccess && (
         <div className="mt-auto pt-6 border-t border-outline-variant/30">
           <NewRequestDialog />
         </div>

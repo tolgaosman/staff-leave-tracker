@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
+  Building,
   type LucideIcon,
 } from "lucide-react";
 

@@ -16,8 +16,9 @@ function mapPersonnel(p: any): Personnel {
     phone: p.phone ?? "-",
     status: p.status ?? "active",
     startDate: p.start_date ?? "",
-    avatarUrl: p.avatar_url ?? "",
+    avatarUrl: p.user?.avatar_url || p.avatar_url || "",
     email: p.user?.email ?? "",
+    role: p.user?.role || "employee",
   };
 }
 
@@ -41,13 +42,16 @@ export function useCurrentEmployee(): { me: Personnel | undefined; loading: bool
   useEffect(() => {
     if (!email) return;
     let cancelled = false;
-    apiFetch<any[]>("/personnel")
-      .then((rows) => {
+    apiFetch<any>("/me")
+      .then((data) => {
         if (cancelled) return;
-        const found = rows.find(
-          (p) => p.user?.email?.toLowerCase().trim() === email
-        );
-        setMe(found ? mapPersonnel(found) : undefined);
+        if (data && data.personnel) {
+          const p = data.personnel;
+          p.user = data; // mapPersonnel p.user.email beklediği için ekliyoruz
+          setMe(mapPersonnel(p));
+        } else {
+          setMe(undefined);
+        }
       })
       .catch(() => {
         if (!cancelled) setMe(undefined);

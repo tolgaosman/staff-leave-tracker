@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Briefcase, CalendarDays, Mail, Phone } from "lucide-react";
+import { ArrowLeft, Briefcase, CalendarDays, Mail, Phone, LifeBuoy } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -47,8 +47,12 @@ function PersonnelDetail() {
           phone: data.phone || "-",
           status: data.status || "active",
           startDate: data.start_date || "",
-          avatarUrl: data.avatar_url || "",
+          avatarUrl: data.user?.avatar_url || data.avatar_url || "",
           email: data.user?.email || "",
+          emergencyName: data.user?.emergency_name || "",
+          emergencyRelation: data.user?.emergency_relation || "",
+          emergencyPhone: data.user?.emergency_phone || "",
+          role: data.user?.role || "employee",
         });
 
         if (Array.isArray(data.leave_requests)) {
@@ -99,6 +103,14 @@ function PersonnelDetail() {
       value: person.startDate ? formatDate(person.startDate) : "—",
     },
   ];
+
+  if (person.emergencyName) {
+    infoRows.push({
+      icon: LifeBuoy,
+      label: "Acil Durum Kişisi",
+      value: `${person.emergencyName} (${person.emergencyRelation || "Yakını"}) - ${person.emergencyPhone || "Telefon Yok"}`,
+    });
+  }
 
   return (
     <>

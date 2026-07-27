@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Popover } from "@base-ui/react/popover";
 import { Bell } from "lucide-react";
 import Link from "next/link";
 
 import { useAuth } from "@/components/auth/auth-provider";
-import { useIsAdmin } from "@/components/auth/role-store";
+import { useHasDashboardAccess } from "@/components/auth/role-store";
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { RoleSwitcher } from "@/components/dashboard/role-switcher";
 import { ThemeToggle } from "@/components/dashboard/theme-toggle";
@@ -33,17 +33,30 @@ const popupClasses =
 
 export function TopNav() {
   const { user } = useAuth();
-  const isAdmin = useIsAdmin();
+  const hasAccess = useHasDashboardAccess();
+
+  const [dateStr, setDateStr] = useState("");
+
+  useEffect(() => {
+    setDateStr(
+      new Date().toLocaleDateString("tr-TR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    );
+  }, []);
 
   return (
     <header
       className={`absolute ${
-        isAdmin ? "left-64" : "left-0"
+        hasAccess ? "left-64" : "left-0"
       } right-0 top-0 z-30 hidden h-20 items-center justify-between px-10 border-b border-outline-variant/20 bg-transparent md:flex`}
     >
-      {isAdmin ? (
-        <div className="font-serif text-base font-bold text-primary">
-          {user ? `Merhaba, ${user.name} 👋` : "Merhaba 👋"}
+      {hasAccess ? (
+        <div className="font-serif text-base font-bold text-primary capitalize">
+          {dateStr}
         </div>
       ) : (
         <Link href="/" className="flex items-center gap-3 pl-4 transition-opacity hover:opacity-80">
@@ -69,10 +82,7 @@ export function TopNav() {
       )}
 
       <div className="flex items-center gap-4">
-
-        <RoleSwitcher />
-
-
+        {user?.role === 'super_admin' && <RoleSwitcher />}
         <ThemeToggle />
 
 

@@ -8,7 +8,7 @@ const STORAGE_KEY = "izin-takip-auth";
 export type User = {
   name: string;
   email: string;
-  is_admin?: boolean;
+  role: "super_admin" | "hr_admin" | "manager" | "employee";
   avatarUrl?: string;
   /* ── Kişisel profil alanları (tamamı isteğe bağlı, /profile'dan düzenlenir) ── */
   /** Ünvan / görev tanımı, ör. "Kıdemli Yazılım Geliştirici" */
@@ -77,6 +77,22 @@ function nameFromEmail(email: string): string {
     .join(" ");
 }
 
+/** Ham API User nesnesini frontend User tipine çevirir. */
+function mapApiUser(apiUser: any): User {
+  if (!apiUser) return apiUser;
+  return {
+    ...apiUser,
+    phone: apiUser.phone ?? apiUser.personnel?.phone,
+    title: apiUser.title ?? apiUser.personnel?.title,
+    birthDate: apiUser.birth_date ?? apiUser.birthDate,
+    avatarUrl: apiUser.avatar_url ?? apiUser.personnel?.avatar_url ?? apiUser.avatarUrl,
+    emergencyName: apiUser.emergency_name ?? apiUser.emergencyName,
+    emergencyRelation: apiUser.emergency_relation ?? apiUser.emergencyRelation,
+    emergencyPhone: apiUser.emergency_phone ?? apiUser.emergencyPhone,
+    role: apiUser.role || "employee",
+  };
+}
+
 /* ── Public API ── */
 
 type AuthContextValue = {
@@ -101,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.setItem("token", data.token);
     }
-    setUser(data.user);
+    setUser(mapApiUser(data.user));
   };
 
   const signupAction = async (name: string, email: string, password?: string) => {
@@ -112,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.setItem("token", data.token);
     }
-    setUser(data.user);
+    setUser(mapApiUser(data.user));
   };
 
   const logoutAction = async () => {
@@ -128,11 +144,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateUserAction = async (patch: Partial<User>) => {
-    const updated = await apiFetch<User>("/me", {
+    const body: any = { ...patch };
+    if ('birthDate' in patch) body.birth_date = patch.birthDate;
+    if ('avatarUrl' in patch) body.avatar_url = patch.avatarUrl;
+    if ('emergencyName' in patch) body.emergency_name = patch.emergencyName;
+    if ('emergencyRelation' in patch) body.emergency_relation = patch.emergencyRelation;
+    if ('emergencyPhone' in patch) body.emergency_phone = patch.emergencyPhone;
+
+    const updated = await apiFetch<any>("/me", {
       method: "PUT",
-      body: JSON.stringify(patch),
+      body: JSON.stringify(body),
     });
-    setUser(updated);
+    setUser(mapApiUser(updated));
   };
 
   const actions = useMemo(

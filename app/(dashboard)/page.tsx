@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { useIsAdmin } from "@/components/auth/role-store";
+import { useHasDashboardAccess, useRoleStore } from "@/components/auth/role-store";
 import { apiFetch } from "@/lib/api";
 import type { LeaveRequest, LeaveType, Personnel } from "@/lib/data/types";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -21,8 +21,9 @@ function mapPersonnel(p: any): Personnel {
     phone: p.phone ?? "-",
     status: p.status ?? "active",
     startDate: p.start_date ?? "",
-    avatarUrl: p.avatar_url ?? "",
+    avatarUrl: p.user?.avatar_url || p.avatar_url || "",
     email: p.user?.email ?? "",
+    role: p.user?.role || "employee",
   };
 }
 
@@ -49,19 +50,32 @@ function AdminOverview() {
   const [personnel, setPersonnel] = useState<Personnel[]>([]);
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
 
+  const { simulatedRole } = useRoleStore();
+
   useEffect(() => {
     Promise.all([
       apiFetch<any[]>("/personnel"),
       apiFetch<any[]>("/leave-requests"),
     ])
       .then(([pers, reqs]) => {
-        setPersonnel(pers.map(mapPersonnel));
-        setRequests(reqs.map(mapLeave));
+        let mappedPers = pers.map(mapPersonnel);
+        let mappedReqs = reqs.map(mapLeave);
+
+        if (simulatedRole && simulatedRole.startsWith("manager:")) {
+          const simulatedDeptId = simulatedRole.split(":")[1];
+          mappedPers = mappedPers.filter((p) => p.departmentId === simulatedDeptId);
+          
+          const deptPersonIds = new Set(mappedPers.map((p) => p.id));
+          mappedReqs = mappedReqs.filter((r) => deptPersonIds.has(r.personnelId));
+        }
+
+        setPersonnel(mappedPers);
+        setRequests(mappedReqs);
       })
       .catch(() => {
         // sessiz — bileşenler boş durum gösterir
       });
-  }, []);
+  }, [simulatedRole]);
 
   return (
     <>
@@ -96,10 +110,10 @@ function AdminOverview() {
 }
 
 export default function IzinTakipDashboard() {
-  const isAdmin = useIsAdmin();
+  const hasAccess = useHasDashboardAccess();
 
   // Çalışan rolü: şirket-geneli panel yerine kişisel (bireysel) panel.
-  if (!isAdmin) return <EmployeeDashboard />;
+  if (!hasAccess) return <EmployeeDashboard />;
 
   return <AdminOverview />;
 }

@@ -20,10 +20,11 @@ import { LeaveDialog } from "@/components/dashboard/leave-dialog";
 import { LeaveUsageGauge } from "@/components/dashboard/leave-usage-gauge";
 import { MobileCard, MobileCardList } from "@/components/dashboard/mobile-card-list";
 import { ViewReasonDialog } from "@/components/dashboard/view-reason-dialog";
+import { AttachmentDialog } from "@/components/dashboard/attachment-dialog";
 import { StatCard, type Stat } from "@/components/dashboard/stat-card";
 import { apiFetch } from "@/lib/api";
 import { computeLeaveBalance } from "@/lib/data/balance";
-import { leaveTypeLabels, type LeaveRequest, type LeaveType } from "@/lib/data/types";
+import { leaveTypeLabels, attachmentConfig, type LeaveRequest, type LeaveType } from "@/lib/data/types";
 import { publicHolidays2026 } from "@/lib/date/holidays";
 import { parseLocalDate, workingDayCount } from "@/lib/date/business-days";
 
@@ -65,6 +66,8 @@ function mapLeave(it: any, personnelId: string): LeaveRequest {
     note: it.note ?? "",
     rejectionReason: it.rejection_reason ?? undefined,
     createdAt: it.created_at ?? "",
+    attachmentUrl: it.attachment_url ?? undefined,
+    attachmentName: it.attachment_name ?? undefined,
   };
 }
 
@@ -126,11 +129,13 @@ export function EmployeeDashboard() {
 
   const today = todayIso();
 
-  // "Ben"in izinleri: GET /personnel/:id yanıtı izin geçmişini de taşır.
+  // "Ben"in izinleri: GET /me yanıtı izin geçmişini de taşır.
   const fetchMyLeaves = useCallback(() => {
     if (!me) return;
-    apiFetch<any>(`/personnel/${me.id}`)
-      .then((d) => {
+    apiFetch<any>("/me")
+      .then((data) => {
+        const d = data.personnel;
+        if (!d) return;
         const leaves: LeaveRequest[] = (d.leave_requests ?? []).map((it: any) =>
           mapLeave(it, me.id)
         );
@@ -313,7 +318,25 @@ export function EmployeeDashboard() {
               {sortedMyLeaves.map((l) => (
                 <MobileCard
                   key={l.id}
-                  title={leaveTypeLabels[l.type]}
+                  title={
+                    <span className="flex items-center gap-2">
+                      <span>{leaveTypeLabels[l.type]}</span>
+                      {l.attachmentUrl && (
+                        <AttachmentDialog
+                          url={l.attachmentUrl}
+                          name={l.attachmentName}
+                          label={attachmentConfig[l.type]?.label}
+                        >
+                          <span
+                            className="inline-flex items-center rounded-md border border-accent-cyan/30 bg-accent-cyan/10 px-2 py-0.5 text-[10px] font-bold text-accent-cyan hover:bg-accent-cyan/20 cursor-pointer"
+                            title={attachmentConfig[l.type]?.label ?? "Belge"}
+                          >
+                            {attachmentConfig[l.type]?.buttonLabel ?? "Belge"}
+                          </span>
+                        </AttachmentDialog>
+                      )}
+                    </span>
+                  }
                   badge={
                     <span className="inline-flex items-center gap-2">
                       <LeaveStatusBadge status={l.status} />
@@ -357,8 +380,26 @@ export function EmployeeDashboard() {
                 </thead>
                 <tbody>
                   {sortedMyLeaves.map((l) => (
-                    <tr key={l.id} className="border-b border-outline-variant/10 font-sans text-sm last:border-0">
-                      <td className="py-3 pr-4 font-medium text-primary">{leaveTypeLabels[l.type]}</td>
+                    <tr key={l.id} className="border-b border-outline-variant/10 font-sans text-sm last:border-0 hover:bg-black/[0.02]">
+                      <td className="py-3 pr-4 font-medium text-primary">
+                        <div className="flex items-center gap-2">
+                          <span>{leaveTypeLabels[l.type]}</span>
+                          {l.attachmentUrl && (
+                            <AttachmentDialog
+                              url={l.attachmentUrl}
+                              name={l.attachmentName}
+                              label={attachmentConfig[l.type]?.label}
+                            >
+                              <span
+                                className="inline-flex items-center rounded-md border border-accent-cyan/30 bg-accent-cyan/10 px-2 py-0.5 text-[10px] font-bold text-accent-cyan hover:bg-accent-cyan/20 cursor-pointer"
+                                title={attachmentConfig[l.type]?.label ?? "Belge"}
+                              >
+                                {attachmentConfig[l.type]?.buttonLabel ?? "Belge"}
+                              </span>
+                            </AttachmentDialog>
+                          )}
+                        </div>
+                      </td>
                       <td className="py-3 pr-4 font-mono text-xs text-on-surface-variant">
                         {fmt(l.startDate)} – {fmt(l.endDate)}
                       </td>

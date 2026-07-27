@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Pencil, Eye, Search } from "lucide-react";
-import { useIsAdmin } from "@/components/auth/role-store";
+import { Plus, Trash2, Pencil, Eye, Search, ChevronDown } from "lucide-react";
+import { useHasDashboardAccess, useIsAdmin, useRoleStore, useRole } from "@/components/auth/role-store";
 import { Personnel, personnelStatusLabels } from "@/lib/data/types";
 import { Avatar } from "@/components/dashboard/avatar";
 import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
@@ -13,21 +13,23 @@ import { MobileCard, MobileCardList } from "@/components/dashboard/mobile-card-l
 import { useToast } from "@/components/ui/toast";
 import { apiFetch } from "@/lib/api";
 import Link from "next/link";
-
-
 export default function PersonnelPage() {
+  const hasAccess = useHasDashboardAccess();
   const isAdmin = useIsAdmin();
+  const role = useRole();
   const router = useRouter();
   const toast = useToast();
+  const { simulatedRole } = useRoleStore();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [toDelete, setToDelete] = useState<Personnel | null>(null);
   const [editing, setEditing] = useState<Personnel | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDepartmentFilter, setSelectedDepartmentFilter] = useState("");
 
   // Çalışan rolü personel listesini göremez → Genel Bakış'a yönlendir.
   useEffect(() => {
-    if (!isAdmin) router.replace("/");
-  }, [isAdmin, router]);
+    if (!hasAccess) router.replace("/");
+  }, [hasAccess, router]);
 
   const [personnelList, setPersonnelList] = useState<Personnel[]>([]);
 
@@ -42,8 +44,9 @@ export default function PersonnelPage() {
           phone: item.phone || "-",
           status: item.status || "active",
           startDate: item.start_date || "",
-          avatarUrl: item.avatar_url || "",
+          avatarUrl: item.user?.avatar_url || item.avatar_url || "",
           email: item.user?.email || "",
+          role: item.user?.role || "employee",
         }));
         setPersonnelList(mapped);
       })
@@ -58,15 +61,34 @@ export default function PersonnelPage() {
 
   const filteredPersonnel = useMemo(() => {
     return personnelList.filter((p) => {
+      // 1. Arama sorgusu filtresi
       const query = searchQuery.toLowerCase().trim();
-      if (!query) return true;
-      return (
-        p.name.toLowerCase().includes(query) ||
-        p.department.toLowerCase().includes(query) ||
-        p.phone.includes(query)
-      );
+      const matchesSearch = query
+        ? (p.name.toLowerCase().includes(query) ||
+           p.department.toLowerCase().includes(query) ||
+           p.phone.includes(query))
+        : true;
+      
+      // 2. Departman filtresi
+      const matchesDepartment = selectedDepartmentFilter
+        ? p.department === selectedDepartmentFilter
+        : true;
+        
+      // 3. Simüle edilen Manager rolü filtresi
+      let matchesSimulatedRole = true;
+      if (simulatedRole && simulatedRole.startsWith("manager:")) {
+        const simulatedDeptId = simulatedRole.split(":")[1];
+        matchesSimulatedRole = p.departmentId === simulatedDeptId;
+      }
+
+      return matchesSearch && matchesDepartment && matchesSimulatedRole;
     });
-  }, [personnelList, searchQuery]);
+  }, [personnelList, searchQuery, selectedDepartmentFilter, simulatedRole]);
+
+  // Benzersiz departman isimlerini çıkar
+  const uniqueDepartments = useMemo(() => {
+    return Array.from(new Set(personnelList.map((p) => p.department))).sort();
+  }, [personnelList]);
 
 
 
@@ -209,7 +231,25 @@ export default function PersonnelPage() {
                     <thead>
                       <tr className="border-b border-outline-variant/20 font-mono text-xs uppercase tracking-wider text-on-surface-variant/70">
                         <th className="px-6 py-4 font-bold">Personel</th>
-                        <th className="px-6 py-4 font-bold">Departman</th>
+                        <th className="px-6 py-4 font-bold">
+                          {role === "super_admin" ? (
+                            <div className="relative inline-flex items-center">
+                              <select
+                                value={selectedDepartmentFilter}
+                                onChange={(e) => setSelectedDepartmentFilter(e.target.value)}
+                                className="appearance-none bg-surface-2 border border-outline-variant/30 rounded-lg py-1.5 pl-3 pr-8 text-xs font-semibold text-on-surface hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all cursor-pointer normal-case tracking-normal"
+                              >
+                                <option value="">Tüm Departmanlar</option>
+                                {uniqueDepartments.map(d => (
+                                  <option key={d} value={d}>{d}</option>
+                                ))}
+                              </select>
+                              <ChevronDown className="absolute right-2.5 size-3.5 text-on-surface-variant pointer-events-none" />
+                            </div>
+                          ) : (
+                            "Departman"
+                          )}
+                        </th>
                         <th className="px-6 py-4 font-bold">Durum</th>
                         <th className="px-6 py-4 font-bold">Telefon</th>
                         <th className="px-6 py-4 font-bold">Başlangıç Tarihi</th>
@@ -226,7 +266,14 @@ export default function PersonnelPage() {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <Avatar name={p.name} url={p.avatarUrl} className="size-9 shrink-0" />
-                              <span className="font-bold text-primary">{p.name}</span>
+                              <div className="flex flex-col">
+                                <span className="font-bold text-primary">{p.name}</span>
+                                {p.role && p.role !== 'employee' && (
+                                  <span className="text-[10px] uppercase font-bold text-accent-cyan tracking-wider mt-0.5">
+                                    {p.role.replace('_', ' ')}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </td>
 

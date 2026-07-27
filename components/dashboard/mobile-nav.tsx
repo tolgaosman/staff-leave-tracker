@@ -6,7 +6,7 @@ import { Menu as MenuIcon, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { useIsAdmin } from "@/components/auth/role-store";
+import { useHasDashboardAccess } from "@/components/auth/role-store";
 import { isNavItemActive, navItems } from "@/components/dashboard/nav-items";
 import { NewRequestDialog } from "@/components/dashboard/new-request-dialog";
 import { RoleSwitcher } from "@/components/dashboard/role-switcher";
@@ -53,10 +53,10 @@ function BrandText({ className }: { className?: string }) {
    gezinme, tema ve profil menüsüne erişimin tek yolu burasıdır. */
 export function MobileTopBar() {
   const pathname = usePathname();
-  const isAdmin = useIsAdmin();
+  const hasAccess = useHasDashboardAccess();
   const [open, setOpen] = useState(false);
 
-  const visibleItems = navItems.filter((item) => isAdmin || !item.adminOnly);
+  const visibleItems = navItems.filter((item) => hasAccess || !item.adminOnly);
   // Tek öğe kaldığında (çalışan rolü) çekmeceye gerek yok.
   const showDrawer = visibleItems.length > 1;
 
@@ -111,7 +111,7 @@ export function MobileTopBar() {
                   })}
                 </nav>
 
-                {!isAdmin && (
+                {!hasAccess && (
                   <div className="mt-auto border-t border-outline-variant/30 pt-5">
                     <NewRequestDialog />
                   </div>

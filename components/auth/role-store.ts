@@ -3,14 +3,14 @@
 import { useSyncExternalStore } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 
-/* Rol bazlı görünüm kontrolü. Giriş yapan kullanıcının is_admin alanından
-   türetilir; geriye dönük uyumluluk için modül deposunu da yedek olarak destekler. */
+/* Rol bazlı görünüm kontrolü. Giriş yapan kullanıcının role alanından 
+   ve/veya manuel simülasyondan beslenir. */
 
-export type Role = "admin" | "employee";
+export type RoleOption = "super_admin" | "hr_admin" | "employee" | string; // string allows "manager:id"
 
 const STORAGE_KEY = "izin-takip-role";
 
-let role: Role = "admin";
+let simulatedRole: RoleOption | null = null;
 let initialized = false;
 const listeners = new Set<() => void>();
 
@@ -18,8 +18,10 @@ function ensureInit() {
   if (initialized || typeof window === "undefined") return;
   initialized = true;
   try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === "admin" || stored === "employee") role = stored;
+    const stored = window.localStorage.getItem(STORAGE_KEY) as RoleOption | null;
+    if (stored) {
+      simulatedRole = stored;
+    }
   } catch {
     // ignore
   }
@@ -30,34 +32,72 @@ function subscribe(callback: () => void) {
   return () => listeners.delete(callback);
 }
 
-function getSnapshot(): Role {
+function getSnapshot(): RoleOption | null {
   ensureInit();
-  return role;
+  return simulatedRole;
 }
 
-/** SSR/ilk boyama için sabit değer → hidrasyon uyumsuzluğu olmaz. */
-function getServerSnapshot(): Role {
-  return "admin";
+function getServerSnapshot(): RoleOption | null {
+  return null;
 }
 
-export function setRole(next: Role) {
-  role = next;
-  initialized = true;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, next);
-  } catch {
-    // ignore
-  }
-  listeners.forEach((l) => l());
-}
+export const useRoleStore = () => {
+  const role = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  
+  const setSimulatedRole = (next: RoleOption | null) => {
+    simulatedRole = next;
+    initialized = true;
+    try {
+      if (next === null) {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } else {
+        window.localStorage.setItem(STORAGE_KEY, next);
+      }
+    } catch {
+      // ignore
+    }
+    listeners.forEach((l) => l());
+  };
 
-export function useRole(): Role {
+  return { simulatedRole: role, setSimulatedRole };
+};
+
+/**
+ * Mevcut rolü hesaplar.
+ * Eğer kullanıcı super_admin ise ve bir rol simüle ediyorsa onu döndürür.
+ * Değilse kullanıcının kendi rolünü döndürür.
+ * Kullanıcı giriş yapmamışsa "employee" döner.
+ */
+export function useRole(): RoleOption {
   const { user } = useAuth();
-  const storeRole = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  if (!user) return storeRole;
-  return user.is_admin !== false ? "admin" : "employee";
+  const { simulatedRole } = useRoleStore();
+
+  if (!user) return "employee";
+
+  // Sadece super_admin simülasyon yapabilir
+  if (user.role === 'super_admin' && simulatedRole) {
+    return simulatedRole;
+  }
+
+  // user.role is 'manager' in db, we could append their department id if needed, 
+  // but for actual managers, the backend filters it anyway.
+  return user.role;
 }
 
+/**
+ * Geriye dönük uyumluluk için (eski useIsAdmin kullanan yerler için)
+ * Sadece super_admin ve hr_admin tam admin yetkilerine sahiptir (personel düzenleme vs.)
+ */
 export function useIsAdmin(): boolean {
-  return useRole() === "admin";
+  const role = useRole();
+  return role === "super_admin" || role === "hr_admin";
+}
+
+/**
+ * Sol menüyü ve dashboard sekmelerini (Personel, İzinler vb.) görebilecek yetkiler:
+ * super_admin, hr_admin, manager
+ */
+export function useHasDashboardAccess(): boolean {
+  const role = useRole();
+  return role === "super_admin" || role === "hr_admin" || role.startsWith("manager");
 }

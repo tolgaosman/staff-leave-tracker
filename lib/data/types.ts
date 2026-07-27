@@ -18,6 +18,10 @@ export type Personnel = {
       used to derive each person's annual leave entitlement. */
   startDate?: string;
   avatarUrl?: string;
+  role: "super_admin" | "hr_admin" | "manager" | "employee";
+  emergencyName?: string;
+  emergencyRelation?: string;
+  emergencyPhone?: string;
 };
 
 export type LeaveType = "annual" | "excuse" | "sick" | "unpaid";

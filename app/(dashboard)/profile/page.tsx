@@ -442,17 +442,7 @@ function ProfileEditor({ user }: { user: User }) {
                   {role === "admin" ? "Yönetici" : "Çalışan"}
                 </span>
               </li>
-              {me?.phone && (
-                <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2/40 px-4 py-3">
-                  <span className="flex items-center gap-2 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">
-                    <Phone className="size-4" />
-                    Kayıtlı Telefon
-                  </span>
-                  <span className="font-sans text-sm text-on-surface">
-                    {me.phone}
-                  </span>
-                </li>
-              )}
+
               {form.birthDate && (
                 <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2/40 px-4 py-3">
                   <span className="flex items-center gap-2 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">

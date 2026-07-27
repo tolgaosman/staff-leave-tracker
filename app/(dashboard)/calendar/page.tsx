@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useIsAdmin } from "@/components/auth/role-store";
+import { useHasDashboardAccess, useRoleStore } from "@/components/auth/role-store";
 import type { LeaveRequest, LeaveType, Personnel } from "@/lib/data/types";
 import {
   CalendarDayDialog,
@@ -14,13 +14,14 @@ import { getPublicHolidayName } from "@/lib/date/holidays";
 import { apiFetch } from "@/lib/api";
 
 export default function CalendarPage() {
-  const isAdmin = useIsAdmin();
+  const hasAccess = useHasDashboardAccess();
+  const { simulatedRole } = useRoleStore();
   const router = useRouter();
 
   // Çalışan rolü bu sayfayı göremez → Genel Bakış'a yönlendir.
   useEffect(() => {
-    if (!isAdmin) router.replace("/");
-  }, [isAdmin, router]);
+    if (!hasAccess) router.replace("/");
+  }, [hasAccess, router]);
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selected, setSelected] = useState<{
@@ -54,8 +55,9 @@ export default function CalendarPage() {
           phone: p.phone || "-",
           status: p.status || "active",
           startDate: p.start_date || "",
-          avatarUrl: p.avatar_url || "",
+          avatarUrl: p.user?.avatar_url || p.avatar_url || "",
           email: p.user?.email || "",
+          role: p.user?.role || "employee",
         }));
         setPersonnelList(mappedPers);
       })
@@ -73,7 +75,18 @@ export default function CalendarPage() {
   // Takvimde gösterilecek izinler: onaylı + bekleyen (reddedilenler hariç).
   const visibleLeaves = useMemo<LeaveRequest[]>(() => {
     return requestsList
-      .filter((r) => r.status === "approved" || r.status === "pending")
+      .filter((r) => {
+        if (r.status !== "approved" && r.status !== "pending") return false;
+
+        // Simüle edilen Manager rolü filtresi
+        if (simulatedRole && simulatedRole.startsWith("manager:")) {
+          const simulatedDeptId = simulatedRole.split(":")[1];
+          const person = personnelMap.get(String(r.personnel_id));
+          if (!person || person.departmentId !== simulatedDeptId) return false;
+        }
+
+        return true;
+      })
       .map((item) => ({
         id: String(item.id),
         personnelId: String(item.personnel_id),
@@ -84,7 +97,7 @@ export default function CalendarPage() {
         note: item.note || "",
         createdAt: item.created_at || "",
       }));
-  }, [requestsList]);
+  }, [requestsList, personnelMap, simulatedRole]);
 
   const renderCells = () => {
     const cells = [];
@@ -225,7 +238,7 @@ export default function CalendarPage() {
     "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
   ];
 
-  if (!isAdmin) return null;
+  if (!hasAccess) return null;
 
   return (
     <div className="space-y-8">
