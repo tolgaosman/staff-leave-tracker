@@ -136,7 +136,7 @@ export function AnnouncementsPanel() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const isAdmin = user?.role === "super_admin" || user?.role === "hr_admin";
+  const isAdmin = user?.role === "super_admin" || user?.role === "hr_admin" || user?.role === "manager";
 
   function fetchAnnouncements() {
     setLoading(true);
