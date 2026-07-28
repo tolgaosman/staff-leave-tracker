@@ -69,9 +69,12 @@ function ResetPasswordForm() {
           <p className="mb-2 font-semibold">Şifre sıfırlandı!</p>
           <p className="text-sm text-on-surface-variant">Yeni şifrenizle sisteme giriş yapabilirsiniz.</p>
         </div>
-        <Button asChild className="w-full">
-          <Link href="/login">Giriş Yap</Link>
-        </Button>
+        <Link 
+          href="/login"
+          className="inline-flex h-9 w-full items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
+        >
+          Giriş Yap
+        </Link>
       </div>
     );
   }
