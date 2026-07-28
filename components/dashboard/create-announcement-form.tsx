@@ -60,7 +60,7 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
         <div className="flex size-8 items-center justify-center rounded-full bg-accent-cyan/15 text-accent-cyan">
           <Plus className="size-4" />
         </div>
-        <h2 className="font-bold text-on-surface text-base">Yeni Duyuru Oluştur</h2>
+        <h2 className="font-bold text-on-surface text-base">Duyuru Oluşturma</h2>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
