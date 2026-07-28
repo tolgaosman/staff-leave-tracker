@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Megaphone, Trash2, Clock, CalendarDays } from "lucide-react";
+import { Megaphone, Trash2, CalendarDays } from "lucide-react";
 
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -89,7 +89,7 @@ export function AnnouncementsPanel({ refreshKey = 0 }: { refreshKey?: number }) 
           {isAdmin ? "Henüz duyuru yok. İlk duyuruyu oluşturun." : "Aktif duyuru bulunmuyor."}
         </p>
       ) : (
-        <ul className="space-y-4">
+        <div className="space-y-4">
           {filteredAnnouncements.map((a) => (
             <div
               key={a.id}
@@ -140,7 +140,7 @@ export function AnnouncementsPanel({ refreshKey = 0 }: { refreshKey?: number }) 
               </p>
             </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
