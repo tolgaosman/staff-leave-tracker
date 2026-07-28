@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import { LogIn } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
@@ -93,14 +92,14 @@ function ResetPasswordForm() {
           <label htmlFor="email" className="text-sm font-medium leading-none text-on-surface">
             E-posta
           </label>
-          <Input
+          <input
             id="email"
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
-            className="border-outline bg-surface text-on-surface focus-visible:ring-primary"
+            className="w-full rounded-md border px-3 py-2 text-sm outline-none transition-colors border-outline bg-surface text-on-surface focus-visible:ring-2 focus-visible:ring-primary"
           />
         </div>
         
@@ -108,7 +107,7 @@ function ResetPasswordForm() {
           <label htmlFor="password" className="text-sm font-medium leading-none text-on-surface">
             Yeni Şifre
           </label>
-          <Input
+          <input
             id="password"
             type="password"
             required
@@ -116,7 +115,7 @@ function ResetPasswordForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
-            className="border-outline bg-surface text-on-surface focus-visible:ring-primary"
+            className="w-full rounded-md border px-3 py-2 text-sm outline-none transition-colors border-outline bg-surface text-on-surface focus-visible:ring-2 focus-visible:ring-primary"
           />
         </div>
 
@@ -124,7 +123,7 @@ function ResetPasswordForm() {
           <label htmlFor="password_confirmation" className="text-sm font-medium leading-none text-on-surface">
             Yeni Şifre (Tekrar)
           </label>
-          <Input
+          <input
             id="password_confirmation"
             type="password"
             required
@@ -132,7 +131,7 @@ function ResetPasswordForm() {
             value={passwordConfirmation}
             onChange={(e) => setPasswordConfirmation(e.target.value)}
             disabled={loading}
-            className="border-outline bg-surface text-on-surface focus-visible:ring-primary"
+            className="w-full rounded-md border px-3 py-2 text-sm outline-none transition-colors border-outline bg-surface text-on-surface focus-visible:ring-2 focus-visible:ring-primary"
           />
         </div>
 

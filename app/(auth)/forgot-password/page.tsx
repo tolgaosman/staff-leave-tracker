@@ -5,7 +5,6 @@ import Link from "next/link";
 import { LogIn } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
@@ -60,7 +59,7 @@ export default function ForgotPasswordPage() {
             <label htmlFor="email" className="text-sm font-medium leading-none text-on-surface">
               E-posta
             </label>
-            <Input
+            <input
               id="email"
               type="email"
               placeholder="isim@sirket.com"
@@ -68,7 +67,7 @@ export default function ForgotPasswordPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
-              className="border-outline bg-surface text-on-surface focus-visible:ring-primary"
+              className="w-full rounded-md border px-3 py-2 text-sm outline-none transition-colors border-outline bg-surface text-on-surface focus-visible:ring-2 focus-visible:ring-primary"
             />
           </div>
           <Button type="submit" disabled={loading} className="w-full">
