@@ -20,8 +20,8 @@ export default function AnnouncementsPage() {
   if (!hasAccess) return null;
 
   return (
-    <div className="space-y-10 flex flex-col items-center">
-      <div className="border-b border-outline-variant/20 pb-6 w-full max-w-4xl text-center">
+    <div className="space-y-8 flex flex-col">
+      <div className="border-b border-outline-variant/20 pb-6 w-full max-w-4xl">
         <h2 className="font-serif text-3xl font-bold text-primary sm:text-4xl lg:text-5xl">
           Duyuru
         </h2>
