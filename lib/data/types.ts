@@ -22,6 +22,8 @@ export type Personnel = {
   emergencyName?: string;
   emergencyRelation?: string;
   emergencyPhone?: string;
+  annualLeaveBalance?: number;
+  carriedOverBalance?: number;
 };
 
 export type LeaveType = "annual" | "excuse" | "sick" | "unpaid";
@@ -91,12 +93,12 @@ export function leaveDayCount(startDate: string, endDate: string): number {
    sync with the underlying data (single source of truth). */
 export type LeaveBalance = {
   personnelId: string;
-  /** Yearly annual-leave entitlement, derived from seniority (startDate). */
+  /** Yearly annual-leave entitlement (read from backend) */
   entitled: number;
-  /** Working days already consumed by APPROVED annual leaves. */
-  used: number;
+  /** Unused leave days from previous years (read from backend) */
+  carriedOver: number;
   /** Working days locked up in PENDING annual requests (not yet deducted). */
   pending: number;
-  /** entitled - used. Can be shown to the user as "kalan izin". */
+  /** Entitled + carriedOver - pending */
   remaining: number;
 };

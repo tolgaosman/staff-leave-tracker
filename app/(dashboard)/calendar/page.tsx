@@ -123,11 +123,10 @@ export default function CalendarPage() {
         cells.push(
           <div
             key={day}
-            className={`min-h-[56px] rounded-lg border p-1 text-left sm:min-h-[96px] sm:rounded-xl sm:p-2 lg:min-h-[120px] ${
-              isWeekend
-                ? "border-amber-500/25 bg-amber-500/5"
-                : "border-amber-500/30 bg-amber-500/10"
-            }`}
+            className={`min-h-[56px] rounded-lg border p-1 text-left sm:min-h-[96px] sm:rounded-xl sm:p-2 lg:min-h-[120px] ${isWeekend
+              ? "border-amber-500/25 bg-amber-500/5"
+              : "border-amber-500/30 bg-amber-500/10"
+              }`}
           >
             <div className="flex items-center justify-between font-mono text-xs font-bold text-amber-800 dark:text-amber-300 sm:text-sm">
               <span>{day}</span>
@@ -189,14 +188,12 @@ export default function CalendarPage() {
             {entries.map(({ leave, person }, idx) => (
               <div
                 key={`${leave.id}-${idx}`}
-                className={`truncate rounded px-2 py-1 text-xs font-semibold ${
-                  leave.status === "approved"
-                    ? "bg-accent/50 text-accent-foreground shadow-sm"
-                    : "border border-dashed border-accent-violet/50 bg-accent-violet/10 text-accent-violet"
-                }`}
-                title={`${person.name} (${person.department}) — ${
-                  leave.status === "approved" ? "Onaylandı" : "Bekliyor"
-                }`}
+                className={`truncate rounded px-2 py-1 text-xs font-semibold ${leave.status === "approved"
+                  ? "bg-accent/50 text-accent-foreground shadow-sm"
+                  : "border border-dashed border-accent-violet/50 bg-accent-violet/10 text-accent-violet"
+                  }`}
+                title={`${person.name} (${person.department}) — ${leave.status === "approved" ? "Onaylandı" : "Bekliyor"
+                  }`}
               >
                 {person.name.split(" ")[0]}
               </div>

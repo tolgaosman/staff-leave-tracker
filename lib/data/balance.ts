@@ -40,12 +40,11 @@ export function annualEntitlement(startDate?: string, now: Date = new Date()): n
  */
 export function computeLeaveBalance(
   person: Personnel,
-  allLeaves: LeaveRequest[],
-  now: Date = new Date()
+  allLeaves: LeaveRequest[]
 ): LeaveBalance {
-  const entitled = annualEntitlement(person.startDate, now);
+  const entitled = person.annualLeaveBalance || 0;
+  const carriedOver = person.carriedOverBalance || 0;
 
-  let used = 0;
   let pending = 0;
 
   for (const leave of allLeaves) {
@@ -53,16 +52,14 @@ export function computeLeaveBalance(
     if (leave.type !== "annual") continue;
 
     const days = workingDayCount(leave.startDate, leave.endDate);
-    if (leave.status === "approved") used += days;
-    else if (leave.status === "pending") pending += days;
-    // rejected → bakiyeyi etkilemez
+    if (leave.status === "pending") pending += days;
   }
 
   return {
     personnelId: person.id,
     entitled,
-    used,
+    carriedOver,
     pending,
-    remaining: entitled - used,
+    remaining: entitled + carriedOver - pending,
   };
 }

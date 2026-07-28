@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Pencil, Eye, Search, ChevronDown } from "lucide-react";
+import { Plus, Trash2, Pencil, Eye, Search, ChevronDown, Shield } from "lucide-react";
 import { useHasDashboardAccess, useIsAdmin, useRoleStore, useRole } from "@/components/auth/role-store";
 import { Personnel, personnelStatusLabels } from "@/lib/data/types";
 import { Avatar } from "@/components/dashboard/avatar";
@@ -13,6 +13,14 @@ import { MobileCard, MobileCardList } from "@/components/dashboard/mobile-card-l
 import { useToast } from "@/components/ui/toast";
 import { apiFetch } from "@/lib/api";
 import Link from "next/link";
+
+const roleLabels: Record<string, string> = {
+  super_admin: "Sistem Yöneticisi",
+  hr_admin: "İnsan Kaynakları",
+  manager: "Departman Müdürü",
+  employee: "Çalışan"
+};
+
 export default function PersonnelPage() {
   const hasAccess = useHasDashboardAccess();
   const isAdmin = useIsAdmin();
@@ -31,6 +39,22 @@ export default function PersonnelPage() {
     if (!hasAccess) router.replace("/");
   }, [hasAccess, router]);
 
+  const isSuperAdmin = role === "super_admin";
+
+  const makeManager = async (personnel: Personnel) => {
+    const newRole = personnel.role === "manager" ? "employee" : "manager";
+    try {
+      await apiFetch(`/personnel/${personnel.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ role: newRole }),
+      });
+      toast.success(newRole === "manager" ? `${personnel.name} artık departman müdürü` : `${personnel.name} artık müdür değil`);
+      fetchPersonnel();
+    } catch {
+      toast.error(newRole === "manager" ? "Müdür yetkisi verilemedi" : "Yetki kaldırılamadı");
+    }
+  };
+
   const [personnelList, setPersonnelList] = useState<Personnel[]>([]);
 
   const fetchPersonnel = () => {
@@ -47,6 +71,8 @@ export default function PersonnelPage() {
           avatarUrl: item.user?.avatar_url || item.avatar_url || "",
           email: item.user?.email || "",
           role: item.user?.role || "employee",
+          annualLeaveBalance: item.annual_leave_balance || 0,
+          carriedOverBalance: item.carried_over_balance || 0,
         }));
         setPersonnelList(mapped);
       })
@@ -142,9 +168,9 @@ export default function PersonnelPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Arama Çubuğu*/}
+            {/* Arama Çubuğu ve Filtreler */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="relative w-full max-w-md">
+              <div className="relative w-full max-w-md flex-1">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant/50" />
                 <input
                   type="text"
@@ -154,6 +180,22 @@ export default function PersonnelPage() {
                   className="w-full rounded-lg border border-outline-variant/30 bg-surface-1 py-2 pl-9 pr-4 font-sans text-sm text-on-surface outline-none placeholder:text-on-surface-variant/50 focus:border-accent-cyan"
                 />
               </div>
+
+              {role === "super_admin" && (
+                <div className="relative w-full sm:w-auto">
+                  <select
+                    value={selectedDepartmentFilter}
+                    onChange={(e) => setSelectedDepartmentFilter(e.target.value)}
+                    className="w-full sm:w-auto appearance-none bg-surface-2 border border-outline-variant/30 rounded-lg py-2 pl-4 pr-10 text-sm font-semibold text-on-surface hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all cursor-pointer tracking-normal"
+                  >
+                    <option value="">Tüm Departmanlar</option>
+                    {uniqueDepartments.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
+                </div>
+              )}
             </div>
 
             {filteredPersonnel.length === 0 ? (
@@ -171,7 +213,16 @@ export default function PersonnelPage() {
                     key={p.id}
                     leading={<Avatar name={p.name} url={p.avatarUrl} className="size-10 shrink-0" />}
                     title={p.name}
-                    subtitle={p.department}
+                    subtitle={
+                      <div className="flex flex-col">
+                        <span>{p.department}</span>
+                        {p.role && p.role !== 'employee' && (
+                          <span className="text-[10px] uppercase font-bold text-accent-cyan tracking-wider mt-0.5">
+                            {roleLabels[p.role] || p.role.replace('_', ' ')}
+                          </span>
+                        )}
+                      </div>
+                    }
                     badge={
                       <span className="inline-block rounded-full border border-outline-variant/30 bg-white/50 px-3 py-1 font-mono text-xs font-semibold text-secondary">
                         {personnelStatusLabels[p.status]}
@@ -190,6 +241,19 @@ export default function PersonnelPage() {
                     ]}
                     actions={
                       <>
+                        {isSuperAdmin && p.role !== "super_admin" && p.role !== "hr_admin" && (
+                          <button
+                            onClick={() => makeManager(p)}
+                            className={`flex size-9 items-center justify-center rounded-lg border border-outline-variant/30 transition-colors active:scale-95 cursor-pointer ${
+                              p.role === "manager" 
+                                ? "text-destructive hover:bg-destructive/10" 
+                                : "text-amber-500 hover:bg-amber-500/10"
+                            }`}
+                            title={p.role === "manager" ? "Müdür Yetkisini Al" : "Sadece Kendi Departmanının Müdürü Yap"}
+                          >
+                            <Shield className="size-4" />
+                          </button>
+                        )}
                         <Link
                           href={`/personnel/detail?id=${p.id}`}
                           className="flex size-9 items-center justify-center rounded-lg border border-outline-variant/30 text-on-surface-variant transition-colors active:scale-95"
@@ -231,25 +295,7 @@ export default function PersonnelPage() {
                     <thead>
                       <tr className="border-b border-outline-variant/20 font-mono text-xs uppercase tracking-wider text-on-surface-variant/70">
                         <th className="px-6 py-4 font-bold">Personel</th>
-                        <th className="px-6 py-4 font-bold">
-                          {role === "super_admin" ? (
-                            <div className="relative inline-flex items-center">
-                              <select
-                                value={selectedDepartmentFilter}
-                                onChange={(e) => setSelectedDepartmentFilter(e.target.value)}
-                                className="appearance-none bg-surface-2 border border-outline-variant/30 rounded-lg py-1.5 pl-3 pr-8 text-xs font-semibold text-on-surface hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all cursor-pointer normal-case tracking-normal"
-                              >
-                                <option value="">Tüm Departmanlar</option>
-                                {uniqueDepartments.map(d => (
-                                  <option key={d} value={d}>{d}</option>
-                                ))}
-                              </select>
-                              <ChevronDown className="absolute right-2.5 size-3.5 text-on-surface-variant pointer-events-none" />
-                            </div>
-                          ) : (
-                            "Departman"
-                          )}
-                        </th>
+                        <th className="px-6 py-4 font-bold">Departman</th>
                         <th className="px-6 py-4 font-bold">Durum</th>
                         <th className="px-6 py-4 font-bold">Telefon</th>
                         <th className="px-6 py-4 font-bold">Başlangıç Tarihi</th>
@@ -270,7 +316,7 @@ export default function PersonnelPage() {
                                 <span className="font-bold text-primary">{p.name}</span>
                                 {p.role && p.role !== 'employee' && (
                                   <span className="text-[10px] uppercase font-bold text-accent-cyan tracking-wider mt-0.5">
-                                    {p.role.replace('_', ' ')}
+                                    {roleLabels[p.role] || p.role.replace('_', ' ')}
                                   </span>
                                 )}
                               </div>
@@ -302,6 +348,20 @@ export default function PersonnelPage() {
                           {/* 5. Sütun: Aksiyon Butonları */}
                           <td className="px-6 py-4">
                             <div className="flex items-center justify-end gap-2">
+                              {isSuperAdmin && p.role !== "super_admin" && p.role !== "hr_admin" && (
+                                <button
+                                  onClick={() => makeManager(p)}
+                                  className={`flex size-8 items-center justify-center rounded-lg border border-outline-variant/30 transition-colors cursor-pointer ${
+                                    p.role === "manager" 
+                                      ? "text-destructive hover:bg-destructive/10" 
+                                      : "text-amber-500 hover:bg-amber-500/10"
+                                  }`}
+                                  title={p.role === "manager" ? "Müdür Yetkisini Al" : "Sadece Kendi Departmanının Müdürü Yap"}
+                                >
+                                  <Shield className="size-4" />
+                                </button>
+                              )}
+                              
                               <Link
                                 href={`/personnel/detail?id=${p.id}`}
                                 className="flex size-8 items-center justify-center rounded-lg border border-outline-variant/30 text-on-surface-variant transition-colors hover:bg-white hover:text-primary"

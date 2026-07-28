@@ -74,13 +74,18 @@ export function useRole(): RoleOption {
 
   if (!user) return "employee";
 
-  // Sadece super_admin simülasyon yapabilir
   if (user.role === 'super_admin' && simulatedRole) {
     return simulatedRole;
   }
 
-  // user.role is 'manager' in db, we could append their department id if needed, 
-  // but for actual managers, the backend filters it anyway.
+  // Manager: Varsayılan olarak "employee" (kişisel görünüm). 
+  // Sadece eğer açıkça "manager" seçilmişse manager rolüne geçer.
+  if (user.role === 'manager') {
+    if (simulatedRole === 'manager') return 'manager';
+    return 'employee';
+  }
+
+  // user.role is 'employee' or 'hr_admin'
   return user.role;
 }
 

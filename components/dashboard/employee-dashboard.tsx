@@ -209,8 +209,8 @@ export function EmployeeDashboard() {
 
   const years = tenureYears(me.startDate);
   const usedPct =
-    balance && balance.entitled > 0
-      ? Math.min(100, Math.round((balance.used / balance.entitled) * 100))
+    balance && (balance.entitled + balance.carriedOver) > 0
+      ? Math.min(100, Math.round(((((balance.entitled + balance.carriedOver) - balance.remaining) / (balance.entitled + balance.carriedOver))) * 100))
       : 0;
 
   const statusChip = activeOrUpcoming.leave
@@ -220,8 +220,8 @@ export function EmployeeDashboard() {
     : { text: "Aktif", cls: "border-accent-cyan/30 bg-accent-cyan/10 text-accent-cyan" };
 
   const balanceStats: Stat[] = [
-    { label: "HAK EDİLEN", value: String(balance?.entitled ?? 0), icon: CalendarCheck, accent: "cyan", caption: "Kıdeme göre yıllık" },
-    { label: "KULLANILAN", value: String(balance?.used ?? 0), icon: CalendarMinus, accent: "violet", caption: "Onaylı yıllık izin", valueColor: "text-primary" },
+    { label: "HAK EDİLEN", value: String(balance?.entitled ?? 0), icon: CalendarCheck, accent: "cyan", caption: "Bu yılki hak ediş" },
+    { label: "DEVREDEN", value: String(balance?.carriedOver ?? 0), icon: CalendarMinus, accent: "violet", caption: "Geçen yıldan", valueColor: "text-primary" },
     { label: "KULLANILABİLİR YILLIK İZİN", value: String(balance?.remaining ?? 0), icon: Wallet, accent: "cyan", caption: "Kalan bakiye", valueColor: "text-primary" },
     { label: "ONAY BEKLEYEN", value: String(balance?.pending ?? 0), icon: Hourglass, accent: "neutral", caption: "Bekleyen yıllık talep", valueColor: "text-primary" },
   ];
@@ -263,12 +263,18 @@ export function EmployeeDashboard() {
 
       {/* Yıllık kullanım çubuğu + Yaklaşan iznim */}
       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <LeaveUsageGauge
-          used={balance?.used ?? 0}
-          entitled={balance?.entitled ?? 0}
-          remaining={balance?.remaining ?? 0}
-          usedPct={usedPct}
-        />
+        <div className="md:col-span-1">
+          <LeaveUsageGauge
+            used={((balance?.entitled ?? 0) + (balance?.carriedOver ?? 0)) - (balance?.remaining ?? 0)}
+            entitled={(balance?.entitled ?? 0) + (balance?.carriedOver ?? 0)}
+            remaining={balance?.remaining ?? 0}
+            usedPct={
+              (balance?.entitled ?? 0) + (balance?.carriedOver ?? 0) > 0
+                ? Math.round(((((balance?.entitled ?? 0) + (balance?.carriedOver ?? 0)) - (balance?.remaining ?? 0)) / ((balance?.entitled ?? 0) + (balance?.carriedOver ?? 0))) * 100)
+                : 0
+            }
+          />
+        </div>
 
         <div className="glass-panel flex flex-col rounded-xl p-5 md:p-8">
           <div className="mb-4 flex items-center gap-2">

@@ -50,6 +50,8 @@ async function fetchBalance(personnelId: string, isEmployee: boolean = false): P
     avatarUrl: d.user?.avatar_url || d.avatar_url || "",
     email: d.user?.email || "",
     role: d.user?.role || "employee",
+    annualLeaveBalance: d.annual_leave_balance != null ? Number(d.annual_leave_balance) : undefined,
+    carriedOverBalance: d.carried_over_balance != null ? Number(d.carried_over_balance) : undefined,
   };
   const leaves: LeaveRequest[] = (d.leave_requests ?? []).map((it: any) => ({
     id: String(it.id),
@@ -146,6 +148,8 @@ function LeaveForm({
 
   const requestedDays = start && end ? workingDayCount(start, end) : 0;
 
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!personnelId) return;
@@ -169,25 +173,36 @@ function LeaveForm({
 
     setSaving(true);
     try {
-      const body = {
-        leave_type_id: leaveTypeId,
-        start_date: start,
-        end_date: end,
-        total_days: totalDays,
-        note: note.trim() || null,
-        attachment_url: attachmentUrl || null,
-      };
+      const formData = new FormData();
+      formData.append("leave_type_id", String(leaveTypeId));
+      formData.append("start_date", start);
+      formData.append("end_date", end);
+      formData.append("total_days", String(totalDays));
+      if (note.trim()) {
+        formData.append("note", note.trim());
+      }
+      
+      if (attachmentFile) {
+        formData.append("attachment", attachmentFile);
+      } else if (attachmentUrl) {
+        // Eski URL varsa ve silinmediyse onu gönder
+        formData.append("attachment_url", attachmentUrl);
+      }
+
       if (leave) {
-        // Düzenleme — personel ve durum değiştirilmez (durum onay/red ile yönetilir).
+        // Düzenleme
+        // PHP requires _method=PUT for multipart/form-data updates
+        formData.append("_method", "PUT");
         await apiFetch(`/leave-requests/${leave.id}`, {
-          method: "PUT",
-          body: JSON.stringify(body),
+          method: "POST",
+          body: formData,
         });
         toast.success("İzin talebi güncellendi");
       } else {
+        formData.append("personnel_id", String(personnelId));
         await apiFetch("/leave-requests", {
           method: "POST",
-          body: JSON.stringify({ ...body, personnel_id: Number(personnelId) }),
+          body: formData,
         });
         toast.success("İzin talebi oluşturuldu");
       }
@@ -201,11 +216,12 @@ function LeaveForm({
     }
   }
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {
       setAttachmentName(file.name);
-      setAttachmentUrl(await readFile(file));
+      setAttachmentFile(file);
+      // We don't read as base64 anymore to save memory, just keep the file
     }
   }
 

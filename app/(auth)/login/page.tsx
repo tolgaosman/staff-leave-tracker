@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Link from "next/link";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import {
@@ -70,12 +71,22 @@ export default function LoginPage() {
           />
         </div>
 
-        <Button
-          type="submit"
-          className="mt-2 h-auto w-full bg-accent-cyan py-3 text-base font-bold text-white hover:bg-accent-cyan/90"
-        >
-          Giriş Yap
-        </Button>
+        <div className="space-y-3 pt-2">
+          <Button
+            type="submit"
+            className="h-auto w-full bg-accent-cyan py-3 text-base font-bold text-white hover:bg-accent-cyan/90"
+          >
+            Giriş Yap
+          </Button>
+          <div className="text-center">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-semibold text-accent-cyan hover:underline"
+            >
+              Şifremi unuttum
+            </Link>
+          </div>
+        </div>
       </form>
     </AuthCard>
   );

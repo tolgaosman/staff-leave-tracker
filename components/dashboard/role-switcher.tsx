@@ -18,28 +18,37 @@ const staticOptions = [
 ];
 
 export function RoleSwitcher() {
+  const { user } = useAuth();
   const role = useRole();
   const { setSimulatedRole, simulatedRole } = useRoleStore();
   const [departments, setDepartments] = useState<{id: number, name: string}[]>([]);
 
   useEffect(() => {
-    apiFetch<any[]>("/departments")
-      .then(setDepartments)
-      .catch(() => {});
-  }, []);
+    if (user?.role === "super_admin") {
+      apiFetch<any[]>("/departments")
+        .then(setDepartments)
+        .catch(() => {});
+    }
+  }, [user?.role]);
 
-  const dynamicOptions = departments.map(d => ({
-    value: `manager:${d.id}`,
-    label: `Müdür (${d.name})`,
-    icon: Briefcase
-  }));
+  let options: any[] = [];
+  
+  if (user?.role === "super_admin") {
+    const dynamicOptions = departments.map(d => ({
+      value: `manager:${d.id}`,
+      label: `Müdür (${d.name})`,
+      icon: Briefcase
+    }));
+    options = [staticOptions[0], ...dynamicOptions, { value: "employee", label: "Çalışan", icon: User }];
+  } else if (user?.role === "manager") {
+    options = [
+      { value: "employee", label: "Kişisel Görünüm", icon: User },
+      { value: "manager", label: "Departman Müdürü", icon: Briefcase }
+    ];
+  }
 
-  const options = [
-    staticOptions[0],
-    ...dynamicOptions,
-  ];
-
-  const active = options.find((o) => o.value === role) ?? staticOptions[0];
+  // Güvenlik: active değeri bulunamazsa ilk seçeneğe düş
+  const active = options.find((o) => o.value === role) ?? options[0] ?? staticOptions[0];
   const ActiveIcon = active.icon;
 
   const handleSelect = (val: RoleOption) => {
@@ -57,7 +66,7 @@ export function RoleSwitcher() {
         className="flex items-center gap-1.5 rounded-full border border-outline-variant/30 bg-surface-1 px-2.5 py-1 text-xs font-medium text-on-surface-variant outline-none transition-colors hover:text-primary data-[popup-open]:border-accent-cyan/40 data-[popup-open]:text-primary cursor-pointer sm:gap-2 sm:px-3 sm:py-1.5 sm:text-sm"
       >
         <ActiveIcon className="size-3.5 sm:size-4" />
-        <span>{active.label} (Simüle)</span>
+        <span>{active.label} {user?.role === "super_admin" && "(Simüle)"}</span>
         <ChevronDown className="size-3 opacity-60 sm:size-3.5" />
       </Menu.Trigger>
 
@@ -65,7 +74,7 @@ export function RoleSwitcher() {
         <Menu.Positioner sideOffset={12} align="end" className="z-50">
           <Menu.Popup className={`${popupClasses} w-56`}>
             <div className="px-3 pb-2 pt-1 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant/70">
-              Görünüm rolü simülasyonu
+              {user?.role === "super_admin" ? "Görünüm rolü simülasyonu" : "Görünüm Seçimi"}
             </div>
             {options.map((o) => {
               const Icon = o.icon;
@@ -77,7 +86,7 @@ export function RoleSwitcher() {
                 >
                   <Icon className="size-4 opacity-70" />
                   <span className="flex-1">{o.label}</span>
-                  {(simulatedRole === o.value || (simulatedRole === null && o.value === "super_admin")) && (
+                  {role === o.value && (
                     <Check className="size-4 text-accent-cyan" />
                   )}
                 </Menu.Item>

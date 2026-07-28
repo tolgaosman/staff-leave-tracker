@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Sun,
   User as UserIcon,
+  Briefcase,
 } from "lucide-react";
 import { useState, useSyncExternalStore } from "react";
 
@@ -147,6 +148,15 @@ function ProfileEditor({ user }: { user: User }) {
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
+  const roleLabels: Record<string, { label: string; icon: any }> = {
+    super_admin: { label: "Sistem Yöneticisi", icon: ShieldCheck },
+    hr_admin: { label: "İnsan Kaynakları", icon: ShieldCheck },
+    manager: { label: "Departman Müdürü", icon: Briefcase },
+    employee: { label: "Çalışan", icon: UserIcon },
+  };
+  const currentRoleInfo = roleLabels[user.role] ?? roleLabels.employee;
+  const RoleIcon = currentRoleInfo.icon;
+
   const set = <K extends keyof ProfileForm>(key: K, value: ProfileForm[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
@@ -242,27 +252,6 @@ function ProfileEditor({ user }: { user: User }) {
               <p className="mt-1 font-sans text-base text-on-surface-variant">
                 {form.title || "Ünvan eklenmemiş"}
               </p>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-cyan/30 bg-accent-cyan/10 px-2.5 py-0.5 font-label-mono text-xs text-accent-cyan">
-                  {role === "admin" ? (
-                    <ShieldCheck className="size-3.5" />
-                  ) : (
-                    <UserIcon className="size-3.5" />
-                  )}
-                  {role === "admin" ? "Yönetici" : "Çalışan"}
-                </span>
-                {me?.department && (
-                  <span className="inline-flex items-center rounded-full border border-border bg-surface-2/60 px-2.5 py-0.5 font-label-mono text-xs text-on-surface-variant">
-                    {me.department}
-                  </span>
-                )}
-                {form.location && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-2/60 px-2.5 py-0.5 font-label-mono text-xs text-on-surface-variant">
-                    <MapPin className="size-3.5" />
-                    {form.location}
-                  </span>
-                )}
-              </div>
             </div>
           </div>
         </div>
@@ -431,17 +420,24 @@ function ProfileEditor({ user }: { user: User }) {
               </li>
               <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2/40 px-4 py-3">
                 <span className="flex items-center gap-2 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">
-                  {role === "admin" ? (
-                    <ShieldCheck className="size-4" />
-                  ) : (
-                    <UserIcon className="size-4" />
-                  )}
+                  <RoleIcon className="size-3.5" />
                   Rol
                 </span>
                 <span className="font-sans text-sm text-on-surface">
-                  {role === "admin" ? "Yönetici" : "Çalışan"}
+                  {currentRoleInfo.label}
                 </span>
               </li>
+              {me?.department && (
+                <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2/40 px-4 py-3">
+                  <span className="flex items-center gap-2 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">
+                    <Briefcase className="size-3.5" />
+                    Departman
+                  </span>
+                  <span className="font-sans text-sm text-on-surface">
+                    {me.department}
+                  </span>
+                </li>
+              )}
 
               {form.birthDate && (
                 <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2/40 px-4 py-3">

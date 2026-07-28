@@ -25,6 +25,7 @@ import { AttachmentDialog } from "@/components/dashboard/attachment-dialog";
 import { LeaveStatusBadge } from "@/components/dashboard/badges";
 import { ExportButton } from "@/components/dashboard/export-button";
 import { MobileCard, MobileCardList } from "@/components/dashboard/mobile-card-list";
+import { ReasonDialog } from "@/components/dashboard/reason-dialog";
 
 
 const filterSelectClasses =
@@ -328,7 +329,14 @@ export default function LeaveRequestsPage() {
                       }
                       title={person?.name || "Bilinmeyen Personel"}
                       subtitle={person?.department || "-"}
-                      badge={<LeaveStatusBadge status={r.status} />}
+                      badge={
+                        <div className="flex items-center">
+                          <LeaveStatusBadge status={r.status} />
+                          {r.status === 'rejected' && r.rejectionReason && (
+                            <ReasonDialog reason={r.rejectionReason} />
+                          )}
+                        </div>
+                      }
                       rows={[
                         {
                           label: "İzin Türü",
@@ -497,7 +505,12 @@ export default function LeaveRequestsPage() {
 
                             {/* Durum Rozeti */}
                             <td className="px-6 py-4">
-                              <LeaveStatusBadge status={r.status} />
+                              <div className="flex items-center">
+                                <LeaveStatusBadge status={r.status} />
+                                {r.status === 'rejected' && r.rejectionReason && (
+                                  <ReasonDialog reason={r.rejectionReason} />
+                                )}
+                              </div>
                             </td>
 
                             {/* İşlemler (Onay/Red/Düzenle/Sil) — yalnız admin */}
@@ -512,8 +525,8 @@ export default function LeaveRequestsPage() {
                                           await apiFetch(`/leave-requests/${r.id}/approve`, { method: "PATCH" });
                                           toast.success("Talep onaylandı");
                                           fetchData();
-                                        } catch {
-                                          toast.error("İşlem başarısız");
+                                        } catch (err: any) {
+                                          toast.error(err.message || "İşlem başarısız");
                                         }
                                       }}
                                       title="Onayla"
@@ -586,8 +599,8 @@ export default function LeaveRequestsPage() {
               await apiFetch(`/leave-requests/${toDelete.id}`, { method: "DELETE" });
               toast.success("Talep silindi");
               fetchData();
-            } catch {
-              toast.error("Silme başarısız");
+            } catch (err: any) {
+              toast.error(err.message || "Silme başarısız");
             }
             setToDelete(null);
           }
@@ -604,10 +617,10 @@ export default function LeaveRequestsPage() {
                 method: "PATCH",
                 body: JSON.stringify({ rejection_reason: reason }),
               });
-              toast.error("Talep reddedildi");
+              toast.success("Talep reddedildi");
               fetchData();
-            } catch {
-              toast.error("İşlem başarısız");
+            } catch (err: any) {
+              toast.error(err.message || "İşlem başarısız");
             }
             setToReject(null);
           }

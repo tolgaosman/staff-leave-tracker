@@ -53,6 +53,8 @@ function PersonnelDetail() {
           emergencyRelation: data.user?.emergency_relation || "",
           emergencyPhone: data.user?.emergency_phone || "",
           role: data.user?.role || "employee",
+          annualLeaveBalance: data.annual_leave_balance || 0,
+          carriedOverBalance: data.carried_over_balance || 0,
         });
 
         if (Array.isArray(data.leave_requests)) {

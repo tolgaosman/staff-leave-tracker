@@ -82,7 +82,7 @@ export function TopNav() {
       )}
 
       <div className="flex items-center gap-4">
-        {user?.role === 'super_admin' && <RoleSwitcher />}
+        {(user?.role === 'super_admin' || user?.role === 'manager') && <RoleSwitcher />}
         <ThemeToggle />
 
 
