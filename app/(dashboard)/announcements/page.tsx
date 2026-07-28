@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AnnouncementsPanel } from "@/components/dashboard/announcements-panel";
+import { CreateAnnouncementForm } from "@/components/dashboard/create-announcement-form";
 import { useHasDashboardAccess } from "@/components/auth/role-store";
 
 export default function AnnouncementsPage() {
   const hasAccess = useHasDashboardAccess();
   const router = useRouter();
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // Çalışan rolü bu sayfaya doğrudan giremez, dashboard'a yönlendir.
   useEffect(() => {
     if (!hasAccess) {
       router.replace("/");
@@ -29,8 +30,9 @@ export default function AnnouncementsPage() {
         </p>
       </div>
 
-      <div className="max-w-4xl">
-        <AnnouncementsPanel />
+      <div className="max-w-4xl space-y-8">
+        <CreateAnnouncementForm onCreated={() => setRefreshKey((prev) => prev + 1)} />
+        <AnnouncementsPanel refreshKey={refreshKey} />
       </div>
     </div>
   );
