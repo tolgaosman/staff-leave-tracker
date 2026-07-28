@@ -29,6 +29,7 @@ export function AnnouncementsPanel({ refreshKey = 0 }: { refreshKey?: number }) 
   const toast = useToast();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const isAdmin = user?.role === "super_admin" || user?.role === "hr_admin" || user?.role === "manager";
 
@@ -53,12 +54,15 @@ export function AnnouncementsPanel({ refreshKey = 0 }: { refreshKey?: number }) 
   }, [announcements, simulatedRole]);
 
   async function handleDelete(id: number) {
+    setDeletingId(id);
     try {
       await apiFetch(`/announcements/${id}`, { method: "DELETE" });
       toast.success("Duyuru silindi");
       fetchAnnouncements();
     } catch (err: any) {
       toast.error(err.message || "Silinemedi");
+    } finally {
+      setDeletingId(null);
     }
   }
 
