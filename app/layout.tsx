@@ -29,12 +29,18 @@ const apiOrigin = (() => {
   }
 })();
 
+// Dev modunda React, hata ayıklama için eval() kullanır (call stack yeniden yapılandırması).
+// Production'da React asla eval() kullanmaz — orada 'unsafe-eval' olmadan güvenli CSP korunur.
+const isDev = process.env.NODE_ENV !== "production";
+
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
   "form-action 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+    : "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   `img-src 'self' data: blob: ${apiOrigin}`.trim(),
