@@ -68,15 +68,6 @@ function setUser(next: User | null) {
   listeners.forEach((l) => l());
 }
 
-function nameFromEmail(email: string): string {
-  const local = email.split("@")[0] ?? email;
-  return local
-    .split(/[._-]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
 /** Ham API User nesnesini frontend User tipine çevirir. */
 function mapApiUser(apiUser: any): User {
   if (!apiUser) return apiUser;
@@ -98,7 +89,6 @@ function mapApiUser(apiUser: any): User {
 type AuthContextValue = {
   user: User | null;
   login: (email: string, password?: string) => Promise<void>;
-  signup: (name: string, email: string, password?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (patch: Partial<User>) => Promise<void>;
 };
@@ -120,16 +110,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(mapApiUser(data.user));
   };
 
-  const signupAction = async (name: string, email: string, password?: string) => {
-    const data = await apiFetch<{ token: string; user: User }>("/register", {
-      method: "POST",
-      body: JSON.stringify({ name, email, password: password || "password123" }),
-    });
-    if (typeof window !== "undefined") {
-      localStorage.setItem("token", data.token);
-    }
-    setUser(mapApiUser(data.user));
-  };
+  /* NOT: Kendi kendine kayıt (signup) bilinçli olarak yoktur — backend'de
+     herkese açık /register rotası kaldırıldı. Hesapları İK/Sistem Yöneticisi
+     POST /personnel ile açar; kullanıcı şifresini /forgot-password ile belirler. */
 
   const logoutAction = async () => {
     try {
@@ -161,7 +144,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const actions = useMemo(
     () => ({
       login: loginAction,
-      signup: signupAction,
       logout: logoutAction,
       updateUser: updateUserAction,
     }),

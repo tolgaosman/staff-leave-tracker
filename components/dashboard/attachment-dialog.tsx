@@ -4,6 +4,26 @@ import { Dialog } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
 import { useState } from "react";
 
+/* Ek dosyalar kullanıcı tarafından yüklenir; url/name GÜVENİLMEZ girdidir.
+   Bu yüzden: (1) yalnızca http(s) ve güvenli data: türlerine izin verilir —
+   javascript:/data:text/html gibi şemalar engellenir, (2) PDF görüntüleyici
+   sandbox'lanır, böylece gömülen içerik script çalıştıramaz, form gönderemez
+   veya üst pencereyi başka bir adrese yönlendiremez. */
+
+function isSafeUrl(url: string): boolean {
+  const v = url.trim().toLowerCase();
+  if (v.startsWith("http://") || v.startsWith("https://")) return true;
+  // Yalnızca zararsız gömme türleri; data:text/html ve data:image/svg+xml script çalıştırabilir.
+  return (
+    v.startsWith("data:application/pdf;") ||
+    v.startsWith("data:image/png;") ||
+    v.startsWith("data:image/jpeg;") ||
+    v.startsWith("data:image/jpg;") ||
+    v.startsWith("data:image/gif;") ||
+    v.startsWith("data:image/webp;")
+  );
+}
+
 function FileViewer({
   url,
   name,
@@ -13,13 +33,25 @@ function FileViewer({
   name?: string;
   label: string;
 }) {
+  if (!isSafeUrl(url)) {
+    return (
+      <p className="p-4 text-center text-sm text-on-surface-variant">
+        Bu ek görüntülenemiyor (desteklenmeyen veya güvenli olmayan dosya biçimi).
+      </p>
+    );
+  }
+
   const lower = (name ?? url).toLowerCase();
-  const isPdf = lower.endsWith(".pdf");
+  const isPdf = lower.endsWith(".pdf") || lower.startsWith("data:application/pdf;");
 
   if (isPdf) {
     return (
       <iframe
         src={url}
+        // Boş sandbox = tüm ayrıcalıklar kapalı (script, form, top-navigation yok).
+        // Tarayıcının yerleşik PDF görüntüleyicisi bundan etkilenmez.
+        sandbox=""
+        referrerPolicy="no-referrer"
         className="h-full w-full rounded-lg border-none bg-white"
         title={`${label} Görüntüleyici`}
       />
@@ -28,9 +60,11 @@ function FileViewer({
 
   // Images (jpg, png, gif, webp, etc.)
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={url}
       alt={label}
+      referrerPolicy="no-referrer"
       className="mx-auto max-h-full max-w-full rounded-lg object-contain"
     />
   );
