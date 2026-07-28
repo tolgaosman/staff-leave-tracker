@@ -19,6 +19,7 @@ import { apiFetch } from "@/lib/api";
 
 import { Avatar } from "@/components/dashboard/avatar";
 import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
+import { ConflictWarningDialog } from "@/components/dashboard/conflict-warning-dialog";
 import { RejectDialog } from "@/components/dashboard/reject-dialog";
 import { LeaveDialog } from "@/components/dashboard/leave-dialog";
 import { AttachmentDialog } from "@/components/dashboard/attachment-dialog";
@@ -47,6 +48,7 @@ export default function LeaveRequestsPage() {
   const [editing, setEditing] = useState<LeaveRequest | null>(null);
   const [toDelete, setToDelete] = useState<LeaveRequest | null>(null);
   const [toReject, setToReject] = useState<LeaveRequest | null>(null);
+  const [toApprove, setToApprove] = useState<LeaveRequest | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   // Çoklu filtre: her alan bağımsız; "all" o kriteri baypas eder.
   const [filters, setFilters] = useState<{
@@ -383,15 +385,7 @@ export default function LeaveRequestsPage() {
                             {r.status === "pending" && (
                               <>
                                 <button
-                                  onClick={async () => {
-                                    try {
-                                      await apiFetch(`/leave-requests/${r.id}/approve`, { method: "PATCH" });
-                                      toast.success("Talep onaylandı");
-                                      fetchData();
-                                    } catch {
-                                      toast.error("İşlem başarısız");
-                                    }
-                                  }}
+                                  onClick={() => setToApprove(r)}
                                   title="Onayla"
                                   className="flex size-9 items-center justify-center rounded-md border border-green-600/30 bg-green-500/10 text-green-700 active:scale-95"
                                 >
@@ -520,15 +514,7 @@ export default function LeaveRequestsPage() {
                                 {r.status === "pending" && (
                                   <>
                                     <button
-                                      onClick={async () => {
-                                        try {
-                                          await apiFetch(`/leave-requests/${r.id}/approve`, { method: "PATCH" });
-                                          toast.success("Talep onaylandı");
-                                          fetchData();
-                                        } catch (err: any) {
-                                          toast.error(err.message || "İşlem başarısız");
-                                        }
-                                      }}
+                                      onClick={() => setToApprove(r)}
                                       title="Onayla"
                                       className="flex size-8 items-center justify-center rounded-md border border-green-600/30 bg-green-500/10 text-green-700 hover:bg-green-500/20 active:scale-95 cursor-pointer"
                                     >
@@ -626,6 +612,25 @@ export default function LeaveRequestsPage() {
           }
         }}
       />
+
+      {/* Çakışma Uyarısı — onay butonuna basıldığında açılır */}
+      {toApprove && (
+        <ConflictWarningDialog
+          leaveRequestId={toApprove.id}
+          open={toApprove !== null}
+          onCancel={() => setToApprove(null)}
+          onConfirm={async () => {
+            try {
+              await apiFetch(`/leave-requests/${toApprove.id}/approve`, { method: "PATCH" });
+              toast.success("Talep onaylandı");
+              fetchData();
+            } catch (err: any) {
+              toast.error(err.message || "İşlem başarısız");
+            }
+            setToApprove(null);
+          }}
+        />
+      )}
     </>
   );
 }

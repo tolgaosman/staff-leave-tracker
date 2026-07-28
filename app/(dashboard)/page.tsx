@@ -10,6 +10,7 @@ import { EmployeeDashboard } from "@/components/dashboard/employee-dashboard";
 import { LeaveDistributionChart } from "@/components/dashboard/leave-distribution-chart";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { OnLeaveTable } from "@/components/dashboard/on-leave-table";
+import { AnnouncementsPanel } from "@/components/dashboard/announcements-panel";
 
 /** Ham API personel satırını domain `Personnel`'e çevirir. */
 function mapPersonnel(p: any): Personnel {
@@ -105,6 +106,11 @@ function AdminOverview() {
       <div className="mb-8">
         <OnLeaveTable personnel={personnel} requests={requests} />
       </div>
+
+      {/* Duyurular */}
+      <div className="mb-8">
+        <AnnouncementsPanel />
+      </div>
     </>
   );
 }
@@ -113,7 +119,12 @@ export default function IzinTakipDashboard() {
   const hasAccess = useHasDashboardAccess();
 
   // Çalışan rolü: şirket-geneli panel yerine kişisel (bireysel) panel.
-  if (!hasAccess) return <EmployeeDashboard />;
+  if (!hasAccess) return (
+    <div className="space-y-6">
+      <EmployeeDashboard />
+      <AnnouncementsPanel />
+    </div>
+  );
 
   return <AdminOverview />;
 }
