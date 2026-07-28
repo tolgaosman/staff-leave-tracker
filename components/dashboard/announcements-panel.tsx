@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Megaphone, Plus, Trash2, X } from "lucide-react";
 import { Dialog } from "@base-ui/react/dialog";
 
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useRoleStore } from "@/components/auth/role-store";
 import { useToast } from "@/components/ui/toast";
 
 export type Announcement = {
@@ -168,6 +169,7 @@ function CreateAnnouncementDialog({ onCreated, userRole }: { onCreated: () => vo
 /* ── Main Component ─────────────────────────────────────────────────────── */
 export function AnnouncementsPanel() {
   const { user } = useAuth();
+  const { simulatedRole } = useRoleStore();
   const toast = useToast();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -186,6 +188,14 @@ export function AnnouncementsPanel() {
     fetchAnnouncements();
   }, []);
 
+  const filteredAnnouncements = useMemo(() => {
+    if (!simulatedRole || !simulatedRole.startsWith("manager:")) {
+      return announcements;
+    }
+    const deptId = Number(simulatedRole.split(":")[1]);
+    return announcements.filter(a => !a.department_id || a.department_id === deptId);
+  }, [announcements, simulatedRole]);
+
   async function handleDelete(id: number) {
     try {
       await apiFetch(`/announcements/${id}`, { method: "DELETE" });
@@ -196,7 +206,7 @@ export function AnnouncementsPanel() {
     }
   }
 
-  if (!loading && announcements.length === 0 && !isAdmin) return null;
+  if (!loading && filteredAnnouncements.length === 0 && !isAdmin) return null;
 
   return (
     <div className="glass-panel rounded-xl p-5 space-y-4">
@@ -207,9 +217,9 @@ export function AnnouncementsPanel() {
             <Megaphone className="size-4" />
           </div>
           <h2 className="font-bold text-on-surface text-base">Duyurular</h2>
-          {announcements.length > 0 && (
+          {filteredAnnouncements.length > 0 && (
             <span className="inline-flex items-center rounded-full bg-accent-violet/15 px-2 py-0.5 text-xs font-bold text-accent-violet">
-              {announcements.length}
+              {filteredAnnouncements.length}
             </span>
           )}
         </div>
@@ -219,13 +229,13 @@ export function AnnouncementsPanel() {
       {/* List */}
       {loading ? (
         <div className="text-sm text-on-surface-variant animate-pulse">Yükleniyor...</div>
-      ) : announcements.length === 0 ? (
+      ) : filteredAnnouncements.length === 0 ? (
         <p className="text-sm text-on-surface-variant/70 italic">
           {isAdmin ? "Henüz duyuru yok. İlk duyuruyu oluşturun." : "Aktif duyuru bulunmuyor."}
         </p>
       ) : (
         <ul className="space-y-3">
-          {announcements.map((a) => (
+          {filteredAnnouncements.map((a) => (
             <li
               key={a.id}
               className="rounded-xl border border-accent-violet/20 bg-accent-violet/5 p-4 flex gap-3 items-start"
