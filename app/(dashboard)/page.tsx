@@ -91,7 +91,7 @@ function AdminOverview() {
 
       {/* Stat cards */}
       <div className="mb-8">
-        <DashboardStats />
+        <DashboardStats personnel={personnel} requests={requests} />
       </div>
 
       {/* Chart + activity */}
