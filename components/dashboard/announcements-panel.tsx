@@ -13,34 +13,51 @@ export type Announcement = {
   title: string;
   body: string;
   is_active: boolean;
+  department_id?: number | null;
+  department?: { id: number; name: string };
   expires_at: string | null;
   created_at: string;
   creator?: { id: number; name: string };
 };
 
 /* ── Create Dialog (admin only) ─────────────────────────────────────────── */
-function CreateAnnouncementDialog({ onCreated }: { onCreated: () => void }) {
+function CreateAnnouncementDialog({ onCreated, userRole }: { onCreated: () => void; userRole?: string }) {
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
+  const [departmentId, setDepartmentId] = useState<string>("");
+  const [departments, setDepartments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const canSelectDept = userRole === "super_admin" || userRole === "hr_admin";
+
+  useEffect(() => {
+    if (open && canSelectDept && departments.length === 0) {
+      apiFetch<any[]>("/departments").then(setDepartments).catch(() => {});
+    }
+  }, [open, canSelectDept, departments.length]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
+      const payload: any = {
+        title,
+        body,
+        expires_at: expiresAt || null,
+      };
+      if (canSelectDept && departmentId) {
+        payload.department_id = departmentId;
+      }
+
       await apiFetch("/announcements", {
         method: "POST",
-        body: JSON.stringify({
-          title,
-          body,
-          expires_at: expiresAt || null,
-        }),
+        body: JSON.stringify(payload),
       });
       toast.success("Duyuru yayınlandı");
-      setTitle(""); setBody(""); setExpiresAt("");
+      setTitle(""); setBody(""); setExpiresAt(""); setDepartmentId("");
       setOpen(false);
       onCreated();
     } catch (err: any) {
@@ -97,6 +114,25 @@ function CreateAnnouncementDialog({ onCreated }: { onCreated: () => void }) {
                   className="w-full rounded-lg border border-outline-variant/40 bg-surface-2 px-3 py-2 text-sm text-on-surface outline-none focus:border-accent-cyan resize-none"
                 />
               </div>
+
+              {canSelectDept && (
+                <div className="space-y-1.5">
+                  <label className="text-sm font-semibold text-on-surface-variant">Hedef Kitle</label>
+                  <select
+                    value={departmentId}
+                    onChange={(e) => setDepartmentId(e.target.value)}
+                    className="w-full rounded-lg border border-outline-variant/40 bg-surface-2 px-3 py-2 text-sm text-on-surface outline-none focus:border-accent-cyan"
+                  >
+                    <option value="">Tüm Şirket (Genel)</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-on-surface-variant">
                   Son Geçerlilik Tarihi <span className="text-on-surface-variant/60">(opsiyonel)</span>
@@ -177,7 +213,7 @@ export function AnnouncementsPanel() {
             </span>
           )}
         </div>
-        {isAdmin && <CreateAnnouncementDialog onCreated={fetchAnnouncements} />}
+        {isAdmin && <CreateAnnouncementDialog onCreated={fetchAnnouncements} userRole={user?.role} />}
       </div>
 
       {/* List */}
@@ -195,12 +231,23 @@ export function AnnouncementsPanel() {
               className="rounded-xl border border-accent-violet/20 bg-accent-violet/5 p-4 flex gap-3 items-start"
             >
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-on-surface leading-snug">{a.title}</p>
+                <p className="font-bold text-sm text-on-surface leading-snug flex items-center gap-2">
+                  {a.title}
+                  {a.department ? (
+                    <span className="inline-flex items-center rounded bg-accent-cyan/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-cyan">
+                      {a.department.name}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center rounded bg-accent-violet/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-violet">
+                      Genel
+                    </span>
+                  )}
+                </p>
                 <p className="mt-1 text-sm text-on-surface-variant leading-relaxed whitespace-pre-wrap">
                   {a.body}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-on-surface-variant/60">
-                  {a.creator && <span>{a.creator.name}</span>}
+                  {a.creator && <span>Yayınlayan: {a.creator.name}</span>}
                   <span>{new Date(a.created_at).toLocaleDateString("tr-TR")}</span>
                   {a.expires_at && (
                     <span className="text-amber-600 dark:text-amber-400">
