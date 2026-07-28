@@ -7,14 +7,17 @@ import "react-datepicker/dist/react-datepicker.css";
 registerLocale("tr", tr);
 
 interface CustomDatePickerProps {
-  selected: Date | null;
-  onChange: (date: Date | null) => void;
+  selected?: Date | null;
+  onChange: (date: any) => void;
   minDate?: Date;
   placeholderText?: string;
   className?: string;
   required?: boolean;
   showTimeSelect?: boolean;
   dateFormat?: string;
+  selectsRange?: boolean;
+  startDate?: Date | null;
+  endDate?: Date | null;
 }
 
 export function CustomDatePicker({
@@ -26,6 +29,9 @@ export function CustomDatePicker({
   required,
   showTimeSelect = false,
   dateFormat = "dd.MM.yyyy",
+  selectsRange,
+  startDate,
+  endDate,
 }: CustomDatePickerProps) {
   return (
     <DatePicker
@@ -41,6 +47,9 @@ export function CustomDatePicker({
       className={className || "w-full rounded-lg border border-outline-variant/40 bg-surface-2 px-3 py-2 text-sm text-on-surface outline-none focus:border-accent-cyan"}
       required={required}
       isClearable
+      selectsRange={selectsRange}
+      startDate={startDate}
+      endDate={endDate}
     />
   );
 }

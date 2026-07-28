@@ -12,8 +12,8 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
   const toast = useToast();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [expiresAt, setExpiresAt] = useState<Date | null>(null);
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
+  const [startDate, expiresAt] = dateRange;
   const [departmentId, setDepartmentId] = useState<string>("");
   const [departments, setDepartments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -68,7 +68,7 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
         body: JSON.stringify(payload),
       });
       toast.success("Duyuru yayınlandı");
-      setTitle(""); setBody(""); setStartDate(null); setExpiresAt(null); setDepartmentId("");
+      setTitle(""); setBody(""); setDateRange([null, null]); setDepartmentId("");
       onCreated();
     } catch (err: any) {
       toast.error(err.message || "Duyuru oluşturulamadı");
@@ -145,23 +145,14 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-on-surface-variant">
-              Başlangıç Tarihi <span className="text-on-surface-variant/60">(opsiyonel)</span>
+              Tarih Aralığı <span className="text-on-surface-variant/60">(opsiyonel)</span>
             </label>
             <CustomDatePicker
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              placeholderText="Gün/Ay/Yıl"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-on-surface-variant">
-              Bitiş Tarihi <span className="text-on-surface-variant/60">(opsiyonel)</span>
-            </label>
-            <CustomDatePicker
-              selected={expiresAt}
-              onChange={(date) => setExpiresAt(date)}
-              placeholderText="Gün/Ay/Yıl"
+              selectsRange={true}
+              startDate={startDate}
+              endDate={expiresAt}
+              onChange={(update) => setDateRange(update)}
+              placeholderText="Başlangıç - Bitiş"
             />
           </div>
         </div>
