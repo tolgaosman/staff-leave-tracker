@@ -27,5 +27,5 @@ export const navItems: NavItem[] = [
   { label: "Personel Listesi", icon: Users, href: "/personnel", adminOnly: true },
   { label: "İzin Talepleri", icon: CalendarDays, href: "/leave-requests", adminOnly: true },
   { label: "İzin Takvimi", icon: Calendar, href: "/calendar", adminOnly: true },
-  { label: "Duyuru Oluşturma", icon: Megaphone, href: "/announcements", adminOnly: true },
+  { label: "Duyurular", icon: Megaphone, href: "/announcements", adminOnly: true },
 ];

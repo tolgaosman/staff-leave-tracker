@@ -5,13 +5,15 @@ import { Megaphone, Plus } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useToast } from "@/components/ui/toast";
+import { CustomDatePicker } from "@/components/ui/custom-date-picker";
 
 export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void }) {
   const { user } = useAuth();
   const toast = useToast();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [expiresAt, setExpiresAt] = useState("");
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [expiresAt, setExpiresAt] = useState<Date | null>(null);
   const [departmentId, setDepartmentId] = useState<string>("");
   const [departments, setDepartments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -29,10 +31,33 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
     e.preventDefault();
     setLoading(true);
     try {
+      let finalStartDate: string | null = null;
+      if (startDate) {
+        const today = new Date();
+        const isToday = startDate.getDate() === today.getDate() &&
+                        startDate.getMonth() === today.getMonth() &&
+                        startDate.getFullYear() === today.getFullYear();
+        if (isToday) {
+          finalStartDate = today.toISOString();
+        } else {
+          const d = new Date(startDate);
+          d.setHours(8, 0, 0, 0);
+          finalStartDate = d.toISOString();
+        }
+      }
+
+      let finalExpiresAt: string | null = null;
+      if (expiresAt) {
+        const d = new Date(expiresAt);
+        d.setHours(17, 0, 0, 0);
+        finalExpiresAt = d.toISOString();
+      }
+
       const payload: any = {
         title,
         body,
-        expires_at: expiresAt || null,
+        start_date: finalStartDate,
+        expires_at: finalExpiresAt,
       };
       if (canSelectDept && departmentId) {
         payload.department_id = departmentId;
@@ -43,7 +68,7 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
         body: JSON.stringify(payload),
       });
       toast.success("Duyuru yayınlandı");
-      setTitle(""); setBody(""); setExpiresAt(""); setDepartmentId("");
+      setTitle(""); setBody(""); setStartDate(null); setExpiresAt(null); setDepartmentId("");
       onCreated();
     } catch (err: any) {
       toast.error(err.message || "Duyuru oluşturulamadı");
@@ -90,7 +115,7 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {canSelectDept && (
+          {canSelectDept ? (
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-on-surface-variant">Hedef Kitle</label>
               <select
@@ -106,17 +131,37 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
                 ))}
               </select>
             </div>
+          ) : (
+            <div className="space-y-1.5 opacity-80">
+              <label className="text-sm font-semibold text-on-surface-variant">Hedef Kitle</label>
+              <select
+                disabled
+                className="w-full rounded-lg border border-outline-variant/40 bg-surface-2 px-3 py-2 text-sm text-on-surface outline-none cursor-not-allowed"
+              >
+                <option>Sadece Kendi Departmanınız</option>
+              </select>
+            </div>
           )}
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-on-surface-variant">
-              Son Geçerlilik Tarihi <span className="text-on-surface-variant/60">(opsiyonel)</span>
+              Başlangıç Tarihi <span className="text-on-surface-variant/60">(opsiyonel)</span>
             </label>
-            <input
-              type="datetime-local"
-              value={expiresAt}
-              onChange={(e) => setExpiresAt(e.target.value)}
-              className="w-full rounded-lg border border-outline-variant/40 bg-surface-2 px-3 py-2 text-sm text-on-surface outline-none focus:border-accent-cyan"
+            <CustomDatePicker
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              placeholderText="Gün/Ay/Yıl"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-on-surface-variant">
+              Bitiş Tarihi <span className="text-on-surface-variant/60">(opsiyonel)</span>
+            </label>
+            <CustomDatePicker
+              selected={expiresAt}
+              onChange={(date) => setExpiresAt(date)}
+              placeholderText="Gün/Ay/Yıl"
             />
           </div>
         </div>

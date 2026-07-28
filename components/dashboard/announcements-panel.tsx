@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Megaphone, Trash2 } from "lucide-react";
+import { Megaphone, Trash2, Clock, CalendarDays } from "lucide-react";
 
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useRoleStore } from "@/components/auth/role-store";
 import { useToast } from "@/components/ui/toast";
+import { formatDateTR } from "@/lib/format";
 
 export type Announcement = {
   id: number;
@@ -15,6 +16,7 @@ export type Announcement = {
   is_active: boolean;
   department_id?: number | null;
   department?: { id: number; name: string };
+  start_date: string | null;
   expires_at: string | null;
   created_at: string;
   creator?: { id: number; name: string };
@@ -87,48 +89,56 @@ export function AnnouncementsPanel({ refreshKey = 0 }: { refreshKey?: number }) 
           {isAdmin ? "Henüz duyuru yok. İlk duyuruyu oluşturun." : "Aktif duyuru bulunmuyor."}
         </p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {filteredAnnouncements.map((a) => (
-            <li
+            <div
               key={a.id}
-              className="rounded-xl border border-accent-violet/20 bg-accent-violet/5 p-4 flex gap-3 items-start"
+              className="rounded-xl border border-outline-variant/30 bg-surface-1 p-5 shadow-sm transition-all hover:border-outline-variant/60 relative group"
             >
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-on-surface leading-snug flex items-center gap-2">
-                  {a.title}
-                  {a.department ? (
-                    <span className="inline-flex items-center rounded bg-accent-cyan/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-cyan">
-                      {a.department.name}
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center rounded bg-accent-violet/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-violet">
-                      Genel
-                    </span>
-                  )}
-                </p>
-                <p className="mt-1 text-sm text-on-surface-variant leading-relaxed whitespace-pre-wrap">
-                  {a.body}
-                </p>
-                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-on-surface-variant/60">
-                  {a.creator && <span>Yayınlayan: {a.creator.name}</span>}
-                  <span>{new Date(a.created_at).toLocaleDateString("tr-TR")}</span>
-                  {a.expires_at && (
-                    <span className="text-amber-600 dark:text-amber-400">
-                      Bitiş: {new Date(a.expires_at).toLocaleDateString("tr-TR")}
-                    </span>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-start justify-between">
+                  <h3 className="font-bold text-on-surface text-lg leading-tight pr-8">{a.title}</h3>
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleDelete(a.id)}
+                      disabled={deletingId === a.id}
+                      className="absolute right-4 top-4 p-2 rounded-lg text-error/70 hover:bg-error/10 hover:text-error opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50"
+                      title="Duyuruyu Sil"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
                   )}
                 </div>
+                
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-on-surface-variant/80 font-medium mt-1 mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan/50"></span>
+                    {a.creator?.name || "Yönetim"}
+                  </div>
+                  
+                  {a.department && (
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-2 border border-outline-variant/30">
+                      {a.department.name} Departmanı
+                    </div>
+                  )}
+
+                  {!a.department && (
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accent-violet/10 text-accent-violet border border-accent-violet/20">
+                      Tüm Şirket
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-1.5 ml-auto">
+                    <CalendarDays className="size-3.5" />
+                    {a.start_date ? formatDateTR(a.start_date) : formatDateTR(a.created_at)}
+                  </div>
+                </div>
               </div>
-              {isAdmin && (
-                <button
-                  onClick={() => handleDelete(a.id)}
-                  className="shrink-0 rounded-full p-1.5 text-on-surface-variant/50 hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-all"
-                  title="Duyuruyu sil"
-                >
-                  <Trash2 className="size-4" />
-                </button>
-              )}
-            </li>
+              
+              <p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-wrap mt-2 bg-surface-2/50 rounded-lg p-3 border border-outline-variant/20">
+                {a.body}
+              </p>
+            </div>
           ))}
         </ul>
       )}

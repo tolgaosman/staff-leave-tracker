@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { CustomDatePicker } from "@/components/ui/custom-date-picker";
 import {
   apiFetch,
   getLeaveTypes,
@@ -288,30 +289,24 @@ function LeaveForm({
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <label htmlFor="l-start" className={labelClasses}>
+            <label className={labelClasses}>
               Başlangıç
             </label>
-            <input
-              id="l-start"
-              type="date"
+            <CustomDatePicker
               required
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-              className={fieldClasses}
+              selected={start ? new Date(start + "T00:00:00") : null}
+              onChange={(d) => setStart(d ? d.toLocaleDateString("en-CA") : "")}
             />
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="l-end" className={labelClasses}>
+            <label className={labelClasses}>
               Bitiş
             </label>
-            <input
-              id="l-end"
-              type="date"
+            <CustomDatePicker
               required
-              min={start || undefined}
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-              className={fieldClasses}
+              minDate={start ? new Date(start + "T00:00:00") : undefined}
+              selected={end ? new Date(end + "T00:00:00") : null}
+              onChange={(d) => setEnd(d ? d.toLocaleDateString("en-CA") : "")}
             />
           </div>
         </div>

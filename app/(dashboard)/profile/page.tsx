@@ -24,6 +24,7 @@ import { Avatar } from "@/components/dashboard/avatar";
 import { ImageCropper } from "@/components/dashboard/image-cropper";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { CustomDatePicker } from "@/components/ui/custom-date-picker";
 import { readFile } from "@/lib/image";
 import { cn } from "@/lib/utils";
 
@@ -314,14 +315,12 @@ function ProfileEditor({ user }: { user: User }) {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="p-birth" className={labelClasses}>
+                <label className={labelClasses}>
                   Doğum Tarihi
                 </label>
-                <input
-                  id="p-birth"
-                  type="date"
-                  value={form.birthDate}
-                  onChange={(e) => set("birthDate", e.target.value)}
+                <CustomDatePicker
+                  selected={form.birthDate ? new Date(form.birthDate + "T00:00:00") : null}
+                  onChange={(d) => set("birthDate", d ? d.toLocaleDateString("en-CA") : "")}
                   className={`${fieldClasses} dark:[color-scheme:dark]`}
                 />
               </div>

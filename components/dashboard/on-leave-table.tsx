@@ -11,6 +11,7 @@ import {
   type Personnel,
 } from "@/lib/data/types";
 import { workingDayCount } from "@/lib/date/business-days";
+import { formatDateTR } from "@/lib/format";
 
 /** Bugünün tarihini yerel bileşenlerden "yyyy-mm-dd" üretir (toISOString UTC'ye
     kaydığı için kullanmıyoruz — bkz. lib/date/business-days.ts). */
@@ -20,8 +21,6 @@ function todayIso(): string {
   const d = String(t.getDate()).padStart(2, "0");
   return `${t.getFullYear()}-${m}-${d}`;
 }
-
-const fmt = (iso: string) => new Date(iso + "T00:00:00").toLocaleDateString("tr-TR");
 
 export function OnLeaveTable({
   personnel: allPersonnel,
@@ -71,8 +70,8 @@ export function OnLeaveTable({
           type: leaveTypeLabels[leave.type],
           leaveType: leave.type,
           note: leave.note?.trim() ? leave.note : "—",
-          startDate: fmt(leave.startDate),
-          endDate: fmt(leave.endDate),
+          startDate: leave.startDate,
+          endDate: leave.endDate,
           rawStart: leave.startDate,
           daysLeft: workingDayCount(today, leave.endDate),
           attachmentUrl: leave.attachmentUrl,
@@ -152,9 +151,9 @@ export function OnLeaveTable({
               {
                 label: "Tarih",
                 value: (
-                  <span className="font-mono text-xs">
-                    {r.startDate} – {r.endDate}
-                  </span>
+                  <div className="text-xs text-on-surface-variant font-medium">
+                    {formatDateTR(r.startDate)} – {formatDateTR(r.endDate)}
+                  </div>
                 ),
               },
               {
@@ -233,8 +232,10 @@ export function OnLeaveTable({
                 <td className="px-6 py-4 max-w-[220px] truncate text-on-surface-variant font-sans text-sm" title={r.note}>
                   {r.note}
                 </td>
-                <td className="px-6 py-4 text-on-surface-variant font-mono text-xs whitespace-nowrap">
-                  {r.startDate} – {r.endDate}
+                <td className="px-6 py-4">
+                  <div className="text-[11px] text-on-surface-variant/80 font-medium whitespace-nowrap hidden sm:block">
+                    {formatDateTR(r.startDate)} – {formatDateTR(r.endDate)}
+                  </div>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <span className="font-bold text-secondary">

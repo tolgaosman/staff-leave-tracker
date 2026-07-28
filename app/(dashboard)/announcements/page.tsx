@@ -23,7 +23,7 @@ export default function AnnouncementsPage() {
     <div className="space-y-8 flex flex-col">
       <div className="border-b border-outline-variant/20 pb-6 w-full max-w-4xl">
         <h2 className="font-serif text-3xl font-bold text-primary sm:text-4xl lg:text-5xl">
-          Duyuru
+          Duyurular
         </h2>
         <p className="font-sans text-sm text-on-surface-variant mt-2 md:text-base">
           Tüm çalışanların ana sayfasında görünecek genel duyuruları buradan yönetebilirsiniz.
