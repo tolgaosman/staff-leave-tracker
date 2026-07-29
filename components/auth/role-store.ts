@@ -71,8 +71,12 @@ export function useRole(): RoleOption {
     return simulation ?? user.role;
   }
 
+  // Müdür VARSAYILAN olarak kişisel görünümde başlar; departman yönetimi
+  // ekranına yalnızca dropdown'dan açıkça "Departman Müdürü"nü seçerek geçer.
+  // Giriş sırasında simülasyon temizlendiği için (bkz. auth-provider) her yeni
+  // oturum kişisel görünümle açılır; seçim oturum boyunca korunur.
   if (user.role === 'manager') {
-    return simulation === 'employee' ? 'employee' : 'manager';
+    return simulation === 'manager' ? 'manager' : 'employee';
   }
 
   // user.role is 'employee' or 'hr_admin'

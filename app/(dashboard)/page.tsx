@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { useHasDashboardAccess, useRoleStore } from "@/components/auth/role-store";
+import { useHasDashboardAccess, useIsAdmin, useRoleStore } from "@/components/auth/role-store";
 import { apiFetch } from "@/lib/api";
 import type { LeaveRequest, LeaveType, Personnel } from "@/lib/data/types";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -45,12 +45,10 @@ function mapLeave(it: any): LeaveRequest {
   };
 }
 
-/* Yönetici (admin) şirket-geneli paneli — veriyi bir kez çekip alt bileşenlere
-   prop olarak geçirir (üç ayrı fetch yerine tek çağrı). */
+/* Yönetici (admin) şirket-geneli paneli */
 function AdminOverview() {
   const [personnel, setPersonnel] = useState<Personnel[]>([]);
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
-
   const { simulatedRole } = useRoleStore();
 
   useEffect(() => {
@@ -65,7 +63,6 @@ function AdminOverview() {
         if (simulatedRole && simulatedRole.startsWith("manager:")) {
           const simulatedDeptId = simulatedRole.split(":")[1];
           mappedPers = mappedPers.filter((p) => p.departmentId === simulatedDeptId);
-          
           const deptPersonIds = new Set(mappedPers.map((p) => p.id));
           mappedReqs = mappedReqs.filter((r) => deptPersonIds.has(r.personnelId));
         }
@@ -73,9 +70,7 @@ function AdminOverview() {
         setPersonnel(mappedPers);
         setRequests(mappedReqs);
       })
-      .catch(() => {
-        // sessiz — bileşenler boş durum gösterir
-      });
+      .catch(() => {});
   }, [simulatedRole]);
 
   return (
@@ -85,16 +80,14 @@ function AdminOverview() {
           Personel Genel Bakış
         </h2>
         <p className="font-sans text-sm text-on-surface-variant mt-2 md:text-base">
-          Ekibinizin dinlenme ve katılım durumlarına bütünsel bir bakış. İzin taleplerini hak ettikleri özenle yönetin.
+          Ekibinizin dinlenme ve katılım durumlarına bütünsel bir bakış.
         </p>
       </div>
 
-      {/* Stat cards */}
       <div className="mb-8">
         <DashboardStats personnel={personnel} requests={requests} />
       </div>
 
-      {/* Chart + activity */}
       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <LeaveDistributionChart requests={requests} />
@@ -102,12 +95,10 @@ function AdminOverview() {
         <RecentActivity requests={requests} personnel={personnel} />
       </div>
 
-      {/* On Leave Table */}
       <div className="mb-8">
         <OnLeaveTable personnel={personnel} requests={requests} />
       </div>
 
-      {/* Duyurular */}
       <div className="mb-8">
         <AnnouncementsPanel />
       </div>
@@ -116,15 +107,15 @@ function AdminOverview() {
 }
 
 export default function IzinTakipDashboard() {
-  const hasAccess = useHasDashboardAccess();
+  const isAdmin = useIsAdmin();
 
-  // Çalışan rolü: şirket-geneli panel yerine kişisel (bireysel) panel.
-  if (!hasAccess) return (
+  // Admin → doğrudan yönetim paneli, diğerleri → kişisel görünüm
+  if (isAdmin) return <AdminOverview />;
+
+  return (
     <div className="space-y-6">
       <EmployeeDashboard />
       <AnnouncementsPanel />
     </div>
   );
-
-  return <AdminOverview />;
 }

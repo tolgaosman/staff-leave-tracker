@@ -87,8 +87,14 @@ export function RoleSwitcher() {
     ];
   }
 
+  /* Görünüm değiştirebilecek rolü olmayan kullanıcıya (ör. düz çalışan)
+     hiç gösterme. mobile-nav bu bileşeni koşulsuz render ettiği için, aksi
+     halde aşağıdaki fallback boş listeyi staticOptions[0]'a düşürüp çalışana
+     yanlışlıkla "Admin" etiketli, hiç seçeneği olmayan bir menü gösteriyordu. */
+  if (options.length === 0) return null;
+
   // Güvenlik: active değeri bulunamazsa ilk seçeneğe düş
-  const active = options.find((o) => o.value === role) ?? options[0] ?? staticOptions[0];
+  const active = options.find((o) => o.value === role) ?? options[0];
   const ActiveIcon = active.icon;
 
   /* "(Simüle)" etiketi yalnızca GERÇEK simülasyonda gösterilir: super_admin'in
