@@ -1,7 +1,7 @@
-/* Excel (xlsx/xls) ve CSV dışa aktarma yardımcıları.
-   Tamamen tarayıcı tarafında çalışır (statik export'a uygun, sunucu yok). */
+/* Excel (xlsx) ve CSV dışa aktarma yardımcıları.
+   ExcelJS kullanılarak tamamen yerel binary .xlsx dosyaları üretilir. */
 
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 /** Bir kolon tanımı: başlık + her satırdan hücre değerini üreten fonksiyon. */
 export type CsvColumn<T> = {
@@ -9,102 +9,108 @@ export type CsvColumn<T> = {
   value: (row: T) => string | number | null | undefined;
 };
 
-function escapeHtml(str: string | number | null | undefined): string {
-  if (str == null) return "";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function getCellStyle(header: string, valStr: string): string {
-  const normalized = valStr.trim();
-
-  // Durum sütununa özel hücre renklendirmeleri
-  if (normalized === "Aktif" || normalized === "Onaylandı") {
-    return 'style="background-color: #dcfce7; color: #15803d; font-weight: bold; padding: 6px 12px; border: 1px solid #94a3b8; text-align: left; vertical-align: middle;"';
-  }
-  if (normalized === "İzinde" || normalized === "Bekliyor") {
-    return 'style="background-color: #fef08a; color: #a16207; font-weight: bold; padding: 6px 12px; border: 1px solid #94a3b8; text-align: left; vertical-align: middle;"';
-  }
-  if (normalized === "Pasif" || normalized === "Ayrıldı" || normalized === "Reddedildi") {
-    return 'style="background-color: #fee2e2; color: #991b1b; font-weight: bold; padding: 6px 12px; border: 1px solid #94a3b8; text-align: left; vertical-align: middle;"';
-  }
-
-  return 'style="padding: 6px 12px; border: 1px solid #94a3b8; text-align: left; vertical-align: middle;"';
-}
-
 /**
- * Satır dizisini tüm kenarlıkları (all borders), kalın başlıkları ve renklendirilmiş durum hücreleri olan Excel olarak indirir.
+ * Satır dizisini tüm hücrelerinde Tüm Kenarlıklar (All Borders) çizilmiş,
+ * başlıkları kalın (bold) ve durumları renklendirilmiş gerçek .xlsx dosyası olarak indirir.
  */
-export function downloadXlsx<T>(filename: string, rows: T[], columns: CsvColumn<T>[]): void {
+export async function downloadXlsx<T>(
+  filename: string,
+  rows: T[],
+  columns: CsvColumn<T>[]
+): Promise<void> {
   if (typeof window === "undefined") return;
 
-  const headers = columns.map((c) => c.header);
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Personel İzin Listesi", {
+    views: [{ showGridLines: true }],
+  });
 
-  // Excel HTML şablonu
-  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-  <head>
-    <meta charset="utf-8" />
-    <!--[if gte mso 9]>
-    <xml>
-      <x:ExcelWorkbook>
-        <x:ExcelWorksheets>
-          <x:ExcelWorksheet>
-            <x:Name>Veri</x:Name>
-            <x:WorksheetOptions>
-              <x:DisplayGridlines/>
-            </x:WorksheetOptions>
-          </x:ExcelWorksheet>
-        </x:ExcelWorksheets>
-      </x:ExcelWorkbook>
-    </xml>
-    <![endif]-->
-    <style>
-      table { border-collapse: collapse; width: 100%; font-family: Calibri, sans-serif; font-size: 11pt; }
-      th { background-color: #cbd5e1; color: #0f172a; font-weight: bold !important; text-align: left; padding: 8px 12px; border: 1px solid #475569; }
-      td { padding: 6px 12px; border: 1px solid #94a3b8; text-align: left; vertical-align: middle; }
-      tr:nth-child(even) { background-color: #f8fafc; }
-    </style>
-  </head>
-  <body>
-    <table>
-      <thead>
-        <tr>
-          ${headers.map((h) => `<th style="font-weight: bold; background-color: #cbd5e1; border: 1px solid #475569; padding: 8px 12px;">${escapeHtml(h)}</th>`).join("")}
-        </tr>
-      </thead>
-      <tbody>
-        ${rows
-          .map(
-            (row) => `
-          <tr>
-            ${columns
-              .map((c) => {
-                const v = c.value(row);
-                const valStr = v == null ? "" : String(v);
-                const cellStyle = getCellStyle(c.header, valStr);
-                return `<td ${cellStyle}>${escapeHtml(valStr)}</td>`;
-              })
-              .join("")}
-          </tr>`
-          )
-          .join("")}
-      </tbody>
-    </table>
-  </body>
-  </html>`;
+  // 1. Kolonları tanımla
+  worksheet.columns = columns.map((c) => ({
+    header: c.header,
+    key: c.header,
+  }));
 
-  const blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8;" });
+  // 2. Satır verilerini ekle
+  rows.forEach((row) => {
+    const rowData: Record<string, any> = {};
+    columns.forEach((c) => {
+      const v = c.value(row);
+      rowData[c.header] = v == null ? "" : v;
+    });
+    worksheet.addRow(rowData);
+  });
+
+  // Başlık satırı stili - yalnızca tablonun kolonlarına uygula (sonsuz satır dolgusu olmasın)
+  const headerRow = worksheet.getRow(1);
+  headerRow.height = 26;
+  columns.forEach((_, colIdx) => {
+    const cell = headerRow.getCell(colIdx + 1);
+    cell.font = { name: "Calibri", size: 11, bold: true, color: { argb: "FF0F172A" } };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFCBD5E1" },
+    };
+  });
+
+  // Tüm Kenarlıklar (All Borders - Thin Border) stili
+  const allBorders: Partial<ExcelJS.Borders> = {
+    top: { style: "thin", color: { argb: "FF64748B" } },
+    bottom: { style: "thin", color: { argb: "FF64748B" } },
+    left: { style: "thin", color: { argb: "FF64748B" } },
+    right: { style: "thin", color: { argb: "FF64748B" } },
+  };
+
+  // 3. Hücre kenarlıkları, hizalamaları ve renkleri uygula
+  worksheet.eachRow((row, rowNumber) => {
+    row.eachCell((cell) => {
+      // TÜM KENARLIKLAR (All Borders)
+      cell.border = allBorders;
+      cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+
+      if (rowNumber > 1) {
+        cell.font = { name: "Calibri", size: 11 };
+        const valStr = String(cell.value ?? "").trim();
+
+        // Durum sütununa özel hücre renklendirmeleri
+        if (valStr === "Aktif" || valStr === "Onaylandı") {
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDCFCE7" } };
+          cell.font = { name: "Calibri", size: 11, bold: true, color: { argb: "FF15803D" } };
+        } else if (valStr === "İzinde" || valStr === "Bekliyor") {
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFEF08A" } };
+          cell.font = { name: "Calibri", size: 11, bold: true, color: { argb: "FFA16207" } };
+        } else if (valStr === "Pasif" || valStr === "Ayrıldı" || valStr === "Reddedildi") {
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFEE2E2" } };
+          cell.font = { name: "Calibri", size: 11, bold: true, color: { argb: "FF991B1B" } };
+        }
+      }
+    });
+  });
+
+  // Kolon genişliklerini en uzun içeriğe göre otomatik hesapla (en uzun gerekçeyi sığdıracak şekilde genişlet)
+  worksheet.columns.forEach((column) => {
+    let maxLen = 0;
+    column.eachCell?.({ includeEmpty: true }, (cell) => {
+      const len = cell.value ? String(cell.value).length : 0;
+      if (len > maxLen) maxLen = len;
+    });
+    column.width = Math.min(Math.max(maxLen + 5, 14), 120);
+  });
+
+  // 4. İkili .xlsx tam uyumlu binary dosyası üret ve indirmeyi tetikle
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  const name = filename.endsWith(".xls") || filename.endsWith(".xlsx") ? filename : `${filename}.xls`;
-  link.download = name;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  const a = document.createElement("a");
+  a.href = url;
+  const name = filename.endsWith(".xlsx") ? filename : `${filename}.xlsx`;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 

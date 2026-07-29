@@ -27,12 +27,12 @@ export function ExportButton<T>({
 }: ExportButtonProps<T>) {
   const toast = useToast();
 
-  function handleExport() {
+  async function handleExport() {
     if (rows.length === 0) {
       toast.info("Dışa aktarılacak kayıt yok");
       return;
     }
-    downloadXlsx(filename, rows, columns);
+    await downloadXlsx(filename, rows, columns);
     toast.success("Excel indirildi", `${rows.length} kayıt aktarıldı.`);
   }
 

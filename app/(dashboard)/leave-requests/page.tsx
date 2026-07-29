@@ -221,6 +221,10 @@ export default function LeaveRequestsPage() {
                 },
                 { header: "Durum", value: (r) => leaveStatusLabels[r.status] },
                 {
+                  header: "Gerekçe / Açıklama",
+                  value: (r) => r.note ?? "",
+                },
+                {
                   header: "Reddetme Gerekçesi",
                   value: (r) => r.rejectionReason ?? "",
                 },
