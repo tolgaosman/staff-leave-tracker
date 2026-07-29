@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
 import { apiFetch } from "@/lib/api";
+import { clearSimulatedRole } from "@/components/auth/simulated-role-storage";
 
 const STORAGE_KEY = "izin-takip-auth";
 
@@ -107,6 +108,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.setItem("token", data.token);
     }
+    // Yeni oturum her zaman kullanıcının GERÇEK rolüyle başlasın; önceki
+    // kullanıcıdan kalan simülasyon değeri sızmasın.
+    clearSimulatedRole();
     setUser(mapApiUser(data.user));
   };
 
@@ -123,6 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.removeItem("token");
     }
+    clearSimulatedRole();
     setUser(null);
   };
 

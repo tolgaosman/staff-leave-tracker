@@ -2,69 +2,60 @@
 
 import { useSyncExternalStore } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import {
+  getSimulatedRoleServerSnapshot,
+  getSimulatedRoleSnapshot,
+  setSimulatedRole,
+  subscribeSimulatedRole,
+  type RoleOption,
+} from "@/components/auth/simulated-role-storage";
 
-/* Rol bazlı görünüm kontrolü. Giriş yapan kullanıcının role alanından 
-   ve/veya manuel simülasyondan beslenir. */
+/* Rol bazlı görünüm kontrolü. Giriş yapan kullanıcının role alanından
+   ve/veya manuel simülasyondan beslenir.
+   Saklama katmanı simulated-role-storage.ts'te (döngüsel import olmasın diye). */
 
-export type RoleOption = "super_admin" | "hr_admin" | "employee" | string; // string allows "manager:id"
-
-const STORAGE_KEY = "izin-takip-role";
-
-let simulatedRole: RoleOption | null = null;
-let initialized = false;
-const listeners = new Set<() => void>();
-
-function ensureInit() {
-  if (initialized || typeof window === "undefined") return;
-  initialized = true;
-  try {
-    const stored = window.localStorage.getItem(STORAGE_KEY) as RoleOption | null;
-    if (stored) {
-      simulatedRole = stored;
-    }
-  } catch {
-    // ignore
-  }
-}
-
-function subscribe(callback: () => void) {
-  listeners.add(callback);
-  return () => listeners.delete(callback);
-}
-
-function getSnapshot(): RoleOption | null {
-  ensureInit();
-  return simulatedRole;
-}
-
-function getServerSnapshot(): RoleOption | null {
-  return null;
-}
+export type { RoleOption };
+export { setSimulatedRole, clearSimulatedRole } from "@/components/auth/simulated-role-storage";
 
 export const useRoleStore = () => {
-  const role = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  
-  const setSimulatedRole = (next: RoleOption | null) => {
-    simulatedRole = next;
-    initialized = true;
-    try {
-      if (next === null) {
-        window.localStorage.removeItem(STORAGE_KEY);
-      } else {
-        window.localStorage.setItem(STORAGE_KEY, next);
-      }
-    } catch {
-      // ignore
-    }
-    listeners.forEach((l) => l());
-  };
+  const role = useSyncExternalStore(
+    subscribeSimulatedRole,
+    getSimulatedRoleSnapshot,
+    getSimulatedRoleServerSnapshot
+  );
 
   return { simulatedRole: role, setSimulatedRole };
 };
 
 /**
+ * Bir simülasyon değerinin, kullanıcının GERÇEK rolü için meşru olup olmadığı.
+ * role-switcher.tsx'in sunduğu seçeneklerle aynı kuralı ifade eder; tek
+ * doğruluk kaynağı burasıdır, o liste bununla tutarlı kalmalıdır.
+ *
+ *   super_admin → "super_admin" | "manager:<id>"
+ *   manager     → "employee" | "manager"
+ *   diğerleri   → simülasyon yok
+ *
+ * Bayat ya da elle düzenlenmiş bir localStorage değeri (ör. super_admin için
+ * "employee") böylece yok sayılır ve kullanıcı gerçek rolüne döner.
+ */
+function isValidSimulation(realRole: string, simulated: RoleOption | null): boolean {
+  if (!simulated) return false;
+
+  if (realRole === "super_admin") {
+    return simulated === "super_admin" || simulated.startsWith("manager:");
+  }
+
+  if (realRole === "manager") {
+    return simulated === "employee" || simulated === "manager";
+  }
+
+  return false;
+}
+
+/**
  * Mevcut rolü hesaplar.
- * Eğer kullanıcı super_admin ise ve bir rol simüle ediyorsa onu döndürür.
+ * Eğer kullanıcı super_admin ise ve GEÇERLİ bir rol simüle ediyorsa onu döndürür.
  * Değilse kullanıcının kendi rolünü döndürür.
  * Kullanıcı giriş yapmamışsa "employee" döner.
  */
@@ -74,13 +65,14 @@ export function useRole(): RoleOption {
 
   if (!user) return "employee";
 
-  if (user.role === 'super_admin' && simulatedRole) {
-    return simulatedRole;
+  const simulation = isValidSimulation(user.role, simulatedRole) ? simulatedRole : null;
+
+  if (user.role === 'super_admin') {
+    return simulation ?? user.role;
   }
 
   if (user.role === 'manager') {
-    if (simulatedRole === 'employee') return 'employee';
-    return 'manager';
+    return simulation === 'employee' ? 'employee' : 'manager';
   }
 
   // user.role is 'employee' or 'hr_admin'

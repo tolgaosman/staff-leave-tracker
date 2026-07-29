@@ -1,3 +1,5 @@
+import { clearSimulatedRole } from "@/components/auth/simulated-role-storage";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 export async function apiFetch<T>(
@@ -34,6 +36,9 @@ export async function apiFetch<T>(
     if (response.status === 401 && typeof window !== "undefined") {
       localStorage.removeItem("token");
       localStorage.removeItem("izin-takip-auth");
+      // Simüle edilen görünüm rolü de gitmeli; aksi halde bir sonraki
+      // kullanıcının oturumuna sızar.
+      clearSimulatedRole();
       if (!window.location.pathname.includes("/login")) {
         window.location.assign(`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/login`);
       }

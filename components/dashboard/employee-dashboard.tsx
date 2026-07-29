@@ -216,6 +216,9 @@ export function EmployeeDashboard() {
       ? Math.min(100, Math.round((usedDays / totalEntitled) * 100))
       : 0;
 
+  // Tüm izin türlerindeki onay bekleyen talep sayısı
+  const allPendingCount = myLeaves.filter((l) => l.status === "pending").length;
+
   const statusChip = activeOrUpcoming.leave
     ? activeOrUpcoming.active
       ? { text: "İzinde", cls: "border-accent-violet/30 bg-accent-violet/10 text-accent-violet" }
@@ -224,9 +227,9 @@ export function EmployeeDashboard() {
 
   const balanceStats: Stat[] = [
     { label: "HAK EDİLEN", value: String(balance?.entitled ?? 0), icon: CalendarCheck, accent: "cyan", caption: "Bu yılki hak ediş" },
-    { label: "DEVREDEN", value: String(balance?.carriedOver ?? 0), icon: CalendarMinus, accent: "violet", caption: "Geçen yıldan", valueColor: "text-primary" },
     { label: "KULLANILABİLİR YILLIK İZİN", value: String(remainingDays), icon: Wallet, accent: "cyan", caption: "Kalan bakiye", valueColor: "text-primary" },
-    { label: "ONAY BEKLEYEN", value: String(balance?.pending ?? 0), icon: Hourglass, accent: "neutral", caption: "Bekleyen yıllık talep", valueColor: "text-primary" },
+    { label: "DEVREDEN", value: String(balance?.carriedOver ?? 0), icon: CalendarMinus, accent: "violet", caption: "Geçen yıldan", valueColor: "text-primary" },
+    { label: "ONAY BEKLEYEN", value: String(allPendingCount), icon: Hourglass, accent: "neutral", caption: "Bekleyen tüm talepler", valueColor: "text-primary" },
   ];
 
   return (
