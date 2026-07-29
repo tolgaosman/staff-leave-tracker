@@ -88,7 +88,7 @@ export function AnnouncementsPanel({
     setDeletingId(id);
     try {
       await apiFetch(`/announcements/${id}`, { method: "DELETE" });
-      toast.success("Duyuru silindi");
+      toast.reject("Duyuru silindi");
       fetchAnnouncements();
     } catch (err: any) {
       toast.error(err.message || "Silinemedi");

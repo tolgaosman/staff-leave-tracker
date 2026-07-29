@@ -607,7 +607,7 @@ export default function LeaveRequestsPage() {
           if (toDelete) {
             try {
               await apiFetch(`/leave-requests/${toDelete.id}`, { method: "DELETE" });
-              toast.success("Talep silindi");
+              toast.reject("Talep silindi");
               fetchData();
             } catch (err: any) {
               toast.error(err.message || "Silme başarısız");
@@ -627,7 +627,7 @@ export default function LeaveRequestsPage() {
                 method: "PATCH",
                 body: JSON.stringify({ rejection_reason: reason }),
               });
-              toast.success("Talep reddedildi");
+              toast.reject("Talep reddedildi");
               fetchData();
             } catch (err: any) {
               toast.error(err.message || "İşlem başarısız");

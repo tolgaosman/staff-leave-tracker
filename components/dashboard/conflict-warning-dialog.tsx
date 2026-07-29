@@ -109,7 +109,7 @@ export function ConflictWarningDialog({ leaveRequestId, onConfirm, onCancel, ope
               onClick={onConfirm}
               className="flex-1 rounded-xl bg-amber-500 py-2.5 text-sm font-bold text-white hover:bg-amber-500/90 active:scale-95 transition-all"
             >
-              Yine de Onayla
+              Onayla
             </button>
           </div>
         </Dialog.Popup>

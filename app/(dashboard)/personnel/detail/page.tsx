@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Personnel, LeaveRequest, leaveTypeLabels } from "@/lib/data/types";
-import { useIsAdmin } from "@/components/auth/role-store";
+import { useHasDashboardAccess } from "@/components/auth/role-store";
 import { Avatar } from "@/components/dashboard/avatar";
 import {
   LeaveStatusBadge,
@@ -23,17 +23,17 @@ function formatDate(iso: string) {
 function PersonnelDetail() {
   const params = useSearchParams();
   const id = params.get("id") ?? "";
-  const isAdmin = useIsAdmin();
+  const hasAccess = useHasDashboardAccess();
   const router = useRouter();
 
   const [person, setPerson] = useState<Personnel | null>(null);
   const [personLeaves, setPersonLeaves] = useState<LeaveRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Çalışan rolü başka personelin detayını göremez → Genel Bakış'a yönlendir.
+  // Normal çalışan rolü başka personelin detayını göremez → Genel Bakış'a yönlendir.
   useEffect(() => {
-    if (!isAdmin) router.replace("/");
-  }, [isAdmin, router]);
+    if (!hasAccess) router.replace("/");
+  }, [hasAccess, router]);
 
   useEffect(() => {
     if (!id) return;
@@ -78,7 +78,7 @@ function PersonnelDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (!isAdmin) return null;
+  if (!hasAccess) return null;
 
   if (!person) {
     return (

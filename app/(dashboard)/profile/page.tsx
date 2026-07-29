@@ -287,19 +287,6 @@ function ProfileEditor({ user }: { user: User }) {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="p-title" className={labelClasses}>
-                  Ünvan
-                </label>
-                <input
-                  id="p-title"
-                  value={form.title}
-                  onChange={(e) => set("title", e.target.value)}
-                  className={fieldClasses}
-                  placeholder="Örn. Kıdemli Yazılım Geliştirici"
-                />
-              </div>
-
-              <div className="space-y-1.5">
                 <label htmlFor="p-phone" className={labelClasses}>
                   Telefon
                 </label>
@@ -396,6 +383,7 @@ function ProfileEditor({ user }: { user: User }) {
             </p>
 
             <ul className="mt-6 space-y-3">
+              {/* E-posta */}
               <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2/40 px-4 py-3">
                 <span className="flex items-center gap-2 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">
                   <AtSign className="size-4" />
@@ -405,15 +393,8 @@ function ProfileEditor({ user }: { user: User }) {
                   {user.email}
                 </span>
               </li>
-              <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2/40 px-4 py-3">
-                <span className="flex items-center gap-2 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">
-                  <RoleIcon className="size-3.5" />
-                  Rol
-                </span>
-                <span className="font-sans text-sm text-on-surface">
-                  {currentRoleInfo.label}
-                </span>
-              </li>
+
+              {/* Departman (Rolün üstünde) */}
               {me?.department && (
                 <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2/40 px-4 py-3">
                   <span className="flex items-center gap-2 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">
@@ -425,6 +406,17 @@ function ProfileEditor({ user }: { user: User }) {
                   </span>
                 </li>
               )}
+
+              {/* Rol (Departmanın altında - unvan / rol adı gösterir) */}
+              <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2/40 px-4 py-3">
+                <span className="flex items-center gap-2 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">
+                  <RoleIcon className="size-3.5" />
+                  Rol
+                </span>
+                <span className="font-sans text-sm text-on-surface">
+                  {user.title || me?.title || (user.role === "manager" ? "Departman Müdürü" : currentRoleInfo.label)}
+                </span>
+              </li>
 
               {(user.birthDate || form.birthDate) && (
                 <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2/40 px-4 py-3">

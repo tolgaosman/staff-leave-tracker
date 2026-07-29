@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 
 import { Avatar } from "@/components/dashboard/avatar";
-import { CardMenu } from "@/components/dashboard/card-menu";
 import { leaveTypeLabels, type LeaveRequest, type Personnel } from "@/lib/data/types";
 
 function relativeTime(iso: string): string {
@@ -57,7 +56,6 @@ export function RecentActivity({
     <div className="glass-panel flex h-[340px] flex-col rounded-xl p-5 md:h-[400px] md:p-8">
       <div className="mb-6 flex items-center justify-between">
         <h3 className="font-serif text-2xl font-bold text-primary">Son Aktiviteler</h3>
-        <CardMenu />
       </div>
 
       {activities.length === 0 ? (

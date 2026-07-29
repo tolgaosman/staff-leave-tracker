@@ -10,18 +10,21 @@ import {
   Plane,
   UserRound,
   Wallet,
+  X,
 } from "lucide-react";
 
 import { useCurrentEmployee } from "@/components/auth/use-current-employee";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Avatar } from "@/components/dashboard/avatar";
 import { LeaveStatusBadge } from "@/components/dashboard/badges";
+import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
 import { LeaveDialog } from "@/components/dashboard/leave-dialog";
 import { LeaveUsageGauge } from "@/components/dashboard/leave-usage-gauge";
 import { MobileCard, MobileCardList } from "@/components/dashboard/mobile-card-list";
 import { ViewReasonDialog } from "@/components/dashboard/view-reason-dialog";
 import { AttachmentDialog } from "@/components/dashboard/attachment-dialog";
 import { StatCard, type Stat } from "@/components/dashboard/stat-card";
+import { useToast } from "@/components/ui/toast";
 import { apiFetch } from "@/lib/api";
 import { computeLeaveBalance } from "@/lib/data/balance";
 import { leaveTypeLabels, attachmentConfig, type LeaveRequest, type LeaveType } from "@/lib/data/types";
@@ -124,8 +127,11 @@ function UpcomingHolidays() {
 export function EmployeeDashboard() {
   const { user } = useAuth();
   const { me, loading: meLoading } = useCurrentEmployee();
+  const toast = useToast();
   const [myLeaves, setMyLeaves] = useState<LeaveRequest[]>([]);
   const [requestOpen, setRequestOpen] = useState(false);
+  // İptal onayı bekleyen talep (null = dialog kapalı).
+  const [cancelTarget, setCancelTarget] = useState<LeaveRequest | null>(null);
 
   const today = todayIso();
 
@@ -147,6 +153,24 @@ export function EmployeeDashboard() {
   useEffect(() => {
     fetchMyLeaves();
   }, [fetchMyLeaves]);
+
+  /* Kendi bekleyen talebini geri çekme. Sunucu ayrıca sahiplik ve "pending"
+     kontrolü yapıyor (LeaveRequestController@cancel); buradaki koşul yalnızca
+     arayüzü sadeleştirmek için. */
+  const handleCancel = useCallback(async () => {
+    if (!cancelTarget) return;
+    try {
+      await apiFetch(`/leave-requests/${cancelTarget.id}/cancel`, {
+        method: "DELETE",
+      });
+      toast.success("İzin talebiniz iptal edildi");
+      fetchMyLeaves();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Talep iptal edilemedi");
+    } finally {
+      setCancelTarget(null);
+    }
+  }, [cancelTarget, fetchMyLeaves, toast]);
 
   // Bakiye artık store yerine API izinlerinden türetilir.
   const balance = useMemo(
@@ -351,6 +375,17 @@ export function EmployeeDashboard() {
                       {l.status === "rejected" && l.rejectionReason && (
                         <ViewReasonDialog reason={l.rejectionReason} />
                       )}
+                      {l.status === "pending" && (
+                        <button
+                          type="button"
+                          onClick={() => setCancelTarget(l)}
+                          title="Talebi iptal et"
+                          className="inline-flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive transition-colors hover:bg-destructive/20 cursor-pointer"
+                        >
+                          <X className="size-3" />
+                          İptal Et
+                        </button>
+                      )}
                     </span>
                   }
                   rows={[
@@ -419,6 +454,17 @@ export function EmployeeDashboard() {
                         {l.status === "rejected" && l.rejectionReason && (
                           <ViewReasonDialog reason={l.rejectionReason} />
                         )}
+                        {l.status === "pending" && (
+                          <button
+                            type="button"
+                            onClick={() => setCancelTarget(l)}
+                            title="Talebi iptal et"
+                            className="inline-flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive transition-colors hover:bg-destructive/20 cursor-pointer"
+                          >
+                            <X className="size-3" />
+                            İptal Et
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -438,6 +484,22 @@ export function EmployeeDashboard() {
         defaultPersonnelId={me.id}
         lockPersonnel
         onSaved={fetchMyLeaves}
+      />
+
+      <ConfirmDialog
+        open={cancelTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setCancelTarget(null);
+        }}
+        title="Talebi iptal et"
+        description={
+          cancelTarget
+            ? `${leaveTypeLabels[cancelTarget.type]} talebiniz (${fmt(cancelTarget.startDate)} – ${fmt(cancelTarget.endDate)}) geri çekilecek. Bu işlem geri alınamaz.`
+            : ""
+        }
+        confirmLabel="İptal Et"
+        cancelLabel="Vazgeç"
+        onConfirm={handleCancel}
       />
     </>
   );

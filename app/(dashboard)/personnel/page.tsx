@@ -13,6 +13,7 @@ import { MobileCard, MobileCardList } from "@/components/dashboard/mobile-card-l
 import { useToast } from "@/components/ui/toast";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { apiFetch } from "@/lib/api";
+import { annualEntitlement } from "@/lib/data/balance";
 import Link from "next/link";
 
 const roleLabels: Record<string, string> = {
@@ -141,6 +142,7 @@ export default function PersonnelPage() {
               columns={[
                 { header: "Ad Soyad", value: (p) => p.name },
                 { header: "Departman", value: (p) => p.department },
+                { header: "Rol", value: (p) => p.title || (p.role && p.role !== "employee" ? roleLabels[p.role] : `${p.department} Uzmanı`) },
                 { header: "Telefon", value: (p) => p.phone },
                 { header: "Durum", value: (p) => personnelStatusLabels[p.status] },
                 { header: "E-posta", value: (p) => p.email ?? "" },
@@ -239,6 +241,14 @@ export default function PersonnelPage() {
                           </span>
                         ),
                       },
+                      {
+                        label: "Yıllık İzin",
+                        value: (
+                          <span className="font-mono text-xs">
+                            <strong className="text-accent-cyan">{p.annualLeaveBalance ?? 0}</strong> / {annualEntitlement(p.startDate) + (p.carriedOverBalance || 0)} gün kalan
+                          </span>
+                        ),
+                      },
                     ]}
                     actions={
                       <>
@@ -298,8 +308,9 @@ export default function PersonnelPage() {
                         <th className="px-6 py-4 font-bold">Personel</th>
                         <th className="px-6 py-4 font-bold">Departman</th>
                         <th className="px-6 py-4 font-bold">Durum</th>
-                        <th className="px-6 py-4 font-bold">Telefon</th>
                         <th className="px-6 py-4 font-bold">Başlangıç Tarihi</th>
+                        <th className="px-6 py-4 font-bold">Yıllık İzin (Kalan / Hak)</th>
+                        <th className="px-6 py-4 font-bold">Telefon</th>
                         <th className="px-6 py-4 text-right font-bold">İşlemler</th>
                       </tr>
                     </thead>
@@ -334,14 +345,20 @@ export default function PersonnelPage() {
                             </span>
                           </td>
 
-                          {/* 4. Sütun: Telefon */}
-                          <td className="px-6 py-4 text-on-surface-variant font-mono text-xs">
-                            {p.phone}
-                          </td>
-
-                          {/* 4.5. Sütun: Başlangıç Tarihi */}
+                          {/* 4. Sütun: Başlangıç Tarihi */}
                           <td className="px-6 py-4 text-on-surface-variant font-mono text-xs">
                             {p.startDate ? new Date(p.startDate).toLocaleDateString("tr-TR") : "-"}
+                          </td>
+
+                          {/* 4.5. Sütun: Yıllık İzin (Kalan / (Hak Edilen + Devreden)) */}
+                          <td className="px-6 py-4 font-mono text-xs whitespace-nowrap">
+                            <span className="font-bold text-accent-cyan">{p.annualLeaveBalance ?? 0}</span>
+                            <span className="text-on-surface-variant/70"> / {annualEntitlement(p.startDate) + (p.carriedOverBalance || 0)} gün</span>
+                          </td>
+
+                          {/* 5. Sütun: Telefon */}
+                          <td className="px-6 py-4 text-on-surface-variant font-mono text-xs">
+                            {p.phone}
                           </td>
 
                           {/* 5. Sütun: Aksiyon Butonları */}
@@ -422,7 +439,7 @@ export default function PersonnelPage() {
           if (toDelete) {
             try {
               await apiFetch(`/personnel/${toDelete.id}`, { method: "DELETE" });
-              toast.success("Personel silindi");
+              toast.reject("Personel silindi");
               fetchPersonnel();
             } catch {
               toast.error("Personel silinemedi");

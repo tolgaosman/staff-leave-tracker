@@ -82,8 +82,9 @@ function EditAnnouncementForm({
         payload.department_id = departmentId ? Number(departmentId) : null;
       }
 
+      // Rota PATCH olarak tanımlı (routes/api.php); PUT göndermek 405 veriyordu.
       await apiFetch(`/announcements/${announcement.id}`, {
-        method: "PUT",
+        method: "PATCH",
         body: JSON.stringify(payload),
       });
 

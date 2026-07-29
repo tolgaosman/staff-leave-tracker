@@ -16,7 +16,6 @@ import {
   type Personnel,
   type PersonnelStatus,
 } from "@/lib/data/types";
-import { useRole } from "@/components/auth/role-store";
 
 const fieldClasses =
   "w-full rounded-lg border border-white/10 bg-surface-2/60 px-3 py-2 text-base text-on-surface outline-none transition-colors focus:border-accent-cyan/50 placeholder-on-surface-variant/40";
@@ -49,12 +48,6 @@ function PersonnelForm({
   const [status, setStatus] = useState<PersonnelStatus>(
     personnel?.status ?? "active"
   );
-  const [role, setRole] = useState<"super_admin" | "hr_admin" | "manager" | "employee">(
-    personnel?.role ?? "employee"
-  );
-  
-  const currentUserRole = useRole();
-  const canAssignRoles = currentUserRole === "super_admin" || currentUserRole === "hr_admin";
 
   // Departmanlar API'den gelir; seçici bu listeden beslenir.
   const [departments, setDepartments] = useState<ApiDepartment[]>([]);
@@ -89,7 +82,6 @@ function PersonnelForm({
         phone: phone.trim(),
         status,
         avatar_url: avatarUrl || null,
-        ...(canAssignRoles && { role }),
       };
       if (personnel) {
         // Düzenleme (PUT /api/personnel/{id})
@@ -232,24 +224,6 @@ function PersonnelForm({
           />
         </div>
 
-        {canAssignRoles && (
-          <div className="space-y-1.5">
-            <label htmlFor="p-role" className={labelClasses}>
-              Sistem Rolü
-            </label>
-            <CustomSelect
-              id="p-role"
-              value={role}
-              onChange={(val) => setRole(val as any)}
-              options={[
-                { value: "super_admin", label: "Admin" },
-                { value: "hr_admin", label: "İnsan Kaynakları" },
-                { value: "manager", label: "Bölüm Müdürü" },
-                { value: "employee", label: "Çalışan" },
-              ]}
-            />
-          </div>
-        )}
 
         <div className="flex justify-end gap-3 pt-2">
           <Dialog.Close render={<Button variant="outline" />}>İptal</Dialog.Close>

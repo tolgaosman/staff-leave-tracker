@@ -74,14 +74,17 @@ function AdminOverview() {
       .catch(() => {});
   }, [simulatedRole]);
 
+  const isManagerView = simulatedRole && simulatedRole.startsWith("manager:");
+  const deptName = isManagerView && personnel.length > 0 ? personnel[0].department : "";
+
   return (
     <>
       <div className="mb-8 md:mb-12">
         <h2 className="font-serif text-3xl font-bold text-primary sm:text-4xl lg:text-5xl">
-          Personel Genel Bakış
+          {deptName ? `${deptName} Genel Bakış` : "Personel Genel Bakış"}
         </h2>
         <p className="font-sans text-sm text-on-surface-variant mt-2 md:text-base">
-          Ekibinizin dinlenme ve katılım durumlarına bütünsel bir bakış.
+          {deptName ? `${deptName} ekibinizin dinlenme ve katılım durumlarına bütünsel bir bakış.` : "Ekibinizin dinlenme ve katılım durumlarına bütünsel bir bakış."}
         </p>
       </div>
 
@@ -108,10 +111,10 @@ function AdminOverview() {
 }
 
 export default function IzinTakipDashboard() {
-  const isAdmin = useIsAdmin();
+  const hasAccess = useHasDashboardAccess();
 
-  // Admin → doğrudan yönetim paneli, diğerleri → kişisel görünüm
-  if (isAdmin) return <AdminOverview />;
+  // Admin veya Departman Müdürü (simülasyon dahil) → Departman/Şirket Genel Bakışı
+  if (hasAccess) return <AdminOverview />;
 
   return (
     <div className="space-y-6">
