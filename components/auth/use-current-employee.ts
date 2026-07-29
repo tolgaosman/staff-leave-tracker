@@ -19,8 +19,8 @@ function mapPersonnel(p: any): Personnel {
     avatarUrl: p.user?.avatar_url || p.avatar_url || "",
     email: p.user?.email ?? "",
     role: p.user?.role || "employee",
-    annualLeaveBalance: p.annual_leave_balance || 0,
-    carriedOverBalance: p.carried_over_balance || 0,
+    annualLeaveBalance: p.annual_leave_balance != null ? Number(p.annual_leave_balance) : undefined,
+    carriedOverBalance: p.carried_over_balance != null ? Number(p.carried_over_balance) : 0,
   };
 }
 

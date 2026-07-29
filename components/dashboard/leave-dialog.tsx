@@ -73,12 +73,14 @@ function LeaveForm({
   leave,
   defaultPersonnelId,
   lockPersonnel,
+  autoApprove,
   onClose,
   onSaved,
 }: {
   leave: LeaveRequest | null;
   defaultPersonnelId?: string;
   lockPersonnel?: boolean;
+  autoApprove?: boolean;
   onClose: () => void;
   onSaved?: () => void;
 }) {
@@ -202,11 +204,14 @@ function LeaveForm({
         toast.success("İzin talebi güncellendi");
       } else {
         formData.append("personnel_id", String(personnelId));
+        if (autoApprove) {
+          formData.append("status", "approved");
+        }
         await apiFetch("/leave-requests", {
           method: "POST",
           body: formData,
         });
-        toast.success("İzin talebi oluşturuldu");
+        toast.success(autoApprove ? "İzin başarıyla oluşturuldu ve onaylandı" : "İzin talebi oluşturuldu");
       }
       onSaved?.();
       onClose();
@@ -232,10 +237,10 @@ function LeaveForm({
       <div className="mb-6 flex items-start justify-between">
         <div>
           <Dialog.Title className="text-2xl font-bold text-on-surface">
-            {isEdit ? "İzin Talebini Düzenle" : "Yeni İzin Talebi"}
+            {isEdit ? "İzin Talebini Düzenle" : autoApprove ? "Yeni İzin Oluştur" : "Yeni İzin Talebi"}
           </Dialog.Title>
           <Dialog.Description className="mt-1 text-base text-on-surface-variant">
-            İzin talebi için formu doldurun.
+            {autoApprove ? "Personel için onaylı izin oluşturun." : "İzin talebi için formu doldurun."}
           </Dialog.Description>
         </div>
         <Dialog.Close
@@ -379,7 +384,7 @@ function LeaveForm({
             }
             className="bg-accent-cyan text-white hover:bg-accent-cyan/90 disabled:opacity-50"
           >
-            {isEdit ? "Kaydet" : "Talebi Gönder"}
+            {isEdit ? "Kaydet" : autoApprove ? "İzini Oluştur" : "Talebi Gönder"}
           </Button>
         </div>
       </form>
@@ -396,6 +401,8 @@ type Props = {
   defaultPersonnelId?: string;
   /** Personel seçiciyi gizle ve defaultPersonnelId'ye sabitle (çalışan kendine talep). */
   lockPersonnel?: boolean;
+  /** Otomatik olarak onaylanmış izin oluştur (Admin/Yönetici için). */
+  autoApprove?: boolean;
   /** Called after a successful create/update so the caller can refresh its list. */
   onSaved?: () => void;
 };
@@ -406,6 +413,7 @@ export function LeaveDialog({
   leave,
   defaultPersonnelId,
   lockPersonnel,
+  autoApprove,
   onSaved,
 }: Props) {
   return (
@@ -418,6 +426,7 @@ export function LeaveDialog({
             leave={leave ?? null}
             defaultPersonnelId={defaultPersonnelId}
             lockPersonnel={lockPersonnel}
+            autoApprove={autoApprove}
             onClose={() => onOpenChange(false)}
             onSaved={onSaved}
           />

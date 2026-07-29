@@ -42,9 +42,11 @@ export function computeLeaveBalance(
   person: Personnel,
   allLeaves: LeaveRequest[]
 ): LeaveBalance {
-  const entitled = person.annualLeaveBalance || 0;
+  const seniorityEntitlement = annualEntitlement(person.startDate);
   const carriedOver = person.carriedOverBalance || 0;
 
+  // approved olan izinleri sadece "used" göstermek için sayıyoruz
+  let used = 0;
   let pending = 0;
 
   for (const leave of allLeaves) {
@@ -52,14 +54,34 @@ export function computeLeaveBalance(
     if (leave.type !== "annual") continue;
 
     const days = workingDayCount(leave.startDate, leave.endDate);
+    if (leave.status === "approved") used += days;
     if (leave.status === "pending") pending += days;
   }
 
+  if (person.annualLeaveBalance !== undefined && person.annualLeaveBalance !== null) {
+    // Veritabanındaki bakiye zaten onaylı izinler düşülmüş "kalan" değer.
+    // Sadece bekleyen talepleri düşüyoruz.
+    const remaining = Math.max(0, person.annualLeaveBalance - pending);
+    // Hak edilen = kalan + kullanılan + bekleyen - devreden (negatif olmamalı)
+    const entitled = Math.max(seniorityEntitlement, remaining + used + pending - carriedOver);
+    return {
+      personnelId: person.id,
+      entitled,
+      carriedOver,
+      used,
+      pending,
+      remaining,
+    };
+  }
+
+  // Veritabanında bakiye yoksa kıdemden hesapla
+  const remaining = Math.max(0, seniorityEntitlement + carriedOver - used - pending);
   return {
     personnelId: person.id,
-    entitled,
+    entitled: seniorityEntitlement,
     carriedOver,
+    used,
     pending,
-    remaining: entitled + carriedOver - pending,
+    remaining,
   };
 }

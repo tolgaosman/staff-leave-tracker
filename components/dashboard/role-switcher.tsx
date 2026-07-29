@@ -91,6 +91,12 @@ export function RoleSwitcher() {
   const active = options.find((o) => o.value === role) ?? options[0] ?? staticOptions[0];
   const ActiveIcon = active.icon;
 
+  /* "(Simüle)" etiketi yalnızca GERÇEK simülasyonda gösterilir: super_admin'in
+     başka bir departman müdürü rolünü taklit etmesi. Müdür kullanıcı için
+     simulatedRole yalnızca "Kişisel Görünüm" ↔ "Departman Müdürü" arasında
+     geçiş yapan meşru bir görünüm anahtarıdır, simülasyon değil. */
+  const isSimulating = user?.role === "super_admin" && Boolean(simulatedRole);
+
   const handleSelect = (val: RoleOption) => {
     if (val === "super_admin") {
       setSimulatedRole(null);
@@ -106,7 +112,7 @@ export function RoleSwitcher() {
         className="flex items-center gap-1.5 rounded-full border border-outline-variant/30 bg-surface-1 px-2.5 py-1 text-xs font-medium text-on-surface-variant outline-none transition-colors hover:text-primary data-[popup-open]:border-accent-cyan/40 data-[popup-open]:text-primary cursor-pointer sm:gap-2 sm:px-3 sm:py-1.5 sm:text-sm"
       >
         <ActiveIcon className="size-3.5 sm:size-4" />
-        <span>{active.label} {user?.role === "super_admin" && "(Simüle)"}</span>
+        <span>{active.label}{isSimulating ? " (Simüle)" : ""}</span>
         <ChevronDown className="size-3 opacity-60 sm:size-3.5" />
       </Menu.Trigger>
 
@@ -114,7 +120,7 @@ export function RoleSwitcher() {
         <Menu.Positioner sideOffset={12} align="end" className="z-50">
           <Menu.Popup className={`${popupClasses} w-56`}>
             <div className="px-3 pb-2 pt-1 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant/70">
-              {user?.role === "super_admin" ? "Görünüm rolü simülasyonu" : "Görünüm Seçimi"}
+              {isSimulating ? "Görünüm rolü simülasyonu" : "Görünüm Seçimi"}
             </div>
             {options.map((o) => {
               const Icon = o.icon;

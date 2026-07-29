@@ -2,7 +2,7 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { AlertTriangle, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { apiFetch } from "@/lib/api";
 
@@ -28,25 +28,34 @@ type Props = {
 export function ConflictWarningDialog({ leaveRequestId, onConfirm, onCancel, open }: Props) {
   const [conflicts, setConflicts] = useState<ConflictEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const calledRef = useRef(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      calledRef.current = false;
+      return;
+    }
     setLoading(true);
+    calledRef.current = false;
     apiFetch<ConflictEntry[]>(`/leave-requests/${leaveRequestId}/conflicts`)
-      .then(setConflicts)
-      .catch(() => setConflicts([]))
+      .then((data) => {
+        setConflicts(data);
+        if (data.length === 0 && !calledRef.current) {
+          calledRef.current = true;
+          onConfirm();
+        }
+      })
+      .catch(() => {
+        setConflicts([]);
+        if (!calledRef.current) {
+          calledRef.current = true;
+          onConfirm();
+        }
+      })
       .finally(() => setLoading(false));
   }, [open, leaveRequestId]);
 
-  if (!open) return null;
-
-  if (loading) return null; // wait for data before showing
-
-  // Çakışma yoksa kullanıcıya dialog göstermeden direkt onayla
-  if (conflicts.length === 0) {
-    onConfirm();
-    return null;
-  }
+  if (!open || loading || conflicts.length === 0) return null;
 
   return (
     <Dialog.Root open={open} onOpenChange={(o) => { if (!o) onCancel(); }}>

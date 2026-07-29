@@ -78,11 +78,9 @@ export function useRole(): RoleOption {
     return simulatedRole;
   }
 
-  // Manager: Varsayılan olarak "employee" (kişisel görünüm). 
-  // Sadece eğer açıkça "manager" seçilmişse manager rolüne geçer.
   if (user.role === 'manager') {
-    if (simulatedRole === 'manager') return 'manager';
-    return 'employee';
+    if (simulatedRole === 'employee') return 'employee';
+    return 'manager';
   }
 
   // user.role is 'employee' or 'hr_admin'

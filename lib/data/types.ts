@@ -93,12 +93,14 @@ export function leaveDayCount(startDate: string, endDate: string): number {
    sync with the underlying data (single source of truth). */
 export type LeaveBalance = {
   personnelId: string;
-  /** Yearly annual-leave entitlement (read from backend) */
+  /** Yearly annual-leave entitlement (read from backend or computed from seniority) */
   entitled: number;
   /** Unused leave days from previous years (read from backend) */
   carriedOver: number;
+  /** Working days in APPROVED annual requests */
+  used: number;
   /** Working days locked up in PENDING annual requests (not yet deducted). */
   pending: number;
-  /** Entitled + carriedOver - pending */
+  /** Entitled + carriedOver - used - pending */
   remaining: number;
 };

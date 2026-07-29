@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Check, X, Trash2, CalendarClock, Search } from "lucide-react";
+import { Plus, Check, X, Trash2, CalendarClock, Search, RotateCcw } from "lucide-react";
 
 import {
   LeaveRequest,
@@ -92,6 +92,16 @@ export default function LeaveRequestsPage() {
       .catch(() => {
         toast.error("İzin talepleri yüklenemedi");
       });
+  };
+
+  const handlePending = async (r: LeaveRequest) => {
+    try {
+      await apiFetch(`/leave-requests/${r.id}/pending`, { method: "PATCH" });
+      toast.success("Talep tekrar bekliyor durumuna alındı");
+      fetchData();
+    } catch (err: any) {
+      toast.error(err.message || "İşlem başarısız");
+    }
   };
 
   useEffect(() => {
@@ -224,7 +234,7 @@ export default function LeaveRequestsPage() {
               className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent-cyan px-4 py-2 text-base font-bold text-white dark:text-black shadow transition-all hover:opacity-90 active:scale-95 cursor-pointer sm:flex-none"
             >
               <Plus className="size-5" />
-              <span>Yeni İzin Talebi</span>
+              <span>{hasAccess ? "Yeni İzin Oluştur" : "Yeni İzin Talebi"}</span>
             </button>
           </div>
         </div>
@@ -232,7 +242,7 @@ export default function LeaveRequestsPage() {
         {requestsList.length === 0 ? (
           <div className="flex min-h-[200px] flex-col items-center justify-center text-center p-6 glass-panel rounded-xl my-6 md:min-h-[300px] md:p-12">
             <p className="font-sans text-lg text-on-surface-variant max-w-md">
-              Sistemde henüz izin talebi bulunamadı. Listeyi oluşturmak için sağ üstteki &quot;Yeni İzin Talebi&quot; butonuna tıklayınız.
+              Sistemde henüz izin talebi bulunamadı. Listeyi oluşturmak için sağ üstteki &quot;{hasAccess ? "Yeni İzin Oluştur" : "Yeni İzin Talebi"}&quot; butonuna tıklayınız.
             </p>
           </div>
         ) : (
@@ -516,7 +526,7 @@ export default function LeaveRequestsPage() {
                             {hasAccess && (
                             <td className="px-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-2">
-                                {r.status === "pending" && (
+                                {r.status === "pending" ? (
                                   <>
                                     <button
                                       onClick={() => setToApprove(r)}
@@ -533,6 +543,14 @@ export default function LeaveRequestsPage() {
                                       <X className="size-4" />
                                     </button>
                                   </>
+                                ) : (
+                                  <button
+                                    onClick={() => handlePending(r)}
+                                    title="Durumu Tekrar Bekliyora Çek"
+                                    className="flex size-8 items-center justify-center rounded-md border border-amber-600/30 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 active:scale-95 cursor-pointer"
+                                  >
+                                    <RotateCcw className="size-4" />
+                                  </button>
                                 )}
                                 <button
                                   onClick={() => {
@@ -574,6 +592,7 @@ export default function LeaveRequestsPage() {
           if (!o) setEditing(null);
         }}
         leave={editing || undefined}
+        autoApprove={hasAccess && !editing}
         onSaved={fetchData}
       />
 
