@@ -19,6 +19,7 @@ export type Personnel = {
   startDate?: string;
   avatarUrl?: string;
   role: "super_admin" | "hr_admin" | "manager" | "employee";
+  title?: string;
   emergencyName?: string;
   emergencyRelation?: string;
   emergencyPhone?: string;

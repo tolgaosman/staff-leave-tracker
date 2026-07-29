@@ -72,6 +72,7 @@ export default function PersonnelPage() {
           avatarUrl: item.user?.avatar_url || item.avatar_url || "",
           email: item.user?.email || "",
           role: item.user?.role || "employee",
+          title: item.user?.title || item.title || "",
           annualLeaveBalance: item.annual_leave_balance || 0,
           carriedOverBalance: item.carried_over_balance || 0,
         }));
@@ -218,11 +219,9 @@ export default function PersonnelPage() {
                     subtitle={
                       <div className="flex flex-col">
                         <span>{p.department}</span>
-                        {p.role && p.role !== 'employee' && (
-                          <span className="text-[10px] uppercase font-bold text-accent-cyan tracking-wider mt-0.5">
-                            {roleLabels[p.role] || p.role.replace('_', ' ')}
-                          </span>
-                        )}
+                        <span className="text-[10px] font-bold text-accent-cyan tracking-wide mt-0.5">
+                          {p.title || (p.role && p.role !== 'employee' ? roleLabels[p.role] : `${p.department} Uzmanı`)}
+                        </span>
                       </div>
                     }
                     badge={
@@ -315,12 +314,10 @@ export default function PersonnelPage() {
                             <div className="flex items-center gap-3">
                               <Avatar name={p.name} url={p.avatarUrl} className="size-9 shrink-0" />
                               <div className="flex flex-col">
-                                <span className="font-bold text-primary">{p.name}</span>
-                                {p.role && p.role !== 'employee' && (
-                                  <span className="text-[10px] uppercase font-bold text-accent-cyan tracking-wider mt-0.5">
-                                    {roleLabels[p.role] || p.role.replace('_', ' ')}
-                                  </span>
-                                )}
+                                 <span className="font-bold text-primary">{p.name}</span>
+                                <span className="text-[10px] font-bold text-accent-cyan tracking-wide mt-0.5">
+                                  {p.title || (p.role && p.role !== 'employee' ? roleLabels[p.role] : `${p.department} Uzmanı`)}
+                                </span>
                               </div>
                             </div>
                           </td>

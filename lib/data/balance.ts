@@ -60,8 +60,12 @@ export function computeLeaveBalance(
 
   if (person.annualLeaveBalance !== undefined && person.annualLeaveBalance !== null) {
     // Veritabanındaki bakiye zaten onaylı izinler düşülmüş "kalan" değer.
-    // Sadece bekleyen talepleri düşüyoruz.
-    const remaining = Math.max(0, person.annualLeaveBalance - pending);
+    // Devreden bakiye de kullanılabilir güne DAHİLDİR — backend'deki
+    // LeaveRules::validateNewRequest ile birebir aynı formül olmalı:
+    //   annual_leave_balance + carried_over_balance - bekleyen
+    // (Devreden hep 0 olduğu sürece bu fark görünmüyordu; devreden > 0
+    // olduğunda frontend eksik gösterip talebi haksız yere bloklardı.)
+    const remaining = Math.max(0, person.annualLeaveBalance + carriedOver - pending);
     // Hak edilen = kalan + kullanılan + bekleyen - devreden (negatif olmamalı)
     const entitled = Math.max(seniorityEntitlement, remaining + used + pending - carriedOver);
     return {

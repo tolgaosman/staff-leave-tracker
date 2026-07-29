@@ -241,7 +241,7 @@ export function EmployeeDashboard() {
           <div className="min-w-0">
             <h2 className="font-serif text-2xl font-bold text-primary sm:text-3xl lg:text-4xl">Merhaba, {me.name} 👋</h2>
             <p className="mt-1 font-sans text-sm text-on-surface-variant md:text-base">
-              {me.department}
+              {me.department}{me.title ? ` · ${me.title}` : ""}
               {years > 0 && <span> · {years} yıllık kıdem</span>}
               <span
                 className={`ml-3 inline-flex items-center rounded-full border px-2.5 py-0.5 font-label-mono text-xs ${statusChip.cls}`}

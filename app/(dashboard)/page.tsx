@@ -25,6 +25,7 @@ function mapPersonnel(p: any): Personnel {
     avatarUrl: p.user?.avatar_url || p.avatar_url || "",
     email: p.user?.email ?? "",
     role: p.user?.role || "employee",
+    title: p.user?.title || p.title || "",
   };
 }
 
