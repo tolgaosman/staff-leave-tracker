@@ -7,7 +7,6 @@ import {
   XAxis,
   Cell,
   ResponsiveContainer,
-  LabelList,
 } from "recharts";
 
 /* ── Theme-aware colors ── */
@@ -16,7 +15,6 @@ const LIGHT = {
   gradEnd: "#b84456",
   track: "#f3e7e9",
   trackBorder: "rgba(123,30,43,0.08)",
-  pctText: "#7b1e2b",
   labelText: "#6e4a50",
   chipBg: "rgba(123,30,43,0.06)",
   chipBorder: "rgba(123,30,43,0.12)",
@@ -30,7 +28,6 @@ const DARK = {
   gradEnd: "#ff6b81",
   track: "#3f3f46",
   trackBorder: "rgba(255,255,255,0.06)",
-  pctText: "#ff99a8",
   labelText: "#a1a1aa",
   chipBg: "rgba(255,153,168,0.08)",
   chipBorder: "rgba(255,153,168,0.15)",
@@ -61,24 +58,6 @@ type LeaveUsageGaugeProps = {
   remaining: number;
   usedPct: number;
 };
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-function RenderLabel(props: any) {
-  const { x, width, colors } = props;
-  return (
-    <text
-      x={x + width + 10}
-      y={22}
-      fill={colors.pctText}
-      fontSize={13}
-      fontFamily="Ubuntu, sans-serif"
-      fontWeight={700}
-      dominantBaseline="central"
-    >
-      %{props.value}
-    </text>
-  );
-}
 
 export function LeaveUsageGauge({
   used,
@@ -122,7 +101,10 @@ export function LeaveUsageGauge({
           <BarChart
             data={data}
             layout="vertical"
-            margin={{ top: 0, right: 40, left: 0, bottom: 0 }}
+            /* Sağdaki 40px, kaldırılan yüzde etiketi içindi; çubuk artık tam
+               genişlikte. Aşağıdaki kilometre taşı noktalarının hizası bu
+               margin'e bağlı — ikisi birlikte değiştirilmeli. */
+            margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
             barCategoryGap={0}
           >
             <defs>
@@ -156,16 +138,12 @@ export function LeaveUsageGauge({
               animationEasing="ease-out"
             >
               <Cell fill="url(#progressGrad)" />
-              <LabelList
-                dataKey="value"
-                content={<RenderLabel colors={c} />}
-              />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
 
         {/* Milestone dots overlaid */}
-        <div className="absolute inset-0 pointer-events-none flex items-center" style={{ left: 0, right: 40 }}>
+        <div className="absolute inset-0 pointer-events-none flex items-center" style={{ left: 0, right: 0 }}>
           {milestones.map((m) => (
             <div
               key={m}
