@@ -11,6 +11,7 @@ import { PersonnelDialog } from "@/components/dashboard/personnel-dialog";
 import { ExportButton } from "@/components/dashboard/export-button";
 import { MobileCard, MobileCardList } from "@/components/dashboard/mobile-card-list";
 import { useToast } from "@/components/ui/toast";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { apiFetch } from "@/lib/api";
 import Link from "next/link";
 
@@ -182,18 +183,19 @@ export default function PersonnelPage() {
               </div>
 
               {role === "super_admin" && (
-                <div className="relative w-full sm:w-auto">
-                  <select
+                <div className="w-full sm:w-56">
+                  <CustomSelect
                     value={selectedDepartmentFilter}
-                    onChange={(e) => setSelectedDepartmentFilter(e.target.value)}
-                    className="w-full sm:w-auto appearance-none bg-surface-2 border border-outline-variant/30 rounded-lg py-2 pl-4 pr-10 text-sm font-semibold text-on-surface hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all cursor-pointer tracking-normal"
-                  >
-                    <option value="">Tüm Departmanlar</option>
-                    {uniqueDepartments.map(d => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
+                    onChange={(val) => setSelectedDepartmentFilter(val)}
+                    placeholder="Tüm Departmanlar"
+                    options={[
+                      { value: "", label: "Tüm Departmanlar" },
+                      ...uniqueDepartments.map((d) => ({
+                        value: d,
+                        label: d,
+                      })),
+                    ]}
+                  />
                 </div>
               )}
             </div>

@@ -15,6 +15,7 @@ import {
 import { workingDayCount } from "@/lib/date/business-days";
 import { useHasDashboardAccess, useRoleStore, useRole } from "@/components/auth/role-store";
 import { useToast } from "@/components/ui/toast";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { apiFetch } from "@/lib/api";
 
 import { Avatar } from "@/components/dashboard/avatar";
@@ -249,60 +250,64 @@ export default function LeaveRequestsPage() {
                 />
               </div>
 
-              <select
-                aria-label="Dönem"
-                value={filters.period}
-                onChange={(e) =>
-                  setFilters((f) => ({
-                    ...f,
-                    period: e.target.value as typeof f.period,
-                  }))
-                }
-                className={filterSelectClasses}
-              >
-                <option value="all">Tüm Dönemler</option>
-                <option value="this-month">Bu Ay</option>
-                <option value="last-month">Geçen Ay</option>
-              </select>
+              <div className="col-span-1 min-w-[140px]">
+                <CustomSelect
+                  ariaLabel="Dönem"
+                  value={filters.period}
+                  onChange={(val) =>
+                    setFilters((f) => ({
+                      ...f,
+                      period: val as typeof f.period,
+                    }))
+                  }
+                  options={[
+                    { value: "all", label: "Tüm Dönemler" },
+                    { value: "this-month", label: "Bu Ay" },
+                    { value: "last-month", label: "Geçen Ay" },
+                  ]}
+                />
+              </div>
 
               {role === "super_admin" && (
-                <select
-                  aria-label="Departman"
-                  value={filters.department}
-                  onChange={(e) =>
-                    setFilters((f) => ({ ...f, department: e.target.value }))
-                  }
-                  className={filterSelectClasses}
-                >
-                  <option value="all">Tüm Departmanlar</option>
-                  {departments.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
+                <div className="col-span-1 min-w-[160px]">
+                  <CustomSelect
+                    ariaLabel="Departman"
+                    value={filters.department}
+                    onChange={(val) =>
+                      setFilters((f) => ({ ...f, department: val }))
+                    }
+                    options={[
+                      { value: "all", label: "Tüm Departmanlar" },
+                      ...departments.map((d) => ({
+                        value: d,
+                        label: d,
+                      })),
+                    ]}
+                  />
+                </div>
               )}
 
-              <select
-                aria-label="İzin Türü"
-                value={filters.type}
-                onChange={(e) =>
-                  setFilters((f) => ({
-                    ...f,
-                    type: e.target.value as typeof f.type,
-                  }))
-                }
-                className={filterSelectClasses}
-              >
-                <option value="all">Tüm Türler</option>
-                {(Object.entries(leaveTypeLabels) as [LeaveType, string][]).map(
-                  ([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  )
-                )}
-              </select>
+              <div className="col-span-1 min-w-[150px]">
+                <CustomSelect
+                  ariaLabel="İzin Türü"
+                  value={filters.type}
+                  onChange={(val) =>
+                    setFilters((f) => ({
+                      ...f,
+                      type: val as typeof f.type,
+                    }))
+                  }
+                  options={[
+                    { value: "all", label: "Tüm Türler" },
+                    ...(Object.entries(leaveTypeLabels) as [LeaveType, string][]).map(
+                      ([value, label]) => ({
+                        value,
+                        label,
+                      })
+                    ),
+                  ]}
+                />
+              </div>
             </div>
 
             {filteredRequests.length === 0 ? (

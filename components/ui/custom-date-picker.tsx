@@ -12,6 +12,7 @@ interface CustomDatePickerProps {
   minDate?: Date;
   placeholderText?: string;
   className?: string;
+  wrapperClassName?: string;
   required?: boolean;
   showTimeSelect?: boolean;
   dateFormat?: string;
@@ -20,12 +21,17 @@ interface CustomDatePickerProps {
   endDate?: Date | null;
 }
 
+function isValidDate(d: any): d is Date {
+  return d instanceof Date && !isNaN(d.getTime());
+}
+
 export function CustomDatePicker({
   selected,
   onChange,
   minDate,
   placeholderText = "Gün/Ay/Yıl",
   className,
+  wrapperClassName = "w-full",
   required,
   showTimeSelect = false,
   dateFormat = "dd.MM.yyyy",
@@ -33,31 +39,34 @@ export function CustomDatePicker({
   startDate,
   endDate,
 }: CustomDatePickerProps) {
+  const safeSelected = isValidDate(selected) ? selected : null;
+  const safeMinDate = isValidDate(minDate) ? minDate : undefined;
+  const safeStartDate = isValidDate(startDate) ? startDate : null;
+  const safeEndDate = isValidDate(endDate) ? endDate : null;
+
   const commonProps = {
     locale: "tr",
     dateFormat: showTimeSelect ? "dd.MM.yyyy HH:mm" : dateFormat,
     showTimeSelect,
     timeFormat: "HH:mm",
     timeIntervals: 15,
-    minDate,
+    minDate: safeMinDate,
     placeholderText,
+    wrapperClassName,
     className:
       className ||
-      "w-full rounded-lg border border-outline-variant/40 bg-surface-2 px-3 py-2 text-sm text-on-surface outline-none focus:border-accent-cyan",
+      "w-full rounded-lg border border-white/10 bg-surface-2/60 px-3 py-2 text-base text-on-surface outline-none transition-colors focus:border-accent-cyan/50 placeholder-on-surface-variant/40",
     required,
     isClearable: true,
   } as const;
 
-  // react-datepicker'ın tipleri selectsRange'in tam olarak `true`/`false` literal'ine
-  // göre iki ayrı prop kümesini (aralık vs. tekil tarih) birbirini dışlayacak şekilde
-  // ayırıyor; bu yüzden burada boolean bir prop yerine dallanarak render ediyoruz.
   if (selectsRange) {
     return (
       <DatePicker
         {...commonProps}
         selectsRange
-        startDate={startDate}
-        endDate={endDate}
+        startDate={safeStartDate}
+        endDate={safeEndDate}
         onChange={onChange}
       />
     );
@@ -66,7 +75,7 @@ export function CustomDatePicker({
   return (
     <DatePicker
       {...commonProps}
-      selected={selected}
+      selected={safeSelected}
       onChange={onChange}
     />
   );

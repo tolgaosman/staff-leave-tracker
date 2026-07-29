@@ -24,7 +24,6 @@ import { Avatar } from "@/components/dashboard/avatar";
 import { ImageCropper } from "@/components/dashboard/image-cropper";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
-import { CustomDatePicker } from "@/components/ui/custom-date-picker";
 import { readFile } from "@/lib/image";
 import { cn } from "@/lib/utils";
 
@@ -54,7 +53,7 @@ function formFromUser(user: User): ProfileForm {
     name: user.name ?? "",
     title: user.title ?? "",
     phone: user.phone ?? "",
-    birthDate: user.birthDate ?? "",
+    birthDate: user.birthDate ? String(user.birthDate).slice(0, 10) : "",
     location: user.location ?? "",
     bio: user.bio ?? "",
     emergencyName: user.emergencyName ?? "",
@@ -315,17 +314,6 @@ function ProfileEditor({ user }: { user: User }) {
               </div>
 
               <div className="space-y-1.5">
-                <label className={labelClasses}>
-                  Doğum Tarihi
-                </label>
-                <CustomDatePicker
-                  selected={form.birthDate ? new Date(form.birthDate + "T00:00:00") : null}
-                  onChange={(d) => set("birthDate", d ? d.toLocaleDateString("en-CA") : "")}
-                  className={`${fieldClasses} dark:[color-scheme:dark]`}
-                />
-              </div>
-
-              <div className="space-y-1.5 sm:col-span-2">
                 <label htmlFor="p-location" className={labelClasses}>
                   Konum
                 </label>
@@ -438,17 +426,20 @@ function ProfileEditor({ user }: { user: User }) {
                 </li>
               )}
 
-              {form.birthDate && (
+              {(user.birthDate || form.birthDate) && (
                 <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2/40 px-4 py-3">
                   <span className="flex items-center gap-2 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">
                     <Cake className="size-4" />
                     Doğum Günü
                   </span>
                   <span className="font-sans text-sm text-on-surface">
-                    {new Date(form.birthDate).toLocaleDateString("tr-TR", {
-                      day: "numeric",
-                      month: "long",
-                    })}
+                    {(() => {
+                      const raw = user.birthDate || form.birthDate || "";
+                      const d = new Date(raw.includes("T") ? raw : raw + "T00:00:00");
+                      return !isNaN(d.getTime())
+                        ? d.toLocaleDateString("tr-TR", { day: "numeric", month: "long" })
+                        : raw;
+                    })()}
                   </span>
                 </li>
               )}

@@ -11,7 +11,7 @@ function mapPersonnel(p: any): Personnel {
   return {
     id: String(p.id),
     name: p.name,
-    department: p.department?.name ?? "Genel",
+    department: p.department?.name ?? (p.department_id ? "Genel" : "-"),
     departmentId: p.department_id != null ? String(p.department_id) : undefined,
     phone: p.phone ?? "-",
     status: p.status ?? "active",

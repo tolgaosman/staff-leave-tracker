@@ -24,6 +24,37 @@ function isSafeUrl(url: string): boolean {
   );
 }
 
+/* Backend bazı durumlarda mutlak URL yerine göreli bir yol dönebiliyor
+   (ör. "/storage/attachments/x.png"). Böyle bir yol tarayıcıda frontend
+   origin'ine (localhost:3000) göre çözülür ve 404 verir — oysa dosya API
+   origin'inde durur. Bu yüzden göreli yolları API origin'iyle birleştiriyoruz.
+   Kaynak lib/api.ts ile aynı: NEXT_PUBLIC_API_URL (varsayılan localhost:8000). */
+const API_ORIGIN = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api").origin;
+  } catch {
+    return "";
+  }
+})();
+
+function normalizeUrl(rawUrl: string): string {
+  if (!rawUrl) return "";
+
+  // Yinelenen /storage/ segmentlerini temizle (eski kayıtlardaki bozukluk).
+  const cleaned = rawUrl
+    .replace(/\/storage\/\/storage\//g, "/storage/")
+    .replace(/\/storage\/storage\//g, "/storage/");
+
+  // Yalnızca kök-göreli yollar mutlaklaştırılır. "//evil.com" gibi
+  // protokol-göreli (protocol-relative) değerler BİLEREK dışarıda bırakılır:
+  // aksi halde başka bir origin'e işaret edebilirlerdi.
+  if (cleaned.startsWith("/") && !cleaned.startsWith("//")) {
+    return `${API_ORIGIN}${cleaned}`;
+  }
+
+  return cleaned;
+}
+
 function FileViewer({
   url,
   name,
@@ -33,7 +64,9 @@ function FileViewer({
   name?: string;
   label: string;
 }) {
-  if (!isSafeUrl(url)) {
+  const cleanUrl = normalizeUrl(url);
+
+  if (!isSafeUrl(cleanUrl)) {
     return (
       <p className="p-4 text-center text-sm text-on-surface-variant">
         Bu ek görüntülenemiyor (desteklenmeyen veya güvenli olmayan dosya biçimi).
@@ -41,13 +74,13 @@ function FileViewer({
     );
   }
 
-  const lower = (name ?? url).toLowerCase();
+  const lower = (name ?? cleanUrl).toLowerCase();
   const isPdf = lower.endsWith(".pdf") || lower.startsWith("data:application/pdf;");
 
   if (isPdf) {
     return (
       <iframe
-        src={url}
+        src={cleanUrl}
         // Boş sandbox = tüm ayrıcalıklar kapalı (script, form, top-navigation yok).
         // Tarayıcının yerleşik PDF görüntüleyicisi bundan etkilenmez.
         sandbox=""
@@ -62,7 +95,7 @@ function FileViewer({
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={url}
+      src={cleanUrl}
       alt={label}
       referrerPolicy="no-referrer"
       className="mx-auto max-h-full max-w-full rounded-lg object-contain"

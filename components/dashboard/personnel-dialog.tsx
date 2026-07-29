@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { Avatar } from "@/components/dashboard/avatar";
 import { ImageCropper } from "@/components/dashboard/image-cropper";
 import { readFile } from "@/lib/image";
@@ -189,22 +190,17 @@ function PersonnelForm({
             <label htmlFor="p-dept" className={labelClasses}>
               Departman
             </label>
-            <select
+            <CustomSelect
               id="p-dept"
               required
               value={departmentId}
-              onChange={(e) => setDepartmentId(e.target.value)}
-              className={fieldClasses}
-            >
-              {departments.length === 0 && (
-                <option value="">Yükleniyor…</option>
-              )}
-              {departments.map((d) => (
-                <option key={d.id} value={String(d.id)}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setDepartmentId(val)}
+              placeholder={departments.length === 0 ? "Yükleniyor…" : "Departman Seçin..."}
+              options={departments.map((d) => ({
+                value: String(d.id),
+                label: d.name,
+              }))}
+            />
           </div>
           <div className="space-y-1.5">
             <label htmlFor="p-phone" className={labelClasses}>
@@ -225,18 +221,15 @@ function PersonnelForm({
           <label htmlFor="p-status" className={labelClasses}>
             Durum
           </label>
-          <select
+          <CustomSelect
             id="p-status"
             value={status}
-            onChange={(e) => setStatus(e.target.value as PersonnelStatus)}
-            className={fieldClasses}
-          >
-            {statusOptions.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setStatus(val as PersonnelStatus)}
+            options={statusOptions.map(([value, label]) => ({
+              value,
+              label,
+            }))}
+          />
         </div>
 
         {canAssignRoles && (
@@ -244,17 +237,17 @@ function PersonnelForm({
             <label htmlFor="p-role" className={labelClasses}>
               Sistem Rolü
             </label>
-            <select
+            <CustomSelect
               id="p-role"
               value={role}
-              onChange={(e) => setRole(e.target.value as any)}
-              className={fieldClasses}
-            >
-              <option value="super_admin">Super Admin</option>
-              <option value="hr_admin">İnsan Kaynakları</option>
-              <option value="manager">Bölüm Müdürü</option>
-              <option value="employee">Çalışan</option>
-            </select>
+              onChange={(val) => setRole(val as any)}
+              options={[
+                { value: "super_admin", label: "Admin" },
+                { value: "hr_admin", label: "İnsan Kaynakları" },
+                { value: "manager", label: "Bölüm Müdürü" },
+                { value: "employee", label: "Çalışan" },
+              ]}
+            />
           </div>
         )}
 

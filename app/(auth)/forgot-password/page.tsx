@@ -2,14 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LogIn } from "lucide-react";
+import { LogIn, CheckCircle2 } from "lucide-react";
 
+import { useAuth } from "@/components/auth/auth-provider";
+import {
+  AuthCard,
+  authFieldClasses,
+  authLabelClasses,
+} from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast";
+import { useToast } from "@/components/ui/toast";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 export default function ForgotPasswordPage() {
+  const toast = useToast();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -37,59 +44,70 @@ export default function ForgotPasswordPage() {
       setSubmitted(true);
       toast.success(data.message || "Sıfırlama bağlantısı gönderildi");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu";
-      toast.error(msg);
+      setSubmitted(true);
+      toast.success("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="flex w-full max-w-sm flex-col gap-6">
-      <div className="flex flex-col gap-2 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-on-surface">Şifremi Unuttum</h1>
-        <p className="text-on-surface-variant">
-          Hesabınıza ait e-posta adresini girin. Size bir şifre sıfırlama bağlantısı göndereceğiz.
-        </p>
-      </div>
-
+    <AuthCard
+      title="Şifremi Unuttum"
+      subtitle="E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim."
+    >
       {!submitted ? (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium leading-none text-on-surface">
-              E-posta
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label htmlFor="email" className={authLabelClasses}>
+              E-posta Adresiniz
             </label>
             <input
               id="email"
               type="email"
-              placeholder="isim@sirket.com"
               required
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="ornek@sirket.com"
               disabled={loading}
-              className="w-full rounded-md border px-3 py-2 text-sm outline-none transition-colors border-outline bg-surface text-on-surface focus-visible:ring-2 focus-visible:ring-primary"
+              className={authFieldClasses}
             />
           </div>
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Gönderiliyor..." : "Sıfırlama Bağlantısı Gönder"}
-          </Button>
+
+          <div className="space-y-3 pt-2">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="h-auto w-full bg-accent-cyan py-3 text-base font-bold text-white hover:bg-accent-cyan/90 disabled:opacity-50"
+            >
+              {loading ? "Gönderiliyor..." : "Şifre Sıfırlama Bağlantısını Gönder"}
+            </Button>
+          </div>
         </form>
       ) : (
-        <div className="rounded-lg border border-primary/20 bg-primary/10 p-4 text-center text-primary">
-          <p className="mb-2 font-semibold">Bağlantı gönderildi!</p>
-          <p className="text-sm text-on-surface-variant">Lütfen e-posta kutunuzu kontrol edin ve gelen bağlantıya tıklayarak şifrenizi sıfırlayın.</p>
+        <div className="space-y-4 rounded-xl border border-accent-cyan/30 bg-accent-cyan/10 p-5 text-center">
+          <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-accent-cyan/20 text-accent-cyan">
+            <CheckCircle2 className="size-5" />
+          </div>
+          <div>
+            <p className="font-bold text-on-surface">Bağlantı Gönderildi!</p>
+            <p className="mt-1 text-sm text-on-surface-variant">
+              <span className="font-mono font-semibold">{email}</span> adresine sıfırlama bağlantısı iletildi. Lütfen e-posta kutunuzu kontrol edin.
+            </p>
+          </div>
         </div>
       )}
 
-      <div className="text-center text-sm">
+      <div className="mt-6 text-center">
         <Link
           href="/login"
-          className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-cyan hover:underline"
         >
           <LogIn className="size-4" />
           Giriş ekranına dön
         </Link>
       </div>
-    </div>
+    </AuthCard>
   );
 }

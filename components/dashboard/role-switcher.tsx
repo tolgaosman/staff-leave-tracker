@@ -2,7 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { Menu } from "@base-ui/react/menu";
-import { Check, ChevronDown, ShieldCheck, User, Users, Briefcase } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  ShieldCheck,
+  User,
+  Users,
+  Briefcase,
+  Laptop,
+  Calculator,
+  Megaphone,
+  Palette,
+  Truck,
+  Headphones,
+  Building2,
+} from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useRoleStore, useRole, type RoleOption } from "@/components/auth/role-store";
 import { apiFetch } from "@/lib/api";
@@ -13,8 +27,34 @@ const popupClasses =
 const itemClasses =
   "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-1.5 text-base text-on-surface outline-none transition-colors data-[highlighted]:bg-black/5 data-[highlighted]:text-accent-cyan";
 
+function getDepartmentIcon(name: string) {
+  const lower = name.toLowerCase();
+  if (lower.includes("bilgi") || lower.includes("it") || lower.includes("yazılım") || lower.includes("teknoloji") || lower.includes("sistem")) {
+    return Laptop;
+  }
+  if (lower.includes("insan") || lower.includes("ik") || lower.includes("personel") || lower.includes("hr")) {
+    return Users;
+  }
+  if (lower.includes("muhasebe") || lower.includes("finans") || lower.includes("mali")) {
+    return Calculator;
+  }
+  if (lower.includes("pazarlama") || lower.includes("satış") || lower.includes("reklam") || lower.includes("marketing")) {
+    return Megaphone;
+  }
+  if (lower.includes("tasarım") || lower.includes("dizayn") || lower.includes("grafik")) {
+    return Palette;
+  }
+  if (lower.includes("lojistik") || lower.includes("operasyon") || lower.includes("depo")) {
+    return Truck;
+  }
+  if (lower.includes("destek") || lower.includes("müşteri") || lower.includes("çağrı")) {
+    return Headphones;
+  }
+  return Building2;
+}
+
 const staticOptions = [
-  { value: "super_admin", label: "Super Admin", icon: ShieldCheck },
+  { value: "super_admin", label: "Admin", icon: ShieldCheck },
 ];
 
 export function RoleSwitcher() {
@@ -37,9 +77,9 @@ export function RoleSwitcher() {
     const dynamicOptions = departments.map(d => ({
       value: `manager:${d.id}`,
       label: `Müdür (${d.name})`,
-      icon: Briefcase
+      icon: getDepartmentIcon(d.name)
     }));
-    options = [staticOptions[0], ...dynamicOptions, { value: "employee", label: "Çalışan", icon: User }];
+    options = [staticOptions[0], ...dynamicOptions];
   } else if (user?.role === "manager") {
     options = [
       { value: "employee", label: "Kişisel Görünüm", icon: User },

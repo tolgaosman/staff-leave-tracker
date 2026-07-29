@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import { Megaphone, Plus } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useRole } from "@/components/auth/role-store";
 import { useToast } from "@/components/ui/toast";
 import { CustomDatePicker } from "@/components/ui/custom-date-picker";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void }) {
   const { user } = useAuth();
+  const role = useRole();
   const toast = useToast();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -18,8 +21,8 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
   const [departments, setDepartments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const canSelectDept = user?.role === "super_admin" || user?.role === "hr_admin";
-  const isAdmin = canSelectDept || user?.role === "manager";
+  const canSelectDept = role === "super_admin" || role === "hr_admin";
+  const isAdmin = canSelectDept || role.startsWith("manager");
 
   useEffect(() => {
     if (canSelectDept && departments.length === 0) {
@@ -80,7 +83,7 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
   if (!isAdmin) return null;
 
   return (
-    <div className="glass-panel rounded-xl p-5 mb-8">
+    <div className="glass-panel rounded-xl p-5 h-full">
       <div className="flex items-center gap-2 mb-4">
         <div className="flex size-8 items-center justify-center rounded-full bg-accent-cyan/15 text-accent-cyan">
           <Plus className="size-4" />
@@ -118,28 +121,27 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
           {canSelectDept ? (
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-on-surface-variant">Hedef Kitle</label>
-              <select
+              <CustomSelect
                 value={departmentId}
-                onChange={(e) => setDepartmentId(e.target.value)}
-                className="w-full rounded-lg border border-outline-variant/40 bg-surface-2 px-3 py-2 text-sm text-on-surface outline-none focus:border-accent-cyan"
-              >
-                <option value="">Tüm Şirket (Genel)</option>
-                {departments.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setDepartmentId(val)}
+                options={[
+                  { value: "", label: "Tüm Şirket (Genel)" },
+                  ...departments.map((d) => ({
+                    value: String(d.id),
+                    label: d.name,
+                  })),
+                ]}
+              />
             </div>
           ) : (
             <div className="space-y-1.5 opacity-80">
               <label className="text-sm font-semibold text-on-surface-variant">Hedef Kitle</label>
-              <select
+              <CustomSelect
                 disabled
-                className="w-full rounded-lg border border-outline-variant/40 bg-surface-2 px-3 py-2 text-sm text-on-surface outline-none cursor-not-allowed"
-              >
-                <option>Sadece Kendi Departmanınız</option>
-              </select>
+                value=""
+                onChange={() => {}}
+                options={[{ value: "", label: "Sadece Kendi Departmanınız" }]}
+              />
             </div>
           )}
 

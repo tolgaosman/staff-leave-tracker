@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { CustomDatePicker } from "@/components/ui/custom-date-picker";
+import { CustomSelect } from "@/components/ui/custom-select";
 import {
   apiFetch,
   getLeaveTypes,
@@ -251,21 +252,18 @@ function LeaveForm({
             <label htmlFor="l-personnel" className={labelClasses}>
               Personel
             </label>
-            <select
+            <CustomSelect
               id="l-personnel"
               required
               value={personnelId}
               disabled={isEdit}
-              onChange={(e) => setPersonnelId(e.target.value)}
-              className={fieldClasses}
-            >
-              {personnel.length === 0 && <option value="">Yükleniyor…</option>}
-              {personnel.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} — {p.department}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setPersonnelId(val)}
+              placeholder={personnel.length === 0 ? "Yükleniyor…" : "Personel Seçin..."}
+              options={personnel.map((p) => ({
+                value: p.id,
+                label: `${p.name} — ${p.department}`,
+              }))}
+            />
           </div>
         )}
 
@@ -273,18 +271,15 @@ function LeaveForm({
           <label htmlFor="l-type" className={labelClasses}>
             İzin Türü
           </label>
-          <select
+          <CustomSelect
             id="l-type"
             value={type}
-            onChange={(e) => setType(e.target.value as LeaveType)}
-            className={fieldClasses}
-          >
-            {typeOptions.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setType(val as LeaveType)}
+            options={typeOptions.map(([value, label]) => ({
+              value,
+              label,
+            }))}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -296,6 +291,7 @@ function LeaveForm({
               required
               selected={start ? new Date(start + "T00:00:00") : null}
               onChange={(d) => setStart(d ? d.toLocaleDateString("en-CA") : "")}
+              className={fieldClasses}
             />
           </div>
           <div className="space-y-1.5">
@@ -307,6 +303,7 @@ function LeaveForm({
               minDate={start ? new Date(start + "T00:00:00") : undefined}
               selected={end ? new Date(end + "T00:00:00") : null}
               onChange={(d) => setEnd(d ? d.toLocaleDateString("en-CA") : "")}
+              className={fieldClasses}
             />
           </div>
         </div>
@@ -415,7 +412,7 @@ export function LeaveDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
-        <Dialog.Popup className="glass-panel custom-scrollbar fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl p-6 shadow-2xl transition-all data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
+        <Dialog.Popup className="glass-panel custom-scrollbar fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-visible rounded-xl p-6 shadow-2xl transition-all data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
           <LeaveForm
             key={leave?.id ?? "new"}
             leave={leave ?? null}

@@ -6,6 +6,8 @@ export const authFieldClasses =
 export const authLabelClasses =
   "font-label-mono text-xs uppercase tracking-wider text-on-surface-variant";
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export function AuthCard({
   title,
   subtitle,
@@ -20,8 +22,22 @@ export function AuthCard({
   return (
     <div className="glass-panel rounded-2xl p-8 shadow-2xl">
       <div className="mb-6 flex flex-col items-center text-center">
-        <h1 className="text-2xl font-bold text-on-surface">{title}</h1>
-        <p className="mt-1 text-base text-on-surface-variant">{subtitle}</p>
+        <div className="flex items-center justify-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${basePath}/assets/logoLight.png`}
+            alt="İzin Takip Sistemi Logo"
+            className="h-9 w-9 object-contain dark:hidden"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${basePath}/assets/logoDark.png`}
+            alt="İzin Takip Sistemi Logo"
+            className="hidden h-9 w-9 object-contain dark:block"
+          />
+          <h1 className="text-2xl font-bold text-on-surface">{title}</h1>
+        </div>
+        <p className="mt-1 text-sm text-on-surface-variant">{subtitle}</p>
       </div>
 
       {children}
