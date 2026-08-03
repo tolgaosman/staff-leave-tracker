@@ -9,7 +9,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { useHasDashboardAccess } from "@/components/auth/role-store";
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { RoleSwitcher } from "@/components/dashboard/role-switcher";
-import { ThemeToggle } from "@/components/dashboard/theme-toggle";
+
 
 function relativeTime(iso: string): string {
   const then = new Date(iso).getTime();
@@ -83,7 +83,7 @@ export function TopNav() {
 
       <div className="flex items-center gap-4">
         {(user?.role === 'super_admin' || user?.role === 'manager') && <RoleSwitcher />}
-        <ThemeToggle />
+
 
 
 

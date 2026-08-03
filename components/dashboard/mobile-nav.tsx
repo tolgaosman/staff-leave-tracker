@@ -10,7 +10,7 @@ import { useHasDashboardAccess } from "@/components/auth/role-store";
 import { isNavItemActive, navItems } from "@/components/dashboard/nav-items";
 import { NewRequestDialog } from "@/components/dashboard/new-request-dialog";
 import { RoleSwitcher } from "@/components/dashboard/role-switcher";
-import { ThemeToggle } from "@/components/dashboard/theme-toggle";
+
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { cn } from "@/lib/utils";
 
@@ -134,7 +134,7 @@ export function MobileTopBar() {
 
       <div className="flex shrink-0 items-center gap-1">
         <RoleSwitcher />
-        <ThemeToggle />
+
         <UserMenu />
       </div>
     </header>

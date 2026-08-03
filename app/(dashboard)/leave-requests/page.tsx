@@ -419,16 +419,7 @@ export default function LeaveRequestsPage() {
                                 </button>
                               </>
                             )}
-                            <button
-                              onClick={() => {
-                                setEditing(r);
-                                setDialogOpen(true);
-                              }}
-                              title="Düzenle"
-                              className="flex size-9 items-center justify-center rounded-md border border-outline-variant/30 text-on-surface-variant active:scale-95"
-                            >
-                              <CalendarClock className="size-4" />
-                            </button>
+
                             <button
                               onClick={() => setToDelete(r)}
                               title="Sil"
@@ -556,16 +547,7 @@ export default function LeaveRequestsPage() {
                                     <RotateCcw className="size-4" />
                                   </button>
                                 )}
-                                <button
-                                  onClick={() => {
-                                    setEditing(r);
-                                    setDialogOpen(true);
-                                  }}
-                                  title="Düzenle"
-                                  className="flex size-8 items-center justify-center rounded-md border border-outline-variant/30 text-on-surface-variant hover:bg-black/5 active:scale-95 cursor-pointer"
-                                >
-                                  <CalendarClock className="size-4" />
-                                </button>
+
                                 <button
                                   onClick={() => setToDelete(r)}
                                   title="Sil"

@@ -8,14 +8,12 @@ import {
   IdCard,
   LifeBuoy,
   MapPin,
-  Moon,
   Phone,
   ShieldCheck,
-  Sun,
   User as UserIcon,
   Briefcase,
 } from "lucide-react";
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 
 import { useAuth, type User } from "@/components/auth/auth-provider";
 import { useRole } from "@/components/auth/role-store";
@@ -65,68 +63,6 @@ function formFromUser(user: User): ProfileForm {
 
 
 
-/* ── Tema tercihi (DOM sınıfı + localStorage — theme-toggle ile aynı kaynak) ── */
-
-function subscribeTheme(callback: () => void) {
-  const observer = new MutationObserver(callback);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["class"],
-  });
-  return () => observer.disconnect();
-}
-
-function getThemeSnapshot(): "light" | "dark" {
-  return document.documentElement.classList.contains("dark") ? "dark" : "light";
-}
-
-/** SSR/ilk boyamada sabit değer → hidrasyon uyumsuzluğu olmaz. */
-function getThemeServerSnapshot(): "light" | "dark" {
-  return "light";
-}
-
-function ThemePreference() {
-  const theme = useSyncExternalStore(
-    subscribeTheme,
-    getThemeSnapshot,
-    getThemeServerSnapshot
-  );
-
-  function apply(next: "light" | "dark") {
-    document.documentElement.classList.toggle("dark", next === "dark");
-    try {
-      localStorage.setItem("theme", next);
-    } catch {
-      // depolama kullanılamıyorsa sessizce geç
-    }
-  }
-
-  const options = [
-    { value: "light" as const, label: "Açık", icon: Sun },
-    { value: "dark" as const, label: "Koyu", icon: Moon },
-  ];
-
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      {options.map(({ value, label, icon: Icon }) => (
-        <button
-          key={value}
-          type="button"
-          onClick={() => apply(value)}
-          className={cn(
-            "flex cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 py-2.5 font-label-mono text-xs uppercase tracking-wider transition-colors",
-            theme === value
-              ? "border-accent-cyan/40 bg-accent-cyan/10 text-accent-cyan"
-              : "border-border bg-surface-2/40 text-on-surface-variant hover:text-primary"
-          )}
-        >
-          <Icon className="size-4" />
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 /* ── Sayfa ──────────────────────────────────────────────────────────── */
 
@@ -372,7 +308,7 @@ function ProfileEditor({ user }: { user: User }) {
         </div>
 
         {/* Sağ kolon */}
-        <div className="space-y-6">
+        <div className="flex h-full flex-col gap-6">
 
 
           {/* Hesap */}
@@ -437,54 +373,44 @@ function ProfileEditor({ user }: { user: User }) {
               )}
             </ul>
           </section>
-
-          {/* Görünüm */}
-          <section className="glass-panel rounded-xl p-5 md:p-8">
-            <h3 className="font-serif text-2xl font-bold text-primary">
-              Görünüm
+          <section className="glass-panel mt-auto rounded-xl p-5 md:p-8">
+            <h3 className="mb-4 font-serif text-xl font-bold text-primary">
+              Değişiklikleri Kaydet
             </h3>
-            <p className="mt-1 mb-6 font-mono text-xs italic text-on-surface-variant/60">
-              Tema tercihiniz bu cihazda saklanır
-            </p>
-            <ThemePreference />
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <p className="font-sans text-sm text-on-surface-variant">
+                {dirty ? (
+                  <span className="text-primary font-medium">Kaydedilmemiş değişiklikler var</span>
+                ) : saved ? (
+                  <span className="inline-flex items-center gap-1.5 text-accent-cyan font-medium">
+                    <Check className="size-4" />
+                    Değişiklikler kaydedildi
+                  </span>
+                ) : (
+                  "Tüm bilgileriniz güncel"
+                )}
+              </p>
+              <div className="flex items-center gap-3">
+                {dirty && (
+                  <button
+                    type="button"
+                    onClick={() => setForm(formFromUser(user))}
+                    className="cursor-pointer font-label-mono text-xs uppercase tracking-wider text-on-surface-variant transition-colors hover:text-primary"
+                  >
+                    Vazgeç
+                  </button>
+                )}
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={!dirty}
+                  className="bg-accent-cyan px-6 text-white hover:bg-accent-cyan/90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Kaydet
+                </Button>
+              </div>
+            </div>
           </section>
-        </div>
-      </div>
-
-      {/* ── Kaydetme çubuğu ───────────────────────────────────────────── */}
-      <div className="sticky bottom-4 z-20 mt-6">
-        <div className="glass-panel flex flex-wrap items-center justify-between gap-4 rounded-xl px-6 py-4 shadow-lg">
-          <p className="font-sans text-sm text-on-surface-variant">
-            {dirty ? (
-              <span className="text-primary">Kaydedilmemiş değişiklikler var</span>
-            ) : saved ? (
-              <span className="inline-flex items-center gap-1.5 text-accent-cyan">
-                <Check className="size-4" />
-                Değişiklikler kaydedildi
-              </span>
-            ) : (
-              "Tüm bilgileriniz güncel"
-            )}
-          </p>
-          <div className="flex items-center gap-3">
-            {dirty && (
-              <button
-                type="button"
-                onClick={() => setForm(formFromUser(user))}
-                className="cursor-pointer font-label-mono text-xs uppercase tracking-wider text-on-surface-variant transition-colors hover:text-primary"
-              >
-                Vazgeç
-              </button>
-            )}
-            <Button
-              type="submit"
-              size="lg"
-              disabled={!dirty}
-              className="bg-accent-cyan px-6 text-white hover:bg-accent-cyan/90 disabled:cursor-not-allowed disabled:opacity-50 dark:text-black"
-            >
-              Kaydet
-            </Button>
-          </div>
         </div>
       </div>
 

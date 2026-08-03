@@ -11,6 +11,7 @@ import {
   UserRound,
   Wallet,
   X,
+  CalendarClock,
 } from "lucide-react";
 
 import { useCurrentEmployee } from "@/components/auth/use-current-employee";
@@ -132,6 +133,7 @@ export function EmployeeDashboard() {
   const [requestOpen, setRequestOpen] = useState(false);
   // İptal onayı bekleyen talep (null = dialog kapalı).
   const [cancelTarget, setCancelTarget] = useState<LeaveRequest | null>(null);
+  const [editingTarget, setEditingTarget] = useState<LeaveRequest | null>(null);
 
   const today = todayIso();
 
@@ -376,15 +378,26 @@ export function EmployeeDashboard() {
                         <ViewReasonDialog reason={l.rejectionReason} />
                       )}
                       {l.status === "pending" && (
-                        <button
-                          type="button"
-                          onClick={() => setCancelTarget(l)}
-                          title="Talebi iptal et"
-                          className="inline-flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive transition-colors hover:bg-destructive/20 cursor-pointer"
-                        >
-                          <X className="size-3" />
-                          İptal Et
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => { setEditingTarget(l); setRequestOpen(true); }}
+                            title="Talebi düzenle"
+                            className="inline-flex items-center gap-1 rounded-md border border-outline-variant/30 px-2 py-0.5 text-[10px] font-bold text-on-surface-variant transition-colors hover:bg-black/5 cursor-pointer"
+                          >
+                            <CalendarClock className="size-3" />
+                            Düzenle
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setCancelTarget(l)}
+                            title="Talebi iptal et"
+                            className="inline-flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive transition-colors hover:bg-destructive/20 cursor-pointer"
+                          >
+                            <X className="size-3" />
+                            İptal Et
+                          </button>
+                        </div>
                       )}
                     </span>
                   }
@@ -455,15 +468,26 @@ export function EmployeeDashboard() {
                           <ViewReasonDialog reason={l.rejectionReason} />
                         )}
                         {l.status === "pending" && (
-                          <button
-                            type="button"
-                            onClick={() => setCancelTarget(l)}
-                            title="Talebi iptal et"
-                            className="inline-flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive transition-colors hover:bg-destructive/20 cursor-pointer"
-                          >
-                            <X className="size-3" />
-                            İptal Et
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => { setEditingTarget(l); setRequestOpen(true); }}
+                              title="Talebi düzenle"
+                              className="inline-flex items-center gap-1 rounded-md border border-outline-variant/30 px-2 py-0.5 text-[10px] font-bold text-on-surface-variant transition-colors hover:bg-black/5 cursor-pointer"
+                            >
+                              <CalendarClock className="size-3" />
+                              Düzenle
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCancelTarget(l)}
+                              title="Talebi iptal et"
+                              className="inline-flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive transition-colors hover:bg-destructive/20 cursor-pointer"
+                            >
+                              <X className="size-3" />
+                              İptal Et
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -480,7 +504,11 @@ export function EmployeeDashboard() {
 
       <LeaveDialog
         open={requestOpen}
-        onOpenChange={setRequestOpen}
+        onOpenChange={(val) => {
+          setRequestOpen(val);
+          if (!val) setEditingTarget(null);
+        }}
+        leave={editingTarget || undefined}
         defaultPersonnelId={me.id}
         lockPersonnel
         onSaved={fetchMyLeaves}

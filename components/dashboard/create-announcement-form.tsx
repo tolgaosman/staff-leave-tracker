@@ -64,6 +64,8 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
       };
       if (canSelectDept && departmentId) {
         payload.department_id = departmentId;
+      } else if (role.startsWith("manager:")) {
+        payload.department_id = role.split(":")[1];
       }
 
       await apiFetch("/announcements", {
