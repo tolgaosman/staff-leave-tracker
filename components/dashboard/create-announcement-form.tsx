@@ -26,7 +26,7 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
 
   useEffect(() => {
     if (canSelectDept && departments.length === 0) {
-      apiFetch<any[]>("/departments").then(setDepartments).catch(() => {});
+      apiFetch<any[]>("/departments").then(setDepartments).catch(() => { });
     }
   }, [canSelectDept, departments.length]);
 
@@ -38,8 +38,8 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
       if (startDate) {
         const today = new Date();
         const isToday = startDate.getDate() === today.getDate() &&
-                        startDate.getMonth() === today.getMonth() &&
-                        startDate.getFullYear() === today.getFullYear();
+          startDate.getMonth() === today.getMonth() &&
+          startDate.getFullYear() === today.getFullYear();
         if (isToday) {
           finalStartDate = today.toISOString();
         } else {
@@ -105,7 +105,7 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
             className="w-full rounded-lg border border-outline-variant/40 bg-surface-2 px-3 py-2 text-sm text-on-surface outline-none focus:border-accent-cyan"
           />
         </div>
-        
+
         <div className="space-y-1.5">
           <label className="text-sm font-semibold text-on-surface-variant">İçerik</label>
           <textarea
@@ -141,7 +141,7 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
               <CustomSelect
                 disabled
                 value=""
-                onChange={() => {}}
+                onChange={() => { }}
                 options={[{ value: "", label: "Sadece Kendi Departmanınız" }]}
               />
             </div>
