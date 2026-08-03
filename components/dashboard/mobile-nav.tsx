@@ -24,13 +24,7 @@ function LogoImages() {
       <img
         src={`${basePath}/assets/logoLight.png`}
         alt="İzin Takip Sistemi Logo"
-        className="h-8 w-8 shrink-0 object-contain dark:hidden"
-      />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`${basePath}/assets/logoDark.png`}
-        alt="İzin Takip Sistemi Logo"
-        className="hidden h-8 w-8 shrink-0 object-contain dark:block"
+        className="h-8 w-8 shrink-0 object-contain"
       />
     </>
   );

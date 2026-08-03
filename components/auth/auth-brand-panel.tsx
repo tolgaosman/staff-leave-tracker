@@ -16,13 +16,7 @@ export function AuthBrandPanel() {
         <img
           src={`${basePath}/assets/logoLight.png`}
           alt="İzin Takip Sistemi Logo"
-          className="h-16 w-16 object-contain dark:hidden"
-        />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`${basePath}/assets/logoDark.png`}
-          alt="İzin Takip Sistemi Logo"
-          className="hidden h-16 w-16 object-contain dark:block"
+          className="h-16 w-16 object-contain"
         />
         <div>
           <h1 className="font-serif text-3xl font-bold leading-tight text-primary">

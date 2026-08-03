@@ -27,13 +27,7 @@ export function AuthCard({
           <img
             src={`${basePath}/assets/logoLight.png`}
             alt="İzin Takip Sistemi Logo"
-            className="h-9 w-9 object-contain dark:hidden"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`${basePath}/assets/logoDark.png`}
-            alt="İzin Takip Sistemi Logo"
-            className="hidden h-9 w-9 object-contain dark:block"
+            className="h-9 w-9 object-contain"
           />
           <h1 className="text-2xl font-bold text-on-surface">{title}</h1>
         </div>
