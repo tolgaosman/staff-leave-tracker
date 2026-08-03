@@ -61,14 +61,9 @@ export function TopNav() {
       ) : (
         <Link href="/" className="flex items-center gap-3 pl-4 transition-opacity hover:opacity-80">
           <img
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/assets/logoLight.png`}
-            alt="İzin Takip Sistemi Logo"
-            className="h-9 w-9 object-contain dark:hidden"
-          />
-          <img
             src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/assets/logoDark.png`}
             alt="İzin Takip Sistemi Logo"
-            className="hidden h-9 w-9 object-contain dark:block"
+            className="h-9 w-9 object-contain"
           />
           <div>
             <h1 className="font-serif text-lg font-bold leading-tight text-primary">
