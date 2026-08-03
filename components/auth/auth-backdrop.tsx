@@ -1,5 +1,6 @@
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
+const lightLogo = `${basePath}/assets/logoLight.png`;
 const darkLogo = `${basePath}/assets/logoDark.png`;
 
 /** Merkezi temiz bırakan, kenarlara doğru soluklaşan maske. */
@@ -11,7 +12,17 @@ export function AuthBackdrop() {
     <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
       {/* Döşenmiş logo filigranı */}
       <div
-        className="absolute inset-0 rotate-[-12deg] scale-150 opacity-[0.05]"
+        className="absolute inset-0 rotate-[-12deg] scale-150 opacity-[0.05] dark:hidden"
+        style={{
+          backgroundImage: `url(${lightLogo})`,
+          backgroundSize: "76px 76px",
+          backgroundRepeat: "repeat",
+          maskImage: tileMask,
+          WebkitMaskImage: tileMask,
+        }}
+      />
+      <div
+        className="absolute inset-0 hidden rotate-[-12deg] scale-150 opacity-[0.07] dark:block"
         style={{
           backgroundImage: `url(${darkLogo})`,
           backgroundSize: "76px 76px",

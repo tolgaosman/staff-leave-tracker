@@ -25,9 +25,15 @@ export function AuthCard({
         <div className="flex items-center justify-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            src={`${basePath}/assets/logoLight.png`}
+            alt="İzin Takip Sistemi Logo"
+            className="h-9 w-9 object-contain dark:hidden"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={`${basePath}/assets/logoDark.png`}
             alt="İzin Takip Sistemi Logo"
-            className="h-9 w-9 object-contain"
+            className="hidden h-9 w-9 object-contain dark:block"
           />
           <h1 className="text-2xl font-bold text-on-surface">{title}</h1>
         </div>
