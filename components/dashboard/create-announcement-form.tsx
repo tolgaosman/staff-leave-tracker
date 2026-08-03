@@ -173,7 +173,7 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
         <div className="flex justify-end mt-2">
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !title.trim() || !body.trim() || !startDate || !expiresAt}
             className="rounded-lg bg-accent-cyan px-6 py-2.5 text-sm font-bold text-white hover:bg-accent-cyan/90 active:scale-95 disabled:opacity-50 transition-all"
           >
             {loading ? "Yayınlanıyor..." : "Yayınla"}
