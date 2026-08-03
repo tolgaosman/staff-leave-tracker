@@ -128,15 +128,15 @@ export default function CalendarPage() {
               : "border-amber-500/30 bg-amber-500/10"
               }`}
           >
-            <div className="flex items-center justify-between font-mono text-xs font-bold text-black dark:text-amber-100 sm:text-sm">
+            <div className="flex items-center justify-between font-mono text-xs font-bold text-black sm:text-sm">
               <span>{day}</span>
-              <span className="inline-flex rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-black dark:text-amber-200 sm:hidden">
+              <span className="inline-flex rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-black sm:hidden">
                 Tatil
               </span>
             </div>
             <div className="mt-1.5">
               <div
-                className="rounded-md border border-amber-500/30 bg-amber-500/15 px-2 py-1 font-sans text-xs font-bold text-black dark:text-amber-100 shadow-sm leading-tight text-balance"
+                className="rounded-md border border-amber-500/30 bg-amber-500/15 px-2 py-1 font-sans text-xs font-bold text-black shadow-sm leading-tight text-balance"
                 title={`Özel Gün / Resmî Tatil: ${holidayName}`}
               >
                 🚩 {holidayName}
@@ -154,7 +154,7 @@ export default function CalendarPage() {
             key={day}
             className="min-h-[56px] rounded-lg border border-outline-variant/15 bg-surface-2/40 p-1 text-left opacity-60 sm:min-h-[96px] sm:rounded-xl sm:p-2 lg:min-h-[120px]"
           >
-            <div className="font-mono text-xs font-bold text-black dark:text-white/50 sm:text-sm">
+            <div className="font-mono text-xs font-bold text-black sm:text-sm">
               <span>{day}</span>
             </div>
           </div>
