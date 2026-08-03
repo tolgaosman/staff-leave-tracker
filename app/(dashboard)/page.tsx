@@ -119,7 +119,7 @@ export default function IzinTakipDashboard() {
   return (
     <div className="space-y-6">
       <EmployeeDashboard />
-      <AnnouncementsPanel />
+      <AnnouncementsPanel mode="active" />
     </div>
   );
 }
