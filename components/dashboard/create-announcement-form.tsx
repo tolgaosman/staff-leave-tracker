@@ -99,7 +99,9 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="space-y-1.5">
-          <label className="text-sm font-semibold text-on-surface-variant">Başlık</label>
+          <label className="text-sm font-semibold text-on-surface-variant">
+            Başlık <span className="text-destructive">*</span>
+          </label>
           <input
             required
             maxLength={255}
@@ -111,7 +113,9 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-semibold text-on-surface-variant">İçerik</label>
+          <label className="text-sm font-semibold text-on-surface-variant">
+            İçerik <span className="text-destructive">*</span>
+          </label>
           <textarea
             required
             maxLength={5000}
