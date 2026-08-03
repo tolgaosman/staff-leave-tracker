@@ -32,6 +32,10 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!startDate || !expiresAt) {
+      toast.error("Lütfen duyuru başlangıç ve bitiş tarihlerini seçin.");
+      return;
+    }
     setLoading(true);
     try {
       let finalStartDate: string | null = null;
@@ -149,9 +153,10 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-on-surface-variant">
-              Tarih Aralığı <span className="text-on-surface-variant/60">(opsiyonel)</span>
+              Tarih Aralığı <span className="text-destructive">*</span>
             </label>
             <CustomDatePicker
+              required
               selectsRange={true}
               startDate={startDate}
               endDate={expiresAt}
