@@ -154,17 +154,22 @@ function LeaveForm({
 
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
 
+  // Düzenleme yapıyorsak mevcut iznin günlerini bakiyeye ekleyerek (iade ederek) limit hesabı yap
+  const adjustedRemaining = balance
+    ? balance.remaining + (leave && type === "annual" ? Number(leave.totalDays) : 0)
+    : 0;
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!personnelId) return;
 
     const totalDays = workingDayCount(start, end);
 
-    // Bakiye kontrolü: yeni bir YILLIK talep bakiyeyi aşamaz.
-    if (!leave && type === "annual" && balance && totalDays > balance.remaining) {
+    // Bakiye kontrolü: yeni veya güncellenen YILLIK talep bakiyeyi aşamaz.
+    if (type === "annual" && balance && totalDays > adjustedRemaining) {
       toast.error(
         "Yetersiz izin bakiyesi",
-        `Kalan ${balance.remaining} iş günü, bu talep ${totalDays} iş günü. Talep kaydedilmedi.`
+        `Bu işlem için en fazla ${adjustedRemaining} iş günü kullanabilirsiniz. Talep kaydedilmedi.`
       );
       return;
     }
@@ -318,7 +323,7 @@ function LeaveForm({
           <div
             className={cn(
               "rounded-lg border px-3 py-2 font-label-mono text-xs",
-              balance && requestedDays > balance.remaining
+              balance && requestedDays > adjustedRemaining
                 ? "border-destructive/40 bg-destructive/5 text-destructive"
                 : "border-white/10 bg-surface-2/40 text-on-surface-variant"
             )}
@@ -326,8 +331,8 @@ function LeaveForm({
             Bu talep: <span className="font-bold">{requestedDays} iş günü</span>
             {balance && (
               <>
-                {" · "}Kalan bakiye:{" "}
-                <span className="font-bold">{balance.remaining} gün</span>
+                {" · "}Maksimum Limit:{" "}
+                <span className="font-bold">{adjustedRemaining} gün</span>
               </>
             )}
           </div>
@@ -380,7 +385,7 @@ function LeaveForm({
               saving ||
               (!lockPersonnel && personnel.length === 0) ||
               !personnelId ||
-              (type === "annual" && (!balance || requestedDays > balance.remaining))
+              (type === "annual" && (!balance || requestedDays > adjustedRemaining))
             }
             className="bg-accent-cyan text-white hover:bg-accent-cyan/90 disabled:opacity-50"
           >
