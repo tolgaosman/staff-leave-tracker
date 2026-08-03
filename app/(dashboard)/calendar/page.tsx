@@ -128,15 +128,15 @@ export default function CalendarPage() {
               : "border-amber-500/30 bg-amber-500/10"
               }`}
           >
-            <div className="flex items-center justify-between font-mono text-xs font-bold text-amber-800 dark:text-amber-300 sm:text-sm">
+            <div className="flex items-center justify-between font-mono text-xs font-bold text-amber-950 dark:text-amber-100 sm:text-sm">
               <span>{day}</span>
-              <span className="inline-flex rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-200 sm:hidden">
+              <span className="inline-flex rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 dark:text-amber-200 sm:hidden">
                 Tatil
               </span>
             </div>
             <div className="mt-1.5">
               <div
-                className="truncate rounded-md border border-amber-500/30 bg-amber-500/15 px-2 py-1 font-sans text-xs font-bold text-amber-900 dark:text-amber-200 shadow-sm"
+                className="truncate rounded-md border border-amber-500/30 bg-amber-500/15 px-2 py-1 font-sans text-xs font-bold text-amber-950 dark:text-amber-100 shadow-sm"
                 title={`Özel Gün / Resmî Tatil: ${holidayName}`}
               >
                 🚩 {holidayName}

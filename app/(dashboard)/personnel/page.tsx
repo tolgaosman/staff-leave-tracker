@@ -155,7 +155,7 @@ export default function PersonnelPage() {
                   setEditing(null);
                   setDialogOpen(true);
                 }}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent-cyan px-4 py-2 text-base font-bold text-white dark:text-black shadow transition-all hover:opacity-90 active:scale-95 cursor-pointer sm:flex-none"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent-cyan px-4 py-2 text-base font-bold text-white shadow transition-all hover:opacity-90 active:scale-95 cursor-pointer sm:flex-none"
               >
                 <Plus className="size-5" />
                 <span>Yeni Personel</span>
