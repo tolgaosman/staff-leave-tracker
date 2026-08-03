@@ -156,7 +156,7 @@ function LeaveForm({
 
   // Düzenleme yapıyorsak mevcut iznin günlerini bakiyeye ekleyerek (iade ederek) limit hesabı yap
   const adjustedRemaining = balance
-    ? balance.remaining + (leave && type === "annual" ? Number(leave.totalDays) : 0)
+    ? balance.remaining + (leave && type === "annual" ? workingDayCount(leave.startDate, leave.endDate) : 0)
     : 0;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
