@@ -136,7 +136,7 @@ export default function CalendarPage() {
             </div>
             <div className="mt-1.5">
               <div
-                className="rounded-md border border-amber-500/30 bg-amber-500/15 px-2 py-1 font-sans text-xs font-bold text-black shadow-sm leading-tight text-balance"
+                className="truncate rounded-md border border-amber-500/30 bg-amber-500/15 px-2 py-1 font-sans text-[10px] sm:text-[11px] font-bold text-black shadow-sm"
                 title={`Özel Gün / Resmî Tatil: ${holidayName}`}
               >
                 🚩 {holidayName}
