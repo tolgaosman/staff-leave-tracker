@@ -154,7 +154,7 @@ export default function CalendarPage() {
             key={day}
             className="min-h-[56px] rounded-lg border border-outline-variant/15 bg-surface-2/40 p-1 text-left opacity-60 sm:min-h-[96px] sm:rounded-xl sm:p-2 lg:min-h-[120px]"
           >
-            <div className="font-mono text-xs font-bold text-on-surface-variant/40 sm:text-sm">
+            <div className="font-mono text-xs font-bold text-black dark:text-white/50 sm:text-sm">
               <span>{day}</span>
             </div>
           </div>
