@@ -252,7 +252,7 @@ export function EmployeeDashboard() {
     : { text: "Aktif", cls: "border-accent-cyan/30 bg-accent-cyan/10 text-accent-cyan" };
 
   const balanceStats: Stat[] = [
-    { label: "HAK EDİLEN", value: String(balance?.entitled ?? 0), icon: CalendarCheck, accent: "cyan", caption: "Bu yılki hak ediş" },
+    { label: "HAK EDİLEN", value: String(balance?.entitled ?? 0), icon: CalendarCheck, accent: "cyan", caption: "Yıllık hak edilen" },
     { label: "KULLANILABİLİR YILLIK İZİN", value: String(remainingDays), icon: Wallet, accent: "cyan", caption: "Kalan bakiye", valueColor: "text-primary" },
     { label: "DEVREDEN", value: String(balance?.carriedOver ?? 0), icon: CalendarMinus, accent: "violet", caption: "Geçen yıldan", valueColor: "text-primary" },
     { label: "ONAY BEKLEYEN", value: String(allPendingCount), icon: Hourglass, accent: "neutral", caption: "Bekleyen tüm talepler", valueColor: "text-primary" },

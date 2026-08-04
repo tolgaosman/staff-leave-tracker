@@ -42,10 +42,10 @@ export function computeLeaveBalance(
   person: Personnel,
   allLeaves: LeaveRequest[]
 ): LeaveBalance {
-  const seniorityEntitlement = annualEntitlement(person.startDate);
+  const entitled = annualEntitlement(person.startDate);
   const carriedOver = person.carriedOverBalance || 0;
 
-  // approved olan izinleri sadece "used" göstermek için sayıyoruz
+  // approved olan izinleri "used", pending olanları "pending" olarak sayıyoruz
   let used = 0;
   let pending = 0;
 
@@ -58,31 +58,11 @@ export function computeLeaveBalance(
     if (leave.status === "pending") pending += days;
   }
 
-  if (person.annualLeaveBalance !== undefined && person.annualLeaveBalance !== null) {
-    // Veritabanındaki bakiye zaten onaylı izinler düşülmüş "kalan" değer.
-    // Devreden bakiye de kullanılabilir güne DAHİLDİR — backend'deki
-    // LeaveRules::validateNewRequest ile birebir aynı formül olmalı:
-    //   annual_leave_balance + carried_over_balance - bekleyen
-    // (Devreden hep 0 olduğu sürece bu fark görünmüyordu; devreden > 0
-    // olduğunda frontend eksik gösterip talebi haksız yere bloklardı.)
-    const remaining = Math.max(0, person.annualLeaveBalance + carriedOver - pending);
-    // Hak edilen = kalan + kullanılan + bekleyen - devreden (negatif olmamalı)
-    const entitled = Math.max(seniorityEntitlement, remaining + used + pending - carriedOver);
-    return {
-      personnelId: person.id,
-      entitled,
-      carriedOver,
-      used,
-      pending,
-      remaining,
-    };
-  }
-
-  // Veritabanında bakiye yoksa kıdemden hesapla
-  const remaining = Math.max(0, seniorityEntitlement + carriedOver - used - pending);
+  // Kalan bakiye: Hak edilen + devreden - kullanılan (bekleyen talepler haktan hemen düşülmez)
+  const remaining = Math.max(0, entitled + carriedOver - used);
   return {
     personnelId: person.id,
-    entitled: seniorityEntitlement,
+    entitled,
     carriedOver,
     used,
     pending,

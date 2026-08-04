@@ -7,8 +7,9 @@ const basePath =
   process.env.NODE_ENV === "production" ? "/staff-leave-tracker-frontend" : "";
 
 const nextConfig: NextConfig = {
-  output: "export",
+  output: "standalone",
   trailingSlash: true,
+  allowedDevOrigins: ['192.168.128.217'],
   basePath,
   assetPrefix: basePath ? `${basePath}/` : undefined,
   env: {
