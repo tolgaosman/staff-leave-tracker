@@ -81,7 +81,7 @@ function AdminOverview() {
     <>
       <div className="mb-8 md:mb-12">
         <h2 className="font-serif text-3xl font-bold text-primary sm:text-4xl lg:text-5xl">
-          {deptName ? `${deptName} Genel Bakış` : "Personel Genel Bakış"}
+          {deptName ? `${deptName} Genel Bakış` : "Admin Genel Bakış"}
         </h2>
         <p className="font-sans text-sm text-on-surface-variant mt-2 md:text-base">
           {deptName ? `${deptName} ekibinizin dinlenme ve katılım durumlarına bütünsel bir bakış.` : "Ekibinizin dinlenme ve katılım durumlarına bütünsel bir bakış."}
@@ -101,10 +101,6 @@ function AdminOverview() {
 
       <div className="mb-8">
         <OnLeaveTable personnel={personnel} requests={requests} />
-      </div>
-
-      <div className="mb-8">
-        <AnnouncementsPanel />
       </div>
     </>
   );
