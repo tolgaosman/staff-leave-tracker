@@ -42,6 +42,7 @@ function PersonnelForm({
   const isEdit = Boolean(personnel);
   const toast = useToast();
   const [name, setName] = useState(personnel?.name ?? "");
+  const [title, setTitle] = useState(personnel?.title ?? "");
   const [phone, setPhone] = useState(personnel?.phone ?? "");
   const [avatarUrl, setAvatarUrl] = useState(personnel?.avatarUrl ?? "");
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -78,6 +79,7 @@ function PersonnelForm({
     try {
       const payload = {
         name: name.trim(),
+        title: title.trim(),
         department_id: Number(departmentId),
         phone: phone.trim(),
         status,
@@ -163,18 +165,32 @@ function PersonnelForm({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-1.5">
-          <label htmlFor="p-name" className={labelClasses}>
-            Ad Soyad
-          </label>
-          <input
-            id="p-name"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Adı Soyadı"
-            className={fieldClasses}
-          />
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <label htmlFor="p-name" className={labelClasses}>
+              Ad Soyad
+            </label>
+            <input
+              id="p-name"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Adı Soyadı"
+              className={fieldClasses}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="p-title" className={labelClasses}>
+              Rol / Ünvan
+            </label>
+            <input
+              id="p-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Örn. Muhasebe Uzmanı"
+              className={fieldClasses}
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
