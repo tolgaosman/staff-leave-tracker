@@ -20,7 +20,9 @@ import { useRole } from "@/components/auth/role-store";
 import { useCurrentEmployee } from "@/components/auth/use-current-employee";
 import { Avatar } from "@/components/dashboard/avatar";
 import { ImageCropper } from "@/components/dashboard/image-cropper";
+import { ManagerLeaveDetails } from "@/components/dashboard/manager-leave-details";
 import { Button } from "@/components/ui/button";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { useToast } from "@/components/ui/toast";
 import { readFile } from "@/lib/image";
 import { cn } from "@/lib/utils";
@@ -83,6 +85,7 @@ function ProfileEditor({ user }: { user: User }) {
   const [form, setForm] = useState<ProfileForm>(() => formFromUser(user));
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState<"leave" | "personal">("leave");
 
   const roleLabels: Record<string, { label: string; icon: any }> = {
     super_admin: { label: "Sistem Yöneticisi", icon: ShieldCheck },
@@ -140,20 +143,11 @@ function ProfileEditor({ user }: { user: User }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <>
+      <form onSubmit={handleSubmit}>
       {/* ── Hero: kapak + kimlik + tamamlanma halkası ─────────────────── */}
       <section className="glass-panel overflow-hidden rounded-2xl">
-        <div className="relative h-36 bg-gradient-to-r from-accent-cyan via-accent-violet to-accent-cyan/60 md:h-44">
-          <svg
-            className="pointer-events-none absolute -right-6 -top-10 opacity-20"
-            width="240"
-            height="240"
-            viewBox="0 0 100 100"
-          >
-            <circle cx="50" cy="50" r="46" fill="none" stroke="white" strokeWidth="0.4" />
-            <circle cx="50" cy="50" r="34" fill="none" stroke="white" strokeWidth="0.4" />
-            <circle cx="50" cy="50" r="22" fill="none" stroke="white" strokeWidth="0.4" />
-          </svg>
+        <div className="relative h-36 bg-primary md:h-44">
           <span className="absolute left-6 top-5 font-label-mono text-xs uppercase tracking-[0.3em] text-white/80 md:left-10">
             Profilim
           </span>
@@ -193,8 +187,41 @@ function ProfileEditor({ user }: { user: User }) {
         </div>
       </section>
 
-      {/* ── Düzenleme alanları ────────────────────────────────────────── */}
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+      {user.role === "manager" && (
+        <div className="mt-8 flex items-center gap-6 border-b border-slate-200 px-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab("leave")}
+            className={cn(
+              "cursor-pointer pb-3 text-sm font-bold transition-colors border-b-2",
+              activeTab === "leave"
+                ? "border-[#7b1e2b] text-[#7b1e2b]"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            )}
+          >
+            İzin Durumunuz
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("personal")}
+            className={cn(
+              "cursor-pointer pb-3 text-sm font-bold transition-colors border-b-2",
+              activeTab === "personal"
+                ? "border-[#7b1e2b] text-[#7b1e2b]"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            )}
+          >
+            Kişisel Bilgiler
+          </button>
+        </div>
+      )}
+
+      {user.role === "manager" && activeTab === "leave" && <ManagerLeaveDetails />}
+
+      {(user.role !== "manager" || activeTab === "personal") && (
+        <>
+          {/* ── Düzenleme alanları ────────────────────────────────────────── */}
+          <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           {/* Kişisel bilgiler */}
           <section className="glass-panel rounded-xl p-5 md:p-8">
@@ -226,13 +253,11 @@ function ProfileEditor({ user }: { user: User }) {
                 <label htmlFor="p-phone" className={labelClasses}>
                   Telefon
                 </label>
-                <input
+                <PhoneInput
                   id="p-phone"
-                  type="tel"
                   value={form.phone}
-                  onChange={(e) => set("phone", e.target.value)}
-                  className={fieldClasses}
-                  placeholder="05xx xxx xx xx"
+                  onChange={(val) => set("phone", val)}
+                  className="mt-1.5"
                 />
               </div>
 
@@ -294,13 +319,11 @@ function ProfileEditor({ user }: { user: User }) {
                 <label htmlFor="e-phone" className={labelClasses}>
                   Telefon
                 </label>
-                <input
+                <PhoneInput
                   id="e-phone"
-                  type="tel"
                   value={form.emergencyPhone}
-                  onChange={(e) => set("emergencyPhone", e.target.value)}
-                  className={fieldClasses}
-                  placeholder="05xx xxx xx xx"
+                  onChange={(val) => set("emergencyPhone", val)}
+                  className="mt-1.5"
                 />
               </div>
             </div>
@@ -413,6 +436,8 @@ function ProfileEditor({ user }: { user: User }) {
           </section>
         </div>
       </div>
+      </>
+      )}
 
       {cropSrc && (
         <ImageCropper
@@ -425,6 +450,7 @@ function ProfileEditor({ user }: { user: User }) {
           }}
         />
       )}
-    </form>
+      </form>
+    </>
   );
 }

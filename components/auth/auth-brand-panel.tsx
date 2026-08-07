@@ -14,7 +14,7 @@ export function AuthBrandPanel() {
       <div className="flex items-center gap-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`${basePath}/assets/logoLight.png`}
+          src={`${basePath}/assets/siteLogo.png`}
           alt="İzin Takip Sistemi Logo"
           className="h-16 w-16 object-contain"
         />

@@ -80,11 +80,6 @@ export function RoleSwitcher() {
       icon: getDepartmentIcon(d.name)
     }));
     options = [staticOptions[0], ...dynamicOptions];
-  } else if (user?.role === "manager") {
-    options = [
-      { value: "employee", label: "Kişisel Görünüm", icon: User },
-      { value: "manager", label: "Departman Müdürü", icon: Briefcase }
-    ];
   }
 
   /* Görünüm değiştirebilecek rolü olmayan kullanıcıya (ör. düz çalışan)

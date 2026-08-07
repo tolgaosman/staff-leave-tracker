@@ -57,51 +57,66 @@
   --color-on-surface: var(--on-surface);
   --color-on-surface-variant: var(--on-surface-variant);
 
-  --font-label-mono: var(--font-space-mono);
+  --font-label-mono: var(--font-mono);
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #2a1216;
-  --card: #ffffff;
-  --card-foreground: #2a1216;
-  --popover: #ffffff;
-  --popover-foreground: #2a1216;
-  --primary: #7b1e2b;
-  --primary-foreground: #ffffff;
-  --secondary: #9e5561;
-  --secondary-foreground: #ffffff;
-  --muted: #f7eff0;
-  --muted-foreground: #8a6a70;
-  --accent: #f3dfe2;
-  --accent-foreground: #5a1622;
-  --destructive: #c0392b;
-  --border: rgba(123, 30, 43, 0.15);
-  --input: rgba(123, 30, 43, 0.15);
-  --ring: #7b1e2b;
+  /* Core palette */
+  --background:          #F1F5F9;
+  --foreground:          #0F172A;
+  --card:                #FFFFFF;
+  --card-foreground:     #0F172A;
+  --popover:             #FFFFFF;
+  --popover-foreground:  #0F172A;
+
+  /* Brand */
+  --primary:             #7b1e2b;
+  --primary-foreground:  #FFFFFF;
+  --secondary:           #9e5561;
+  --secondary-foreground:#FFFFFF;
+
+  /* Neutrals */
+  --muted:               #F8FAFC;
+  --muted-foreground:    #64748B;
+  --accent:              #f9eced;
+  --accent-foreground:   #5a1622;
+
+  /* State */
+  --destructive:         #EF4444;
+
+  /* Border / Input / Ring */
+  --border:              #E2E8F0;
+  --input:               #E2E8F0;
+  --ring:                #7b1e2b;
+
+  /* Chart */
   --chart-1: #7b1e2b;
   --chart-2: #9e5561;
   --chart-3: #5a1622;
   --chart-4: #b98a90;
   --chart-5: #f0e3e5;
-  --radius: 0.25rem;
-  --sidebar: #fbf4f5;
-  --sidebar-foreground: #2a1216;
-  --sidebar-primary: #7b1e2b;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f0dde0;
-  --sidebar-accent-foreground: #7b1e2b;
-  --sidebar-border: rgba(123, 30, 43, 0.15);
-  --sidebar-ring: #7b1e2b;
 
-  /* Dashboard tokens — bordo (burgundy) + white theme */
-  --accent-cyan: #7b1e2b;
-  --accent-violet: #9e5561;
-  --surface-1: #ffffff;
-  --surface-2: #faf3f4;
-  --surface-3: #f3e7e9;
-  --on-surface: #2a1216;
-  --on-surface-variant: #6e4a50;
+  /* Layout */
+  --radius: 0.5rem;
+
+  /* Sidebar (koyu lacivert) */
+  --sidebar:              #0F172A;
+  --sidebar-foreground:   #F1F5F9;
+  --sidebar-primary:      #c0737d;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:       rgba(255,255,255,0.07);
+  --sidebar-accent-foreground: #F1F5F9;
+  --sidebar-border:       rgba(255,255,255,0.08);
+  --sidebar-ring:         #c0737d;
+
+  /* Dashboard surface tokens */
+  --accent-cyan:          #7b1e2b;
+  --accent-violet:        #9e5561;
+  --surface-1:            #FFFFFF;
+  --surface-2:            #F8FAFC;
+  --surface-3:            #F1F5F9;
+  --on-surface:           #0F172A;
+  --on-surface-variant:   #64748B;
 }
 
 @layer base {
@@ -111,10 +126,12 @@
 
   body {
     background-color: var(--background);
-    background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
     color: var(--foreground);
-    transition: background-color 0.3s ease, color 0.3s ease;
-    @apply font-light;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: "Ubuntu", sans-serif;
   }
 
   html {
@@ -122,24 +139,31 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply ubuntu-bold;
+    font-weight: 600;
+    letter-spacing: -0.025em;
   }
 }
 
-/* ── Dashboard organic sketch helpers ───────────────────────────── */
+/* ── Card & utility helpers ────────────────────────────────────── */
 @utility hand-drawn-border {
   border: 1px solid var(--border);
-  box-shadow: 40px 40px 40px 0px rgba(23, 30, 30, 0.04);
+  box-shadow: none;
 }
 
 @utility glass-panel {
-  background-color: var(--surface-1, #ffffff);
+  background-color: var(--surface-1);
   border: 1px solid var(--border);
-  box-shadow: 40px 40px 40px 0px rgba(23, 30, 30, 0.04);
+  box-shadow: none;
+}
+
+@utility card {
+  background-color: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: none;
 }
 
 @utility glow-cyan {
-  box-shadow: 40px 40px 40px 0px rgba(23, 30, 30, 0.04);
+  box-shadow: none;
 }
 
 @utility text-glow-cyan {
@@ -150,39 +174,23 @@
   border-top: 1.5px solid rgba(123, 30, 43, 0.5);
   border-left: 1.5px solid rgba(123, 30, 43, 0.5);
   border-right: 1.5px solid rgba(123, 30, 43, 0.5);
-  background-color: rgba(123, 30, 43, 0.05);
+  background-color: rgba(123, 30, 43, 0.08);
   position: relative;
   overflow: hidden;
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    opacity: 0.15;
-    background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, #7b1e2b 5px, #7b1e2b 6px);
-  }
 }
 
 @utility chart-bar-violet {
-  border-top: 1.5px solid rgba(158, 85, 97, 0.5);
-  border-left: 1.5px solid rgba(158, 85, 97, 0.5);
-  border-right: 1.5px solid rgba(158, 85, 97, 0.5);
-  background-color: rgba(158, 85, 97, 0.05);
+  border-top: 1.5px solid rgba(124, 58, 237, 0.5);
+  border-left: 1.5px solid rgba(124, 58, 237, 0.5);
+  border-right: 1.5px solid rgba(124, 58, 237, 0.5);
+  background-color: rgba(124, 58, 237, 0.08);
   position: relative;
   overflow: hidden;
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    opacity: 0.15;
-    background-image: repeating-linear-gradient(-45deg, transparent, transparent 5px, #9e5561 5px, #9e5561 6px);
-  }
 }
 
 @utility custom-scrollbar {
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
 
   &::-webkit-scrollbar-track {
@@ -190,38 +198,34 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(23, 30, 30, 0.1);
+    background: #CBD5E1;
     border-radius: 9999px;
 
     &:hover {
-      background: rgba(23, 30, 30, 0.2);
+      background: #94A3B8;
     }
   }
 }
 
-/* Ubuntu Font Classes */
+/* Font weight aliases (Ubuntu) */
 @utility ubuntu-light {
   font-family: "Ubuntu", sans-serif;
   font-weight: 300;
-  font-style: normal;
 }
 
 @utility ubuntu-regular {
   font-family: "Ubuntu", sans-serif;
   font-weight: 400;
-  font-style: normal;
 }
 
 @utility ubuntu-medium {
   font-family: "Ubuntu", sans-serif;
   font-weight: 500;
-  font-style: normal;
 }
 
 @utility ubuntu-bold {
   font-family: "Ubuntu", sans-serif;
   font-weight: 700;
-  font-style: normal;
 }
 
 @utility ubuntu-light-italic {
@@ -247,3 +251,31 @@
   font-weight: 700;
   font-style: italic;
 }
+
+/* ── Custom Animations ────────────────────────────────────────── */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+@utility animate-blob {
+  animation: blob 10s infinite;
+}
+
+@utility animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+@utility animation-delay-4000 {
+  animation-delay: 4s;
+}

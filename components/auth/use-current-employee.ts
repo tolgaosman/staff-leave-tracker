@@ -34,11 +34,12 @@ function mapPersonnel(p: any): Personnel {
  * `me` undefined döner. `loading` ilk çekim tamamlanana kadar true kalır ki
  * çağıran taraf "kayıt yok" uyarısını erken göstermesin.
  */
-export function useCurrentEmployee(): { me: Personnel | undefined; loading: boolean } {
+export function useCurrentEmployee(): { me: Personnel | undefined; rawData: any; loading: boolean } {
   const { user } = useAuth();
   const email = user?.email?.toLowerCase().trim() ?? "";
 
   const [me, setMe] = useState<Personnel | undefined>(undefined);
+  const [rawData, setRawData] = useState<any>(undefined);
   // E-posta yoksa çekilecek bir şey de yok → baştan yükleme bitmiş sayılır.
   const [loading, setLoading] = useState<boolean>(() => Boolean(email));
 
@@ -51,13 +52,18 @@ export function useCurrentEmployee(): { me: Personnel | undefined; loading: bool
         if (data && data.personnel) {
           const p = data.personnel;
           p.user = data; // mapPersonnel p.user.email beklediği için ekliyoruz
+          setRawData(data);
           setMe(mapPersonnel(p));
         } else {
           setMe(undefined);
+          setRawData(undefined);
         }
       })
       .catch(() => {
-        if (!cancelled) setMe(undefined);
+        if (!cancelled) {
+          setMe(undefined);
+          setRawData(undefined);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -67,5 +73,5 @@ export function useCurrentEmployee(): { me: Personnel | undefined; loading: bool
     };
   }, [email]);
 
-  return { me, loading };
+  return { me, rawData, loading };
 }

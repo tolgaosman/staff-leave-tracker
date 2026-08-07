@@ -9,23 +9,23 @@ import { Avatar } from "@/components/dashboard/avatar";
 import Link from "next/link";
 
 const popupClasses =
-  "glass-panel z-50 rounded-xl p-2 shadow-2xl outline-none transition-all data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0";
+  "z-50 rounded-xl border border-slate-200 bg-white p-1.5 outline-none transition-all data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0";
 
 const itemClasses =
-  "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-1.5 text-base text-on-surface outline-none transition-colors data-[highlighted]:bg-black/5 data-[highlighted]:text-accent-cyan";
+  "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 outline-none transition-colors data-[highlighted]:bg-slate-100 data-[highlighted]:text-slate-900";
 
 export function UserMenu() {
   const { user, logout } = useAuth();
   const hasAccess = useHasDashboardAccess();
 
-  if (hasAccess) {
+  if (hasAccess && user?.role === "super_admin") {
     return (
       <button
         onClick={logout}
-        className="flex size-8 sm:size-9 md:size-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-destructive/10 hover:text-destructive"
+        className="flex size-8 sm:size-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600"
         title="Çıkış Yap"
       >
-        <LogOut className="size-4 sm:size-5" />
+        <LogOut className="size-4" />
       </button>
     );
   }
@@ -34,13 +34,13 @@ export function UserMenu() {
     <Menu.Root>
       <Menu.Trigger
         aria-label="User menu"
-        className="rounded-full outline-none transition-transform active:scale-95 data-[popup-open]:ring-2 data-[popup-open]:ring-accent-cyan/50"
+        className="rounded-full outline-none transition-transform active:scale-95 data-[popup-open]:ring-2 data-[popup-open]:ring-[#7b1e2b]/30"
       >
-        {user && hasAccess ? (
-          <Avatar name={user.name} url={user.avatarUrl} className="size-8 sm:size-9 md:size-10 border border-accent-cyan/30" />
+        {user ? (
+          <Avatar name={user.name} url={user.avatarUrl} className="size-8 sm:size-9 border border-slate-200" />
         ) : (
-          <span className="flex size-8 sm:size-9 md:size-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-black/5 hover:text-primary data-[popup-open]:bg-black/5 data-[popup-open]:text-primary">
-            <User className="size-4 sm:size-5" />
+          <span className="flex size-8 sm:size-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
+            <User className="size-4" />
           </span>
         )}
       </Menu.Trigger>
@@ -51,10 +51,10 @@ export function UserMenu() {
             {user ? (
               <>
                 <div className="border-b border-border px-3 pb-2 pt-1">
-                  <p className="truncate text-base font-bold text-on-surface">
+                  <p className="truncate text-sm font-semibold text-slate-900">
                     {user.name}
                   </p>
-                  <p className="truncate font-label-mono text-xs text-on-surface-variant/70">
+                  <p className="truncate text-xs text-slate-400">
                     {user.email}
                   </p>
                 </div>
@@ -65,10 +65,10 @@ export function UserMenu() {
                   <User className="size-4" />
                   Profil
                 </Menu.Item>
-                <Menu.Separator className="my-1.5 h-px bg-border" />
+                <Menu.Separator className="my-1 h-px bg-slate-200" />
                 <Menu.Item
                   onClick={logout}
-                  className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-1.5 text-base text-destructive outline-none transition-colors data-[highlighted]:bg-destructive/10"
+                  className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-600 outline-none transition-colors data-[highlighted]:bg-red-50"
                 >
                   <LogOut className="size-4" />
                   Çıkış Yap
@@ -79,7 +79,7 @@ export function UserMenu() {
                 <Menu.Item className="p-0 outline-none">
                   <Link
                     href="/login"
-                    className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-base text-on-surface outline-none transition-colors hover:bg-white/5 hover:text-accent-cyan"
+                    className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 outline-none transition-colors hover:bg-slate-100"
                   >
                     <LogIn className="size-4" />
                     Giriş Yap

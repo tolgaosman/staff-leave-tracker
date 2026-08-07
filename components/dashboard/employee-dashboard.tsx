@@ -247,30 +247,30 @@ export function EmployeeDashboard() {
 
   const statusChip = activeOrUpcoming.leave
     ? activeOrUpcoming.active
-      ? { text: "İzinde", cls: "border-accent-violet/30 bg-accent-violet/10 text-accent-violet" }
-      : { text: "Yaklaşan izni var", cls: "border-amber-500/30 bg-amber-500/10 text-amber-600" }
-    : { text: "Aktif", cls: "border-accent-cyan/30 bg-accent-cyan/10 text-accent-cyan" };
+      ? { text: "İzinde", cls: "bg-[#f9eced] text-[#7b1e2b] ring-1 ring-[#e8c5ca]" }
+      : { text: "Yaklaşan izni var", cls: "bg-amber-100 text-amber-700 ring-1 ring-amber-200" }
+    : { text: "Aktif", cls: "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200" };
 
   const balanceStats: Stat[] = [
     { label: "HAK EDİLEN", value: String(balance?.entitled ?? 0), icon: CalendarCheck, accent: "cyan", caption: "Yıllık hak edilen" },
-    { label: "KULLANILABİLİR YILLIK İZİN", value: String(remainingDays), icon: Wallet, accent: "cyan", caption: "Kalan bakiye", valueColor: "text-primary" },
-    { label: "DEVREDEN", value: String(balance?.carriedOver ?? 0), icon: CalendarMinus, accent: "violet", caption: "Geçen yıldan", valueColor: "text-primary" },
-    { label: "ONAY BEKLEYEN", value: String(allPendingCount), icon: Hourglass, accent: "neutral", caption: "Bekleyen tüm talepler", valueColor: "text-primary" },
+    { label: "KULLANILABİLİR YILLIK İZİN", value: String(remainingDays), icon: Wallet, accent: "cyan", caption: "Kalan bakiye" },
+    { label: "DEVREDEN", value: String(balance?.carriedOver ?? 0), icon: CalendarMinus, accent: "violet", caption: "Geçen yıldan" },
+    { label: "ONAY BEKLEYEN", value: String(allPendingCount), icon: Hourglass, accent: "neutral", caption: "Bekleyen tüm talepler" },
   ];
 
   return (
     <>
       {/* Hero */}
-      <div className="mb-8 flex flex-col items-stretch gap-4 border-b border-outline-variant/20 pb-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3 sm:gap-4 sm:pl-4">
-          <Avatar name={me.name} url={user?.avatarUrl || me.avatarUrl} className="size-12 shrink-0 border border-accent-cyan/30 text-lg sm:size-16" />
+      <div className="mb-6 flex flex-col items-stretch gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Avatar name={me.name} url={user?.avatarUrl || me.avatarUrl} className="size-12 shrink-0 rounded-full border border-slate-200 text-lg sm:size-14" />
           <div className="min-w-0">
-            <h2 className="font-serif text-2xl font-bold text-primary sm:text-3xl lg:text-4xl">Merhaba, {me.name} 👋</h2>
-            <p className="mt-1 font-sans text-sm text-on-surface-variant md:text-base">
+            <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">Merhaba, {me.name} 👋</h2>
+            <p className="mt-0.5 text-sm text-slate-500">
               {me.department}{me.title ? ` · ${me.title}` : ""}
               {years > 0 && <span> · {years} yıllık kıdem</span>}
               <span
-                className={`ml-3 inline-flex items-center rounded-full border px-2.5 py-0.5 font-label-mono text-xs ${statusChip.cls}`}
+                className={`ml-2 inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${statusChip.cls}`}
               >
                 {statusChip.text}
               </span>
@@ -294,8 +294,8 @@ export function EmployeeDashboard() {
       </div>
 
       {/* Yıllık kullanım çubuğu + Yaklaşan iznim */}
-      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="md:col-span-1">
+      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
           <LeaveUsageGauge
             used={usedDays}
             entitled={totalEntitled}
@@ -304,7 +304,7 @@ export function EmployeeDashboard() {
           />
         </div>
 
-        <div className="glass-panel flex flex-col rounded-xl p-5 md:p-8">
+        <div className="glass-panel flex flex-col rounded-xl p-5 md:p-8 lg:col-span-1">
           <div className="mb-4 flex items-center gap-2">
             <Plane className="size-5 text-accent-cyan" />
             <h3 className="font-serif text-2xl font-bold text-primary">Yaklaşan İznim</h3>

@@ -23,7 +23,7 @@ export function isNavItemActive(pathname: string, href: string) {
 }
 
 export const navItems: NavItem[] = [
-  { label: "Genel Bakış", icon: LayoutDashboard, href: "/" },
+  { label: "Genel Bakış", icon: LayoutDashboard, href: "/", adminOnly: true },
   { label: "Personel Listesi", icon: Users, href: "/personnel", adminOnly: true },
   { label: "İzin Talepleri", icon: CalendarDays, href: "/leave-requests", adminOnly: true },
   { label: "İzin Takvimi", icon: Calendar, href: "/calendar", adminOnly: true },

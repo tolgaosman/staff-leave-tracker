@@ -155,8 +155,9 @@ function LeaveForm({
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
 
   // Düzenleme yapıyorsak mevcut iznin günlerini bakiyeye ekleyerek (iade ederek) limit hesabı yap
+  // Sadece 'approved' statüsündeki izinler bakiyeden düşüldüğü için, sadece onları iade etmeliyiz.
   const adjustedRemaining = balance
-    ? balance.remaining + (leave && type === "annual" ? workingDayCount(leave.startDate, leave.endDate) : 0)
+    ? balance.remaining + (leave && type === "annual" && leave.status === "approved" ? workingDayCount(leave.startDate, leave.endDate) : 0)
     : 0;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -202,6 +203,12 @@ function LeaveForm({
         // Düzenleme
         // PHP requires _method=PUT for multipart/form-data updates
         formData.append("_method", "PUT");
+        
+        // Eğer izin önceden onaylanmışsa, düzenleme sonrası onaylı kalması için statüyü koruyoruz
+        if (leave.status === "approved") {
+          formData.append("status", "approved");
+        }
+
         await apiFetch(`/leave-requests/${leave.id}`, {
           method: "POST",
           body: formData,
@@ -318,22 +325,25 @@ function LeaveForm({
           </div>
         </div>
 
-        {/* Canlı bakiye bilgisi — yalnız yıllık izinde ve tarihler seçiliyken */}
-        {type === "annual" && requestedDays > 0 && (
+        {/* Canlı bakiye bilgisi — yalnız yıllık izinde */}
+        {type === "annual" && balance !== undefined && (
           <div
             className={cn(
-              "rounded-lg border px-3 py-2 font-label-mono text-xs",
-              balance && requestedDays > adjustedRemaining
-                ? "border-destructive/40 bg-destructive/5 text-destructive"
-                : "border-white/10 bg-surface-2/40 text-on-surface-variant"
+              "rounded-lg border px-4 py-3 font-label-mono text-sm shadow-sm",
+              requestedDays > adjustedRemaining
+                ? "border-destructive/40 bg-destructive/10 text-destructive"
+                : "border-accent-cyan/30 bg-accent-cyan/10 text-accent-cyan"
             )}
           >
-            Bu talep: <span className="font-bold">{requestedDays} iş günü</span>
-            {balance && (
-              <>
-                {" · "}Maksimum Limit:{" "}
-                <span className="font-bold">{adjustedRemaining} gün</span>
-              </>
+            <div className="flex justify-between items-center mb-1">
+              <span>Personelin Kalan Yıllık İzni:</span>
+              <span className="font-bold text-base">{adjustedRemaining} İş Günü</span>
+            </div>
+            {requestedDays > 0 && (
+              <div className="flex justify-between items-center text-xs opacity-80 border-t border-current/20 pt-1 mt-1">
+                <span>Bu Talepte İstenen:</span>
+                <span className="font-bold">{requestedDays} İş Günü</span>
+              </div>
             )}
           </div>
         )}

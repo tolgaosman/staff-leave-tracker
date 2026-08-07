@@ -53,38 +53,38 @@ export function RecentActivity({
   }, [requests, personnel]);
 
   return (
-    <div className="glass-panel flex h-[340px] flex-col rounded-xl p-5 md:h-[400px] md:p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h3 className="font-serif text-2xl font-bold text-primary">Son Aktiviteler</h3>
+    <div className="flex h-[340px] flex-col rounded-xl border border-slate-200 bg-white md:h-[400px]">
+      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 md:px-6">
+        <h3 className="text-base font-semibold text-slate-900">Son Aktiviteler</h3>
       </div>
 
       {activities.length === 0 ? (
         <div className="flex flex-1 items-center justify-center">
-          <p className="font-mono text-xs uppercase text-on-surface-variant/70">
+          <p className="text-sm text-slate-400">
             Henüz etkinlik yok
           </p>
         </div>
       ) : (
-        <ul className="custom-scrollbar flex-1 space-y-2 overflow-y-auto pr-2">
+        <ul className="custom-scrollbar flex-1 space-y-0 overflow-y-auto">
           {activities.map((activity) => (
             <li
               key={activity.id}
-              className="flex gap-4 border-b border-outline-variant/20 py-4 px-2 transition-colors hover:bg-surface-2 rounded-lg last:border-0"
+              className="flex gap-3 border-b border-slate-100 px-5 py-3 transition-colors hover:bg-slate-50 last:border-0 md:px-6"
             >
               <Avatar
                 name={activity.actor}
                 url={activity.avatarUrl}
-                className="size-10 shrink-0 border border-outline-variant/30"
+                className="size-8 shrink-0 rounded-full"
               />
               <div>
-                <p className="font-sans text-base leading-tight text-on-surface">
-                  <span className="font-bold">{activity.actor}</span>{" "}
-                  <span className="text-accent-cyan">
+                <p className="text-sm leading-snug text-slate-800">
+                  <span className="font-semibold">{activity.actor}</span>{" "}
+                  <span className="text-[#7b1e2b] font-medium">
                     {leaveTypeLabels[activity.type]}
                   </span>{" "}
                   {statusVerb[activity.status]}
                 </p>
-                <p className="mt-1 font-mono text-xs text-on-surface-variant/70 uppercase">
+                <p className="mt-0.5 text-xs text-slate-400">
                   {activity.time}
                 </p>
               </div>

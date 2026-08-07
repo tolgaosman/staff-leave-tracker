@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 
 export const authFieldClasses =
-  "w-full rounded-lg border border-white/10 bg-surface-2/60 px-3 py-2 text-base text-on-surface outline-none transition-colors focus:border-accent-cyan/50 placeholder-on-surface-variant/40";
+  "w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-[#7b1e2b] focus:ring-2 focus:ring-[#7b1e2b]/10 placeholder-slate-400";
 
 export const authLabelClasses =
-  "font-label-mono text-xs uppercase tracking-wider text-on-surface-variant";
+  "text-xs font-semibold uppercase tracking-wider text-slate-500";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
@@ -20,24 +20,19 @@ export function AuthCard({
   footer?: ReactNode;
 }) {
   return (
-    <div className="glass-panel rounded-2xl p-8 shadow-2xl">
-      <div className="mb-6 flex flex-col items-center text-center">
-        <div className="flex items-center justify-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`${basePath}/assets/logoLight.png`}
-            alt="İzin Takip Sistemi Logo"
-            className="h-9 w-9 object-contain"
-          />
-          <h1 className="text-2xl font-bold text-on-surface">{title}</h1>
-        </div>
-        <p className="mt-1 text-sm text-on-surface-variant">{subtitle}</p>
+    <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div className="mb-2 flex flex-col items-center text-center">
+        <img
+          src={`${basePath}/assets/siteLogo.png`}
+          alt="İzin Takip Sistemi Logo"
+          className="h-14 w-auto object-contain"
+        />
       </div>
 
       {children}
 
       {footer && (
-        <div className="mt-6 text-center text-sm text-on-surface-variant">
+        <div className="mt-6 text-center text-sm text-slate-400">
           {footer}
         </div>
       )}

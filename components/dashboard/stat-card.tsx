@@ -24,6 +24,18 @@ export type Stat = {
   valueColor?: string;
 };
 
+const accentStripe: Record<StatAccent, string> = {
+  cyan: "bg-[#7b1e2b]",
+  violet: "bg-[#9e5561]",
+  neutral: "bg-slate-400",
+};
+
+const accentIcon: Record<StatAccent, string> = {
+  cyan: "text-[#7b1e2b]",
+  violet: "text-[#9e5561]",
+  neutral: "text-slate-400",
+};
+
 export function StatCard({
   label,
   value,
@@ -38,46 +50,48 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "glass-panel group relative flex flex-col justify-between overflow-hidden rounded-xl p-4 transition-all duration-300 hover:-translate-y-1 sm:p-5 md:p-6",
-        highlight && "bg-surface-2"
+        "group relative flex overflow-hidden rounded-xl border border-slate-200 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm",
+        highlight && "border-red-200 bg-red-50/30"
       )}
     >
-      {/* Decorative sketchy background element for Global Force card */}
-      {accent === "cyan" && !highlight && (
-        <svg className="absolute bottom-0 right-0 hidden opacity-10 pointer-events-none sm:block" height="120" viewBox="0 0 100 100" width="120">
-          <circle className="text-primary" cx="80" cy="80" fill="none" r="40" stroke="currentColor" strokeWidth="0.5"></circle>
-          <circle className="text-primary" cx="80" cy="80" fill="none" r="30" stroke="currentColor" strokeWidth="0.5"></circle>
-        </svg>
-      )}
+      {/* Left accent stripe */}
+      <div className={cn("w-1 shrink-0", highlight ? "bg-red-500" : accentStripe[accent])} />
 
-      <div>
-        <div className="mb-2 flex items-start gap-2 text-secondary">
-          <Icon className="mt-0.5 size-4 shrink-0 opacity-75" />
-          <span className="font-mono text-[11px] uppercase leading-tight tracking-widest sm:text-xs">
+      <div className="flex flex-1 flex-col justify-between p-4 sm:p-5">
+        {/* Header */}
+        <div className="mb-3 flex items-start justify-between gap-2">
+          <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">
             {label}
           </span>
+          <Icon className={cn("mt-0.5 size-4 shrink-0", highlight ? "text-red-400" : accentIcon[accent])} />
         </div>
+
+        {/* Value */}
         <div
           className={cn(
-            "font-serif text-3xl font-bold tracking-tight mt-2 md:text-4xl",
-            valueColor ? valueColor : highlight ? "text-destructive" : (accent === "cyan" ? "text-primary" : "text-secondary-container")
+            "text-3xl font-bold tracking-tight text-slate-900 md:text-4xl",
+            valueColor ? valueColor : highlight ? "text-red-600" : ""
           )}
         >
           {value.padStart(2, "0")}
         </div>
-      </div>
 
-      <div className="mt-3 flex flex-wrap items-end justify-between gap-x-2 gap-y-1">
-        <div className="font-sans text-xs text-on-surface-variant md:text-sm">
-          {highlight ? "Onay Bekleyenler" : (caption || "Toplam Personel")}
+        {/* Footer */}
+        <div className="mt-3 flex flex-wrap items-end justify-between gap-x-2 gap-y-1">
+          <div className="text-xs text-slate-400">
+            {highlight ? "Onay Bekleyenler" : (caption || "Toplam Personel")}
+          </div>
+
+          {action && actionHref && (
+            <Link
+              href={actionHref}
+              className="group/btn flex items-center gap-1 text-xs font-semibold text-[#7b1e2b] hover:text-[#5a1622]"
+            >
+              <span>{action}</span>
+              <span className="transition-transform group-hover/btn:translate-x-0.5">→</span>
+            </Link>
+          )}
         </div>
-
-        {action && actionHref && (
-          <Link href={actionHref} className="group/btn flex flex-col items-center font-mono text-xs text-primary font-bold">
-            <span>{action}</span>
-            <div className="h-[2px] w-0 bg-primary transition-all duration-300 group-hover/btn:w-full" />
-          </Link>
-        )}
       </div>
     </div>
   );

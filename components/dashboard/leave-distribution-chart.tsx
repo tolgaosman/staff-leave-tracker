@@ -115,7 +115,6 @@ function CustomTooltip({ active, payload, label, colors }: any) {
       style={{
         background: colors.tooltipBg,
         border: `1px solid ${colors.tooltipBorder}`,
-        boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
       }}
     >
       <p
@@ -196,16 +195,6 @@ export function LeaveDistributionChart({ requests }: { requests: LeaveRequest[] 
             barCategoryGap="25%"
             accessibilityLayer={false}
           >
-            <defs>
-              <linearGradient id="barGradPrimary" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={c.gradStart} stopOpacity={0.95} />
-                <stop offset="100%" stopColor={c.gradEnd} stopOpacity={0.7} />
-              </linearGradient>
-              <linearGradient id="barGradAlt" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={c.gradStartAlt} stopOpacity={0.85} />
-                <stop offset="100%" stopColor={c.gradEndAlt} stopOpacity={0.55} />
-              </linearGradient>
-            </defs>
             <CartesianGrid
               strokeDasharray="4 4"
               stroke={c.grid}
@@ -249,7 +238,7 @@ export function LeaveDistributionChart({ requests }: { requests: LeaveRequest[] 
               {data.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={index % 2 === 0 ? "url(#barGradPrimary)" : "url(#barGradAlt)"}
+                  fill={index % 2 === 0 ? c.gradStart : c.gradStartAlt}
                 />
               ))}
             </Bar>

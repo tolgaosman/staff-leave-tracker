@@ -79,21 +79,21 @@ export default function ForgotPasswordPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="h-auto w-full bg-accent-cyan py-3 text-base font-bold text-white hover:bg-accent-cyan/90 disabled:opacity-50"
+              className="h-auto w-full rounded-lg bg-[#7b1e2b] py-2.5 text-sm font-semibold text-white hover:bg-[#5a1622] disabled:opacity-50 transition-colors"
             >
               {loading ? "Gönderiliyor..." : "Şifre Sıfırlama Bağlantısını Gönder"}
             </Button>
           </div>
         </form>
       ) : (
-        <div className="space-y-4 rounded-xl border border-accent-cyan/30 bg-accent-cyan/10 p-5 text-center">
-          <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-accent-cyan/20 text-accent-cyan">
+        <div className="space-y-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center">
+          <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
             <CheckCircle2 className="size-5" />
           </div>
           <div>
-            <p className="font-bold text-on-surface">Bağlantı Gönderildi!</p>
-            <p className="mt-1 text-sm text-on-surface-variant">
-              <span className="font-mono font-semibold">{email}</span> adresine sıfırlama bağlantısı iletildi. Lütfen e-posta kutunuzu kontrol edin.
+            <p className="font-semibold text-slate-900">Bağlantı Gönderildi!</p>
+            <p className="mt-1 text-sm text-slate-500">
+              <span className="font-semibold">{email}</span> adresine sıfırlama bağlantısı iletildi. Lütfen e-posta kutunuzu kontrol edin.
             </p>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
       <div className="mt-6 text-center">
         <Link
           href="/login"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-cyan hover:underline"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#7b1e2b] hover:text-[#5a1622] hover:underline"
         >
           <LogIn className="size-4" />
           Giriş ekranına dön

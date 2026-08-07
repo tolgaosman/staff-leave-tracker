@@ -90,8 +90,8 @@ export function OnLeaveTable({
 
   if (rows.length === 0) {
     return (
-      <div className="glass-panel flex min-h-[180px] flex-col items-center justify-center rounded-xl p-5 text-center md:min-h-[250px] md:p-8">
-        <p className="font-sans text-base text-on-surface-variant">
+      <div className="flex min-h-[180px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-5 text-center md:min-h-[250px]">
+        <p className="text-sm text-slate-400">
           Şu anda izinde olan veya yaklaşan izni bulunan personel yok.
         </p>
       </div>
@@ -99,12 +99,14 @@ export function OnLeaveTable({
   }
 
   return (
-    <div className="glass-panel overflow-hidden rounded-xl">
-      <div className="border-b border-outline-variant/30 p-4 md:p-6">
-        <h3 className="font-serif text-2xl font-bold text-primary">İzindeki Personeller</h3>
-        <p className="font-mono text-xs text-on-surface-variant/70 italic mt-1">
-          Şu anda izinde olan ve yaklaşan izinli çalışanlar
-        </p>
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 md:px-6">
+        <div>
+          <h3 className="text-base font-semibold text-slate-900">İzindeki Personeller</h3>
+          <p className="mt-0.5 text-xs text-slate-400">
+            Şu anda izinde olan ve yaklaşan izinli çalışanlar
+          </p>
+        </div>
       </div>
       {/* Mobil: kart listesi */}
       <MobileCardList className="p-4">
@@ -116,10 +118,10 @@ export function OnLeaveTable({
             subtitle={r.department}
             badge={
               <span
-                className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-label-mono text-xs ${
+                className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
                   r.active
-                    ? "border-accent-violet/30 bg-accent-violet/10 text-accent-violet"
-                    : "border-amber-500/30 bg-amber-500/10 text-amber-600"
+                    ? "bg-[#f9eced] text-[#7b1e2b] ring-1 ring-[#e8c5ca]"
+                    : "bg-amber-100 text-amber-700 ring-1 ring-amber-200"
                 }`}
               >
                 {r.active ? "İzinde" : "Yaklaşan"}
@@ -130,7 +132,7 @@ export function OnLeaveTable({
                 label: "İzin Türü",
                 value: (
                   <span className="inline-flex items-center gap-2">
-                    <span className="inline-block rounded-full border border-outline-variant/30 bg-surface-1 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-accent-cyan">
+                    <span className="inline-block rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
                       {r.type}
                     </span>
                     {r.attachmentUrl && (
@@ -139,7 +141,7 @@ export function OnLeaveTable({
                         name={r.attachmentName}
                         label={attachmentConfig[r.leaveType]?.label}
                       >
-                        <span className="inline-flex items-center rounded-md border border-accent-cyan/30 bg-accent-cyan/10 px-2 py-0.5 text-[10px] font-bold text-accent-cyan">
+                        <span className="inline-flex items-center rounded-md bg-[#f9eced] px-2 py-0.5 text-[10px] font-semibold text-[#7b1e2b] hover:bg-[#f0d4d7] cursor-pointer">
                           {attachmentConfig[r.leaveType]?.buttonLabel ?? "Belge"}
                         </span>
                       </AttachmentDialog>
@@ -173,36 +175,36 @@ export function OnLeaveTable({
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[900px] text-left border-collapse">
           <thead>
-            <tr className="border-b border-outline-variant/20 font-mono text-xs uppercase tracking-wider text-on-surface-variant/70">
-              <th className="px-6 py-4 font-bold">Personel</th>
-              <th className="px-6 py-4 font-bold">Durum</th>
-              <th className="px-6 py-4 font-bold">İzin Türü</th>
-              <th className="px-6 py-4 font-bold">Gerekçe</th>
-              <th className="px-6 py-4 font-bold">Başlangıç–Bitiş</th>
-              <th className="px-6 py-4 font-bold text-right">Dönmeye Kalan</th>
+            <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-3">Personel</th>
+              <th className="px-6 py-3">Durum</th>
+              <th className="px-6 py-3">İzin Türü</th>
+              <th className="px-6 py-3">Gerekçe</th>
+              <th className="px-6 py-3">Başlangıç–Bitiş</th>
+              <th className="px-6 py-3 text-right">Dönmeye Kalan</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr
                 key={r.id}
-                className="border-b border-outline-variant/10 transition-colors hover:bg-white/40 last:border-0"
+                className="border-b border-slate-100 transition-colors hover:bg-slate-50 last:border-0"
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <Avatar name={r.name} url={r.avatarUrl} className="size-9 shrink-0" />
+                    <Avatar name={r.name} url={r.avatarUrl} className="size-8 shrink-0 rounded-full" />
                     <div>
-                      <div className="font-bold text-primary">{r.name}</div>
-                      <div className="text-xs text-on-surface-variant/70">{r.department}</div>
+                      <div className="text-sm font-semibold text-slate-900">{r.name}</div>
+                      <div className="text-xs text-slate-400">{r.department}</div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4">
                   <span
-                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-label-mono text-xs ${
+                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
                       r.active
-                        ? "border-accent-violet/30 bg-accent-violet/10 text-accent-violet"
-                        : "border-amber-500/30 bg-amber-500/10 text-amber-600"
+                        ? "bg-[#f9eced] text-[#7b1e2b] ring-1 ring-[#e8c5ca]"
+                        : "bg-amber-100 text-amber-700 ring-1 ring-amber-200"
                     }`}
                   >
                     {r.active ? "İzinde" : "Yaklaşan"}
@@ -210,7 +212,7 @@ export function OnLeaveTable({
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
-                    <span className="inline-block rounded-full border border-outline-variant/30 px-3 py-1 font-mono text-[10px] font-semibold bg-surface-1 text-accent-cyan uppercase tracking-wider">
+                    <span className="inline-block rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
                       {r.type}
                     </span>
                     {r.attachmentUrl && (
@@ -220,7 +222,7 @@ export function OnLeaveTable({
                         label={attachmentConfig[r.leaveType]?.label}
                       >
                         <span
-                          className="inline-flex items-center rounded-md border border-accent-cyan/30 bg-accent-cyan/10 px-2 py-0.5 text-[10px] font-bold text-accent-cyan hover:bg-accent-cyan/20 cursor-pointer"
+                          className="inline-flex items-center rounded-md bg-[#f9eced] px-2 py-0.5 text-[10px] font-semibold text-[#7b1e2b] hover:bg-[#f0d4d7] cursor-pointer"
                           title={attachmentConfig[r.leaveType]?.label ?? "Belge"}
                         >
                           {attachmentConfig[r.leaveType]?.buttonLabel ?? "Belge"}
@@ -229,16 +231,16 @@ export function OnLeaveTable({
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4 max-w-[220px] truncate text-on-surface-variant font-sans text-sm" title={r.note}>
+                <td className="px-6 py-4 max-w-[220px] truncate text-sm text-slate-500" title={r.note}>
                   {r.note}
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-[11px] text-on-surface-variant/80 font-medium whitespace-nowrap hidden sm:block">
+                  <div className="text-xs text-slate-400 whitespace-nowrap">
                     {formatDateTR(r.startDate)} – {formatDateTR(r.endDate)}
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <span className="font-bold text-secondary">
+                  <span className="text-sm font-semibold text-slate-700">
                     {r.daysLeft > 0 ? `${r.daysLeft} iş günü` : "Bugün dönüyor"}
                   </span>
                 </td>

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Check, X, Trash2, CalendarClock, Search, RotateCcw } from "lucide-react";
+import { Plus, Check, X, Trash2, CalendarClock, Search, RotateCcw, Edit2 } from "lucide-react";
 
 import {
   LeaveRequest,
@@ -29,6 +29,17 @@ import { ExportButton } from "@/components/dashboard/export-button";
 import { MobileCard, MobileCardList } from "@/components/dashboard/mobile-card-list";
 import { ReasonDialog } from "@/components/dashboard/reason-dialog";
 
+function canEditLeave(currentUserRole: string, targetUserRole: string, status: string): boolean {
+  if (status !== 'approved') return false;
+
+  if (currentUserRole === 'super_admin' || currentUserRole === 'hr_admin') {
+     return targetUserRole !== 'super_admin' && targetUserRole !== 'hr_admin';
+  }
+  if (currentUserRole.startsWith('manager')) {
+     return targetUserRole === 'employee';
+  }
+  return false;
+}
 
 const filterSelectClasses =
   "w-full min-w-0 rounded-lg border border-outline-variant/30 bg-surface-1 px-3 py-2 font-sans text-sm text-on-surface outline-none transition-colors focus:border-accent-cyan cursor-pointer sm:w-auto";
@@ -118,6 +129,7 @@ export default function LeaveRequestsPage() {
           department: p.department ? p.department.name : "Genel",
           departmentId: String(p.department_id),
           avatarUrl: p.user?.avatar_url || p.avatar_url || "",
+          role: p.user?.role || "employee",
         },
       ])
     );
@@ -420,6 +432,19 @@ export default function LeaveRequestsPage() {
                               </>
                             )}
 
+                            {canEditLeave(role, person?.role || "employee", r.status) && (
+                              <button
+                                onClick={() => {
+                                  setEditing(r);
+                                  setDialogOpen(true);
+                                }}
+                                title="Düzenle"
+                                className="flex size-9 items-center justify-center rounded-md border border-blue-600/30 bg-blue-500/10 text-blue-700 active:scale-95"
+                              >
+                                <Edit2 className="size-4" />
+                              </button>
+                            )}
+
                             <button
                               onClick={() => setToDelete(r)}
                               title="Sil"
@@ -538,13 +563,26 @@ export default function LeaveRequestsPage() {
                                       <X className="size-4" />
                                     </button>
                                   </>
-                                ) : (
+                                  ) : (
                                   <button
                                     onClick={() => handlePending(r)}
                                     title="Durumu Tekrar Bekliyora Çek"
                                     className="flex size-8 items-center justify-center rounded-md border border-amber-600/30 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 active:scale-95 cursor-pointer"
                                   >
                                     <RotateCcw className="size-4" />
+                                  </button>
+                                )}
+
+                                {canEditLeave(role, person?.role || "employee", r.status) && (
+                                  <button
+                                    onClick={() => {
+                                      setEditing(r);
+                                      setDialogOpen(true);
+                                    }}
+                                    title="Düzenle"
+                                    className="flex size-8 items-center justify-center rounded-md border border-blue-600/30 bg-blue-500/10 text-blue-700 hover:bg-blue-500/20 active:scale-95 cursor-pointer"
+                                  >
+                                    <Edit2 className="size-4" />
                                   </button>
                                 )}
 

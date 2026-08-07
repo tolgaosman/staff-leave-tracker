@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { useAuth } from "@/components/auth/auth-provider";
+import { useCurrentEmployee } from "@/components/auth/use-current-employee";
 import { useHasDashboardAccess, useIsAdmin, useRoleStore } from "@/components/auth/role-store";
 import { apiFetch } from "@/lib/api";
 import type { LeaveRequest, LeaveType, Personnel } from "@/lib/data/types";
@@ -51,6 +53,8 @@ function AdminOverview() {
   const [personnel, setPersonnel] = useState<Personnel[]>([]);
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const { simulatedRole } = useRoleStore();
+  const { user } = useAuth();
+  const { me } = useCurrentEmployee();
 
   useEffect(() => {
     Promise.all([
@@ -61,9 +65,15 @@ function AdminOverview() {
         let mappedPers = pers.map(mapPersonnel);
         let mappedReqs = reqs.map(mapLeave);
 
+        let targetDeptId = null;
         if (simulatedRole && simulatedRole.startsWith("manager:")) {
-          const simulatedDeptId = simulatedRole.split(":")[1];
-          mappedPers = mappedPers.filter((p) => p.departmentId === simulatedDeptId);
+          targetDeptId = simulatedRole.split(":")[1];
+        } else if (user?.role === "manager" && me?.departmentId) {
+          targetDeptId = me.departmentId;
+        }
+
+        if (targetDeptId) {
+          mappedPers = mappedPers.filter((p) => p.departmentId === targetDeptId);
           const deptPersonIds = new Set(mappedPers.map((p) => p.id));
           mappedReqs = mappedReqs.filter((r) => deptPersonIds.has(r.personnelId));
         }
@@ -72,9 +82,12 @@ function AdminOverview() {
         setRequests(mappedReqs);
       })
       .catch(() => {});
-  }, [simulatedRole]);
+  }, [simulatedRole, user?.role, me?.departmentId]);
 
-  const isManagerView = simulatedRole && simulatedRole.startsWith("manager:");
+  let isManagerView = false;
+  if (simulatedRole && simulatedRole.startsWith("manager:")) isManagerView = true;
+  if (user?.role === "manager") isManagerView = true;
+
   const deptName = isManagerView && personnel.length > 0 ? personnel[0].department : "";
 
   return (

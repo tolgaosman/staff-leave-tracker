@@ -1,39 +1,22 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { Popover } from "@base-ui/react/popover";
-import { Bell } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { useHasDashboardAccess } from "@/components/auth/role-store";
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { RoleSwitcher } from "@/components/dashboard/role-switcher";
-
-
-function relativeTime(iso: string): string {
-  const then = new Date(iso).getTime();
-  const diff = Date.now() - then;
-  if (Number.isNaN(diff)) return "";
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${Math.max(mins, 1)} dk önce`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} saat önce`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return "Dün";
-  if (days < 30) return `${days} gün önce`;
-  return new Date(iso).toLocaleDateString("tr-TR");
-}
-
-const iconButtonClasses =
-  "flex size-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-black/5 hover:text-primary data-[popup-open]:bg-black/5 data-[popup-open]:text-primary";
-
-const popupClasses =
-  "glass-panel z-50 rounded-xl p-2 shadow-2xl outline-none transition-all data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0";
+import { isNavItemActive, navItems } from "@/components/dashboard/nav-items";
+import { cn } from "@/lib/utils";
 
 export function TopNav() {
   const { user } = useAuth();
   const hasAccess = useHasDashboardAccess();
+  const pathname = usePathname();
+
+  const visibleItems = navItems.filter((item) => hasAccess || !item.adminOnly);
 
   const [dateStr, setDateStr] = useState("");
 
@@ -49,42 +32,49 @@ export function TopNav() {
   }, []);
 
   return (
-    <header
-      className={`absolute ${
-        hasAccess ? "left-64" : "left-0"
-      } right-0 top-0 z-30 hidden h-20 items-center justify-between px-10 border-b border-outline-variant/20 bg-transparent md:flex`}
-    >
-      {hasAccess ? (
-        <div className="font-serif text-base font-bold text-primary capitalize">
+    <header className="fixed left-0 right-0 top-0 z-30 hidden h-[72px] items-center justify-between bg-white px-6 border-b border-slate-200 md:flex">
+      <div className="flex flex-1 items-center justify-start">
+        <Link href="/" className="flex items-center transition-opacity hover:opacity-80 pl-12">
+          <img
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/assets/siteLogo.png`}
+            alt="İzin Takip Sistemi Logo"
+            className="h-10 w-auto object-contain"
+          />
+        </Link>
+      </div>
+
+      <div className="flex flex-1 items-center justify-center">
+        {/* Horizontal Navigation */}
+        <nav className="flex items-center gap-1">
+          {visibleItems.map(({ label, icon: Icon, href }) => {
+            const active = isNavItemActive(pathname, href);
+            return (
+              <Link
+                key={label}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all duration-150 whitespace-nowrap",
+                  active
+                    ? "bg-[#f9eced] text-[#7b1e2b] font-medium"
+                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                )}
+              >
+                <Icon className="size-4 shrink-0" />
+                <span>{label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      <div className="flex flex-1 items-center justify-end gap-4">
+        <div className="text-sm font-medium text-slate-500 capitalize mr-4">
           {dateStr}
         </div>
-      ) : (
-        <Link href="/" className="flex items-center gap-3 pl-4 transition-opacity hover:opacity-80">
-          <img
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/assets/logoLight.png`}
-            alt="İzin Takip Sistemi Logo"
-            className="h-9 w-9 object-contain"
-          />
-          <div>
-            <h1 className="font-serif text-lg font-bold leading-tight text-primary">
-              İzin Takip
-            </h1>
-            <p className="font-mono text-[10px] tracking-wider text-on-surface-variant">
-              SİSTEMİ
-            </p>
-          </div>
-        </Link>
-      )}
-
-      <div className="flex items-center gap-4">
         {(user?.role === 'super_admin' || user?.role === 'manager') && <RoleSwitcher />}
-
-
-
-
         <UserMenu />
       </div>
     </header>
   );
 }
-

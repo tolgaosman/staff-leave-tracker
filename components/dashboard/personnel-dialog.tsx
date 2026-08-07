@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Avatar } from "@/components/dashboard/avatar";
 import { ImageCropper } from "@/components/dashboard/image-cropper";
 import { readFile } from "@/lib/image";
@@ -214,13 +215,11 @@ function PersonnelForm({
             <label htmlFor="p-phone" className={labelClasses}>
               Telefon
             </label>
-            <input
+            <PhoneInput
               id="p-phone"
               required
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="0500 000 00 00"
-              className={fieldClasses}
+              onChange={setPhone}
             />
           </div>
         </div>

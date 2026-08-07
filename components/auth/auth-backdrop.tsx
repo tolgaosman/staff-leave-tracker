@@ -1,42 +1,20 @@
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-
-const lightLogo = `${basePath}/assets/logoLight.png`;
-const darkLogo = `${basePath}/assets/logoDark.png`;
-
-/** Merkezi temiz bırakan, kenarlara doğru soluklaşan maske. */
-const tileMask =
-  "radial-gradient(ellipse at center, transparent 0%, black 55%, transparent 100%)";
-
 export function AuthBackdrop() {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+  
   return (
-    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-      {/* Döşenmiş logo filigranı */}
-      <div
-        className="absolute inset-0 rotate-[-12deg] scale-150 opacity-[0.05] dark:hidden"
-        style={{
-          backgroundImage: `url(${lightLogo})`,
-          backgroundSize: "76px 76px",
-          backgroundRepeat: "repeat",
-          maskImage: tileMask,
-          WebkitMaskImage: tileMask,
-        }}
-      />
-      <div
-        className="absolute inset-0 hidden rotate-[-12deg] scale-150 opacity-[0.07] dark:block"
-        style={{
-          backgroundImage: `url(${darkLogo})`,
-          backgroundSize: "76px 76px",
-          backgroundRepeat: "repeat",
-          maskImage: tileMask,
-          WebkitMaskImage: tileMask,
-        }}
-      />
-
-      {/* Ortam ışığı */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute left-[-10%] top-[-10%] h-[50%] w-[50%] rounded-full bg-accent-violet/20 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-accent-cyan/20 blur-[100px]" />
-      </div>
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-background">
+      
+      {/* Animated Gradient Blobs - Opaklık artırıldı! */}
+      <div className="absolute left-[-10%] top-[-10%] h-[500px] w-[500px] rounded-full bg-primary/70 blur-[80px] animate-blob" />
+      <div className="absolute right-[-10%] top-[20%] h-[600px] w-[600px] rounded-full bg-secondary/70 blur-[90px] animate-blob animation-delay-2000" />
+      <div className="absolute bottom-[-20%] left-[10%] h-[700px] w-[700px] rounded-full bg-sidebar-primary/70 blur-[100px] animate-blob animation-delay-4000" />
+      
+      {/* Motif kaldırıldı */}
+      
+      {/* Glass Overlay to smoothen the blobs and pattern - Beyazlık azaltıldı, renkler daha net! */}
+      <div className="absolute inset-0 bg-white/10 backdrop-blur-[4px]" />
     </div>
   );
 }
+
+

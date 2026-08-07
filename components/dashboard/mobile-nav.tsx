@@ -22,7 +22,7 @@ function LogoImages() {
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={`${basePath}/assets/logoLight.png`}
+        src={`${basePath}/assets/siteLogo.png`}
         alt="İzin Takip Sistemi Logo"
         className="h-8 w-8 shrink-0 object-contain"
       />
@@ -34,7 +34,7 @@ function BrandText({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "truncate font-serif text-base font-bold leading-tight text-primary",
+        "truncate text-sm font-semibold leading-tight text-slate-900 tracking-tight",
         className
       )}
     >
@@ -55,28 +55,34 @@ export function MobileTopBar() {
   const showDrawer = visibleItems.length > 1;
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between gap-2 border-b border-outline-variant/20 bg-background/85 px-3 backdrop-blur md:hidden">
+    <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between gap-2 border-b border-slate-200 bg-white px-3 md:hidden">
       <div className="flex min-w-0 items-center gap-1">
         {showDrawer && (
           <Dialog.Root open={open} onOpenChange={setOpen}>
             <Dialog.Trigger
               aria-label="Menüyü aç"
-              className="flex size-10 shrink-0 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-black/5 hover:text-primary active:scale-95"
+              className="flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 active:scale-95"
             >
               <MenuIcon className="size-5" />
             </Dialog.Trigger>
 
             <Dialog.Portal>
               <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
-              <Dialog.Popup className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col border-r border-outline-variant/30 bg-sidebar p-5 shadow-2xl outline-none transition-transform duration-300 data-[ending-style]:-translate-x-full data-[starting-style]:-translate-x-full">
+              <Dialog.Popup className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col bg-[#0F172A] p-5 shadow-2xl outline-none transition-transform duration-300 data-[ending-style]:-translate-x-full data-[starting-style]:-translate-x-full">
                 <div className="mb-8 flex items-center justify-between gap-2">
                   <Dialog.Title className="flex min-w-0 items-center gap-2">
-                    <LogoImages />
-                    <BrandText />
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#7b1e2b]">
+                      <img
+                        src={`${basePath}/assets/siteLogo.png`}
+                        alt="İzin Takip"
+                        className="h-4 w-4 object-contain brightness-0 invert"
+                      />
+                    </div>
+                    <span className="text-sm font-semibold text-white tracking-tight">İzin Takip</span>
                   </Dialog.Title>
                   <Dialog.Close
                     aria-label="Menüyü kapat"
-                    className="flex size-9 shrink-0 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-black/5 hover:text-primary active:scale-95"
+                    className="flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/10 hover:text-white active:scale-95"
                   >
                     <X className="size-5" />
                   </Dialog.Close>
@@ -92,21 +98,21 @@ export function MobileTopBar() {
                         onClick={() => setOpen(false)}
                         aria-current={active ? "page" : undefined}
                         className={cn(
-                          "flex items-center gap-3 rounded-lg px-3 py-3 transition-colors active:scale-[0.98]",
+                          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors active:scale-[0.98]",
                           active
-                            ? "bg-sidebar-accent font-bold text-primary"
-                            : "text-on-surface-variant hover:bg-black/5 hover:text-primary"
+                            ? "bg-[#7b1e2b] font-medium text-white"
+                            : "text-slate-400 hover:bg-white/5 hover:text-white"
                         )}
                       >
-                        <Icon className="size-5 shrink-0" />
-                        <span className="font-sans text-base">{label}</span>
+                        <Icon className="size-4 shrink-0" />
+                        <span>{label}</span>
                       </Link>
                     );
                   })}
                 </nav>
 
                 {!hasAccess && (
-                  <div className="mt-auto border-t border-outline-variant/30 pt-5">
+                  <div className="mt-auto border-t border-white/8 pt-4">
                     <NewRequestDialog />
                   </div>
                 )}

@@ -25,9 +25,9 @@ export function NewRequestDialog() {
         onClick={() => setOpen(true)}
         disabled={disabled}
         title={disabled ? "Önce e-postanıza ait bir personel kaydı gerekli" : undefined}
-        className="h-auto w-full gap-2 bg-accent-cyan px-4 py-3 text-base font-bold text-white shadow-[0_0_20px_rgba(123,30,43,0.25)] hover:bg-accent-cyan/90 disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-auto w-full gap-2 rounded-lg bg-[#7b1e2b] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#5a1622] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
       >
-        <Plus className="size-5" />
+        <Plus className="size-4" />
         Yeni Talep
       </Button>
 

@@ -90,14 +90,14 @@ export default function LoginPage() {
         <div className="space-y-3 pt-2">
           <Button
             type="submit"
-            className="h-auto w-full bg-accent-cyan py-3 text-base font-bold text-white hover:bg-accent-cyan/90"
+            className="h-auto w-full rounded-lg bg-[#7b1e2b] py-2.5 text-sm font-semibold text-white hover:bg-[#5a1622] transition-colors"
           >
             Giriş Yap
           </Button>
           <div className="text-center">
             <Link
               href="/forgot-password"
-              className="text-sm font-semibold text-accent-cyan hover:underline"
+              className="text-sm font-semibold text-[#7b1e2b] hover:text-[#5a1622] hover:underline"
             >
               Şifremi unuttum
             </Link>

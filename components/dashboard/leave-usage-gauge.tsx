@@ -108,10 +108,6 @@ export function LeaveUsageGauge({
             barCategoryGap={0}
           >
             <defs>
-              <linearGradient id="progressGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor={c.gradStart} stopOpacity={1} />
-                <stop offset="100%" stopColor={c.gradEnd} stopOpacity={0.85} />
-              </linearGradient>
               <clipPath id="roundedBar">
                 <rect x="0" y="6" width="100%" height="32" rx="16" ry="16" />
               </clipPath>
@@ -137,7 +133,7 @@ export function LeaveUsageGauge({
               animationDuration={900}
               animationEasing="ease-out"
             >
-              <Cell fill="url(#progressGrad)" />
+              <Cell fill={c.gradStart} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
