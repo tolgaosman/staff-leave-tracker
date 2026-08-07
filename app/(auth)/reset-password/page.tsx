@@ -6,11 +6,12 @@ import { useSearchParams } from "next/navigation";
 import { LogIn } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast";
+import { useToast } from "@/components/ui/toast";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 function ResetPasswordForm() {
+  const toast = useToast();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
   const initialEmail = searchParams.get("email") || "";
@@ -25,7 +26,7 @@ function ResetPasswordForm() {
     e.preventDefault();
     
     if (password !== passwordConfirmation) {
-      toast.error("Şifreler eşleşmiyor");
+      toast.error("Şifreler Eşleşmiyor", "Girdiğiniz yeni şifreler birbiriyle uyuşmuyor. Lütfen kontrol edin.");
       return;
     }
 
@@ -53,10 +54,10 @@ function ResetPasswordForm() {
       }
 
       setSuccess(true);
-      toast.success(data.message || "Şifreniz başarıyla sıfırlandı");
+      toast.success("Şifre Sıfırlandı", `${email} hesabınızın şifresi başarıyla yenilendi.`);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu";
-      toast.error(msg);
+      const msg = err instanceof Error ? err.message : "Sıfırlama bağlantısı geçersiz veya süresi dolmuş.";
+      toast.error("Şifre Sıfırlanamadı", msg);
     } finally {
       setLoading(false);
     }

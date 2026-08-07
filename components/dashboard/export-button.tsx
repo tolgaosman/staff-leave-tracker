@@ -29,11 +29,11 @@ export function ExportButton<T>({
 
   async function handleExport() {
     if (rows.length === 0) {
-      toast.info("Dışa aktarılacak kayıt yok");
+      toast.info("Veri Bulunamadı", "Dışa aktarılacak herhangi bir kayıt mevcut değil.");
       return;
     }
     await downloadXlsx(filename, rows, columns);
-    toast.success("Excel indirildi", `${rows.length} kayıt aktarıldı.`);
+    toast.success("Excel Dosyası İndirildi", `Toplam ${rows.length} adet kayıt "${filename}.xlsx" olarak indirildi.`);
   }
 
   return (

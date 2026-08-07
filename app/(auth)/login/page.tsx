@@ -26,11 +26,11 @@ export default function LoginPage() {
     event.preventDefault();
     try {
       await login(email, password);
-      toast.success("Giriş yapıldı");
+      toast.success("Giriş Başarılı", `${email} hesabı ile sisteme giriş yapıldı.`);
       router.push("/");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Giriş başarısız";
-      toast.error(msg);
+      const msg = err instanceof Error ? err.message : "E-posta veya şifreniz hatalı.";
+      toast.error("Giriş Yapılamadı", msg);
     }
   }
 

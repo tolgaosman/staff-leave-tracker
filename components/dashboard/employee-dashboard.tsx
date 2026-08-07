@@ -60,6 +60,7 @@ function tenureYears(startDate?: string): number {
 
 /** Ham API izin satırını domain `LeaveRequest`'e çevirir. */
 function mapLeave(it: any, personnelId: string): LeaveRequest {
+  const decidedByUser = it.decided_by && typeof it.decided_by === "object" ? it.decided_by : (it.decided_by_user && typeof it.decided_by_user === "object" ? it.decided_by_user : undefined);
   return {
     id: String(it.id),
     personnelId,
@@ -70,6 +71,12 @@ function mapLeave(it: any, personnelId: string): LeaveRequest {
     note: it.note ?? "",
     rejectionReason: it.rejection_reason ?? undefined,
     createdAt: it.created_at ?? "",
+    decidedAt: it.decided_at ?? undefined,
+    decidedBy: decidedByUser && decidedByUser.name ? {
+      id: String(decidedByUser.id),
+      name: decidedByUser.name,
+      role: decidedByUser.role,
+    } : undefined,
     attachmentUrl: it.attachment_url ?? undefined,
     attachmentName: it.attachment_name ?? undefined,
   };
@@ -165,10 +172,16 @@ export function EmployeeDashboard() {
       await apiFetch(`/leave-requests/${cancelTarget.id}/cancel`, {
         method: "DELETE",
       });
-      toast.success("İzin talebiniz iptal edildi");
+      toast.success(
+        "Talep İptal Edildi",
+        `${leaveTypeLabels[cancelTarget.type]} izni talebiniz başarıyla iptal edildi.`
+      );
       fetchMyLeaves();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Talep iptal edilemedi");
+      toast.error(
+        "Talep İptal Edilemedi",
+        err instanceof Error ? err.message : "İzin talebi iptal edilirken bir hata oluştu."
+      );
     } finally {
       setCancelTarget(null);
     }
@@ -372,10 +385,22 @@ export function EmployeeDashboard() {
                     </span>
                   }
                   badge={
-                    <span className="inline-flex items-center gap-2">
-                      <LeaveStatusBadge status={l.status} />
-                      {l.status === "rejected" && l.rejectionReason && (
-                        <ViewReasonDialog reason={l.rejectionReason} />
+                    <span className="inline-flex flex-col items-end gap-1">
+                      <span className="inline-flex items-center gap-2">
+                        <LeaveStatusBadge status={l.status} />
+                        {l.status === "rejected" && l.rejectionReason && (
+                          <ViewReasonDialog reason={l.rejectionReason} decidedBy={l.decidedBy} />
+                        )}
+                      </span>
+                      {l.status === "approved" && l.decidedBy?.name && (
+                        <span className="text-[10px] font-semibold text-emerald-700">
+                          Onaylayan: {l.decidedBy.name}
+                        </span>
+                      )}
+                      {l.status === "rejected" && l.decidedBy?.name && (
+                        <span className="text-[10px] font-semibold text-rose-700">
+                          Reddeden: {l.decidedBy.name}
+                        </span>
                       )}
                       {l.status === "pending" && (
                         <div className="flex items-center gap-1">
@@ -462,10 +487,22 @@ export function EmployeeDashboard() {
                       <td className="py-3 pr-4 font-mono text-xs font-bold text-primary">
                         {workingDayCount(l.startDate, l.endDate)}
                       </td>
-                      <td className="py-3 flex items-center gap-2">
-                        <LeaveStatusBadge status={l.status} />
-                        {l.status === "rejected" && l.rejectionReason && (
-                          <ViewReasonDialog reason={l.rejectionReason} />
+                      <td className="py-3 flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-2">
+                          <LeaveStatusBadge status={l.status} />
+                          {l.status === "rejected" && l.rejectionReason && (
+                            <ViewReasonDialog reason={l.rejectionReason} decidedBy={l.decidedBy} />
+                          )}
+                        </div>
+                        {l.status === "approved" && l.decidedBy?.name && (
+                          <span className="text-[11px] font-semibold text-emerald-700">
+                            Onaylayan: {l.decidedBy.name}
+                          </span>
+                        )}
+                        {l.status === "rejected" && l.decidedBy?.name && (
+                          <span className="text-[11px] font-semibold text-rose-700">
+                            Reddeden: {l.decidedBy.name}
+                          </span>
                         )}
                         {l.status === "pending" && (
                           <div className="flex items-center gap-2">

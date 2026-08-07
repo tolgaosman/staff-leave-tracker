@@ -5,7 +5,13 @@ import { Dialog } from "@base-ui/react/dialog";
 import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function ViewReasonDialog({ reason }: { reason: string }) {
+export function ViewReasonDialog({
+  reason,
+  decidedBy,
+}: {
+  reason: string;
+  decidedBy?: { name: string; role?: string };
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -24,9 +30,11 @@ export function ViewReasonDialog({ reason }: { reason: string }) {
             <Dialog.Title className="mt-4 text-xl font-bold text-on-surface">
               Reddetme Gerekçesi
             </Dialog.Title>
-            <Dialog.Description className="mt-2 text-base text-on-surface-variant">
-              Talebiniz aşağıdaki nedenden dolayı reddedildi:
-            </Dialog.Description>
+            {decidedBy?.name && (
+              <span className="mt-2 text-xs font-semibold text-destructive/90 bg-destructive/10 px-2.5 py-0.5 rounded-full">
+                Reddeden: {decidedBy.name}
+              </span>
+            )}
           </div>
           
           <div className="mt-4 rounded-lg border border-outline-variant/30 bg-surface-1 p-4 text-sm text-on-surface text-center italic">

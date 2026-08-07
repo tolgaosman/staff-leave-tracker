@@ -59,16 +59,25 @@ function PersonnelDetail() {
         });
 
         if (Array.isArray(data.leave_requests)) {
-          const mappedLeaves: LeaveRequest[] = data.leave_requests.map((item: any) => ({
-            id: String(item.id),
-            personnelId: String(data.id),
-            type: (item.leave_type?.slug as any) || "annual",
-            startDate: item.start_date ? item.start_date.slice(0, 10) : "",
-            endDate: item.end_date ? item.end_date.slice(0, 10) : "",
-            status: item.status || "pending",
-            note: item.note || "",
-            createdAt: item.created_at || new Date().toISOString(),
-          }));
+          const mappedLeaves: LeaveRequest[] = data.leave_requests.map((item: any) => {
+            const decidedByUser = item.decided_by && typeof item.decided_by === "object" ? item.decided_by : (item.decided_by_user && typeof item.decided_by_user === "object" ? item.decided_by_user : undefined);
+            return {
+              id: String(item.id),
+              personnelId: String(data.id),
+              type: (item.leave_type?.slug as any) || "annual",
+              startDate: item.start_date ? item.start_date.slice(0, 10) : "",
+              endDate: item.end_date ? item.end_date.slice(0, 10) : "",
+              status: item.status || "pending",
+              note: item.note || "",
+              createdAt: item.created_at || new Date().toISOString(),
+              decidedAt: item.decided_at || undefined,
+              decidedBy: decidedByUser && decidedByUser.name ? {
+                id: String(decidedByUser.id),
+                name: decidedByUser.name,
+                role: decidedByUser.role,
+              } : undefined,
+            };
+          });
           setPersonLeaves(mappedLeaves);
         }
       })
@@ -185,7 +194,21 @@ function PersonnelDetail() {
               <MobileCard
                 key={l.id}
                 title={leaveTypeLabels[l.type]}
-                badge={<LeaveStatusBadge status={l.status} />}
+                badge={
+                  <div className="flex flex-col items-end gap-0.5">
+                    <LeaveStatusBadge status={l.status} />
+                    {l.status === "approved" && l.decidedBy?.name && (
+                      <span className="text-[10px] font-semibold text-emerald-700">
+                        Onaylayan: {l.decidedBy.name}
+                      </span>
+                    )}
+                    {l.status === "rejected" && l.decidedBy?.name && (
+                      <span className="text-[10px] font-semibold text-rose-700">
+                        Reddeden: {l.decidedBy.name}
+                      </span>
+                    )}
+                  </div>
+                }
                 rows={[
                   { label: "Başlangıç", value: formatDate(l.startDate) },
                   { label: "Bitiş", value: formatDate(l.endDate) },
@@ -233,7 +256,19 @@ function PersonnelDetail() {
                       {workingDayCount(l.startDate, l.endDate)}
                     </td>
                     <td className="px-6 py-4">
-                      <LeaveStatusBadge status={l.status} />
+                      <div className="flex flex-col items-start gap-0.5">
+                        <LeaveStatusBadge status={l.status} />
+                        {l.status === "approved" && l.decidedBy?.name && (
+                          <span className="text-[11px] font-semibold text-emerald-700">
+                            Onaylayan: {l.decidedBy.name}
+                          </span>
+                        )}
+                        {l.status === "rejected" && l.decidedBy?.name && (
+                          <span className="text-[11px] font-semibold text-rose-700">
+                            Reddeden: {l.decidedBy.name}
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

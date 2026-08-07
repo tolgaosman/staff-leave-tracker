@@ -116,12 +116,12 @@ function LeaveForm({
           // Kilitli değilse ve henüz seçim yoksa ilk personeli varsayılan yap.
           setPersonnelId((current) => current || (opts[0]?.id ?? ""));
         })
-        .catch(() => toast.error("Personel listesi yüklenemedi"));
+        .catch(() => toast.error("Personel Listesi Alınamadı", "İzin seçimi için personel listesi yüklenirken hata oluştu."));
     }
 
     getLeaveTypes()
       .then(setLeaveTypes)
-      .catch(() => toast.error("İzin türleri yüklenemedi"));
+      .catch(() => toast.error("İzin Türleri Alınamadı", "Sistemdeki izin türleri yüklenirken hata oluştu."));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -177,7 +177,7 @@ function LeaveForm({
 
     const leaveTypeId = leaveTypes.find((t) => t.slug === type)?.id;
     if (!leaveTypeId) {
-      toast.error("İzin türü çözümlenemedi");
+      toast.error("Tanımsız İzin Türü", "Seçilen izin türü sistemde tanımlı değil.");
       return;
     }
 
@@ -213,7 +213,7 @@ function LeaveForm({
           method: "POST",
           body: formData,
         });
-        toast.success("İzin talebi güncellendi");
+        toast.success("İzin Talebi Güncellendi", `${start} - ${end} tarihlerine ait izin talebi detayları güncellendi.`);
       } else {
         formData.append("personnel_id", String(personnelId));
         if (autoApprove) {
@@ -223,13 +223,18 @@ function LeaveForm({
           method: "POST",
           body: formData,
         });
-        toast.success(autoApprove ? "İzin başarıyla oluşturuldu ve onaylandı" : "İzin talebi oluşturuldu");
+        toast.success(
+          autoApprove ? "İzin Onaylandı ve Oluşturuldu" : "İzin Talebi Gönderildi",
+          autoApprove
+            ? `${totalDays} iş günlük izin kaydı doğrudan onaylanarak oluşturuldu.`
+            : `${start} - ${end} tarihleri arasındaki ${totalDays} iş günü izin talebiniz onaya sunuldu.`
+        );
       }
       onSaved?.();
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "İşlem başarısız";
-      toast.error(msg);
+      const msg = err instanceof Error ? err.message : "İzin kaydı işlenirken bir sunucu hatası oluştu.";
+      toast.error(isEdit ? "İzin Güncellenemedi" : "İzin Oluşturulamadı", msg);
     } finally {
       setSaving(false);
     }

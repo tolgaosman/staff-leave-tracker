@@ -50,10 +50,20 @@ export default function PersonnelPage() {
         method: "PUT",
         body: JSON.stringify({ role: newRole }),
       });
-      toast.success(newRole === "manager" ? `${personnel.name} artık departman müdürü` : `${personnel.name} artık müdür değil`);
+      toast.success(
+        "Yetki Güncellendi",
+        newRole === "manager"
+          ? `${personnel.name} kişisine ${personnel.department} müdür yetkisi verildi.`
+          : `${personnel.name} kişisinden müdür yetkisi alındı.`
+      );
       fetchPersonnel();
     } catch {
-      toast.error(newRole === "manager" ? "Müdür yetkisi verilemedi" : "Yetki kaldırılamadı");
+      toast.error(
+        "Yetki Değiştirilemedi",
+        newRole === "manager"
+          ? `${personnel.name} kullanıcısına müdür yetkisi verilirken hata oluştu.`
+          : `${personnel.name} kullanıcısının yetkisi kaldırılırken hata oluştu.`
+      );
     }
   };
 
@@ -80,7 +90,7 @@ export default function PersonnelPage() {
         setPersonnelList(mapped);
       })
       .catch(() => {
-        toast.error("Personel listesi yüklenemedi");
+        toast.error("Liste Yüklenemedi", "Personel listesi sunucudan alınırken bir hata oluştu.");
       });
   };
 
@@ -439,10 +449,10 @@ export default function PersonnelPage() {
           if (toDelete) {
             try {
               await apiFetch(`/personnel/${toDelete.id}`, { method: "DELETE" });
-              toast.reject("Personel silindi");
+              toast.reject("Personel Silindi", `${toDelete.name} isimli personel ve tüm izin verileri sistemden silindi.`);
               fetchPersonnel();
             } catch {
-              toast.error("Personel silinemedi");
+              toast.error("Personel Silinemedi", `${toDelete.name} kaydı silinirken sunucu hatası oluştu.`);
             }
             setToDelete(null);
           }

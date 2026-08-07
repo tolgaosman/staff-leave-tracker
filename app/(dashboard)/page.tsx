@@ -33,6 +33,7 @@ function mapPersonnel(p: any): Personnel {
 
 /** Ham API izin satırını domain `LeaveRequest`'e çevirir. */
 function mapLeave(it: any): LeaveRequest {
+  const decidedByUser = it.decided_by && typeof it.decided_by === "object" ? it.decided_by : (it.decided_by_user && typeof it.decided_by_user === "object" ? it.decided_by_user : undefined);
   return {
     id: String(it.id),
     personnelId: String(it.personnel_id),
@@ -44,6 +45,11 @@ function mapLeave(it: any): LeaveRequest {
     rejectionReason: it.rejection_reason ?? undefined,
     createdAt: it.created_at ?? "",
     decidedAt: it.decided_at ?? undefined,
+    decidedBy: decidedByUser && decidedByUser.name ? {
+      id: String(decidedByUser.id),
+      name: decidedByUser.name,
+      role: decidedByUser.role,
+    } : undefined,
     attachmentUrl: it.attachment_url ?? undefined,
   };
 }
@@ -88,13 +94,16 @@ function AdminOverview() {
   if (simulatedRole && simulatedRole.startsWith("manager:")) isManagerView = true;
   if (user?.role === "manager") isManagerView = true;
 
-  const deptName = isManagerView && personnel.length > 0 ? personnel[0].department : "";
+  const deptName = isManagerView ? (me?.department || (personnel.length > 0 ? personnel[0].department : "")) : "";
+  const titleText = isManagerView
+    ? (deptName ? `${deptName} Genel Bakış` : "Departman Genel Bakış")
+    : "Genel Bakış";
 
   return (
     <>
       <div className="mb-8 md:mb-12">
         <h2 className="font-serif text-3xl font-bold text-primary sm:text-4xl lg:text-5xl">
-          {deptName ? `${deptName} Genel Bakış` : "Admin Genel Bakış"}
+          {titleText}
         </h2>
         <p className="font-sans text-sm text-on-surface-variant mt-2 md:text-base">
           {deptName ? `${deptName} ekibinizin dinlenme ve katılım durumlarına bütünsel bir bakış.` : "Ekibinizin dinlenme ve katılım durumlarına bütünsel bir bakış."}

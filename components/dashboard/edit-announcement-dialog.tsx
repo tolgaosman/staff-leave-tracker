@@ -88,11 +88,11 @@ function EditAnnouncementForm({
         body: JSON.stringify(payload),
       });
 
-      toast.success("Duyuru güncellendi");
+      toast.success("Duyuru Güncellendi", `"${title.trim()}" başlıklı duyuru bilgileri güncellendi.`);
       onSaved?.();
       onClose();
     } catch (err: any) {
-      toast.error(err.message || "Duyuru güncellenemedi");
+      toast.error("Duyuru Güncellenemedi", err.message || "Duyuru bilgileri değiştirilirken bir hata oluştu.");
     } finally {
       setLoading(false);
     }

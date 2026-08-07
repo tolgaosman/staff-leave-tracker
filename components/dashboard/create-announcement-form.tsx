@@ -33,7 +33,7 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!startDate || !expiresAt) {
-      toast.error("Lütfen duyuru başlangıç ve bitiş tarihlerini seçin.");
+      toast.error("Tarih Aralığı Eksik", "Lütfen duyuru başlangıç ve bitiş tarihlerini seçin.");
       return;
     }
     setLoading(true);
@@ -76,11 +76,11 @@ export function CreateAnnouncementForm({ onCreated }: { onCreated: () => void })
         method: "POST",
         body: JSON.stringify(payload),
       });
-      toast.success("Duyuru yayınlandı");
+      toast.success("Duyuru Yayınlandı", `"${title.trim()}" başlıklı duyuru başarıyla yayınlandı.`);
       setTitle(""); setBody(""); setDateRange([null, null]); setDepartmentId("");
       onCreated();
     } catch (err: any) {
-      toast.error(err.message || "Duyuru oluşturulamadı");
+      toast.error("Duyuru Yayınlanamadı", err.message || "Duyuru oluşturulurken bir sunucu hatası oluştu.");
     } finally {
       setLoading(false);
     }

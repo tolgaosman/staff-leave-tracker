@@ -122,9 +122,9 @@ function ProfileEditor({ user }: { user: User }) {
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
-      toast.success("Profil güncellendi");
+      toast.success("Profil Güncellendi", "Kişisel ve iletişim bilgileriniz başarıyla kaydedildi.");
     } catch (err: any) {
-      toast.error(err.message || "Profil güncellenemedi");
+      toast.error("Profil Güncellenemedi", err.message || "Lütfen bilgilerinizi kontrol edip tekrar deneyin.");
     }
   }
 
@@ -135,7 +135,7 @@ function ProfileEditor({ user }: { user: User }) {
         setCropSrc(await readFile(file));
       } catch (err) {
         console.error("Resim yüklenirken hata oluştu:", err);
-        toast.error("Resim yüklenemedi");
+        toast.error("Resim Yüklenemedi", "Seçilen resim dosyası işlenirken bir hata oluştu.");
       }
       // Aynı dosya tekrar seçilebilsin diye input sıfırlanır
       e.target.value = "";

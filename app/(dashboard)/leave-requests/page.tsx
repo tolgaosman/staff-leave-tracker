@@ -84,6 +84,7 @@ export default function LeaveRequestsPage() {
           if (item.leave_type) {
             typeStr = (item.leave_type.slug as LeaveType) || "annual";
           }
+          const decidedByUser = item.decided_by && typeof item.decided_by === "object" ? item.decided_by : (item.decided_by_user && typeof item.decided_by_user === "object" ? item.decided_by_user : undefined);
           return {
             id: String(item.id),
             personnelId: String(item.personnel_id),
@@ -94,6 +95,12 @@ export default function LeaveRequestsPage() {
             note: item.note || "",
             rejectionReason: item.rejection_reason || undefined,
             createdAt: item.created_at || new Date().toISOString(),
+            decidedAt: item.decided_at || undefined,
+            decidedBy: decidedByUser && decidedByUser.name ? {
+              id: String(decidedByUser.id),
+              name: decidedByUser.name,
+              role: decidedByUser.role,
+            } : undefined,
             attachmentUrl: item.attachment_url || undefined,
             attachmentName: item.attachment_name || undefined,
           };
@@ -101,17 +108,18 @@ export default function LeaveRequestsPage() {
         setRequestsList(mapped);
       })
       .catch(() => {
-        toast.error("İzin talepleri yüklenemedi");
+        toast.error("İzin Talepleri Yüklenemedi", "Sunucudan izin talepleri alınırken bir hata oluştu.");
       });
   };
 
   const handlePending = async (r: LeaveRequest) => {
     try {
       await apiFetch(`/leave-requests/${r.id}/pending`, { method: "PATCH" });
-      toast.success("Talep tekrar bekliyor durumuna alındı");
+      const personName = personnelMap.get(r.personnelId)?.name || "Personel";
+      toast.success("Durum Güncellendi", `${personName} kişisine ait izin talebi tekrar bekliyor durumuna alındı.`);
       fetchData();
     } catch (err: any) {
-      toast.error(err.message || "İşlem başarısız");
+      toast.error("İşlem Başarısız", err.message || "İzin talebi durumu değiştirilemedi.");
     }
   };
 
@@ -232,6 +240,10 @@ export default function LeaveRequestsPage() {
                   value: (r) => workingDayCount(r.startDate, r.endDate),
                 },
                 { header: "Durum", value: (r) => leaveStatusLabels[r.status] },
+                {
+                  header: "Karar Veren",
+                  value: (r) => r.decidedBy?.name ?? "",
+                },
                 {
                   header: "Gerekçe / Açıklama",
                   value: (r) => r.note ?? "",
@@ -363,10 +375,22 @@ export default function LeaveRequestsPage() {
                       title={person?.name || "Bilinmeyen Personel"}
                       subtitle={person?.department || "-"}
                       badge={
-                        <div className="flex items-center">
-                          <LeaveStatusBadge status={r.status} />
-                          {r.status === 'rejected' && r.rejectionReason && (
-                            <ReasonDialog reason={r.rejectionReason} />
+                        <div className="flex flex-col items-end gap-0.5">
+                          <div className="flex items-center">
+                            <LeaveStatusBadge status={r.status} />
+                            {r.status === 'rejected' && r.rejectionReason && (
+                              <ReasonDialog reason={r.rejectionReason} decidedBy={r.decidedBy} />
+                            )}
+                          </div>
+                          {r.status === "approved" && r.decidedBy?.name && (
+                            <span className="text-[10px] font-semibold text-emerald-700">
+                              Onaylayan: {r.decidedBy.name}
+                            </span>
+                          )}
+                          {r.status === "rejected" && r.decidedBy?.name && (
+                            <span className="text-[10px] font-semibold text-rose-700">
+                              Reddeden: {r.decidedBy.name}
+                            </span>
                           )}
                         </div>
                       }
@@ -534,10 +558,22 @@ export default function LeaveRequestsPage() {
 
                             {/* Durum Rozeti */}
                             <td className="px-6 py-4">
-                              <div className="flex items-center">
-                                <LeaveStatusBadge status={r.status} />
-                                {r.status === 'rejected' && r.rejectionReason && (
-                                  <ReasonDialog reason={r.rejectionReason} />
+                              <div className="flex flex-col items-start gap-0.5">
+                                <div className="flex items-center">
+                                  <LeaveStatusBadge status={r.status} />
+                                  {r.status === 'rejected' && r.rejectionReason && (
+                                    <ReasonDialog reason={r.rejectionReason} decidedBy={r.decidedBy} />
+                                  )}
+                                </div>
+                                {r.status === "approved" && r.decidedBy?.name && (
+                                  <span className="text-[11px] font-semibold text-emerald-700">
+                                    Onaylayan: {r.decidedBy.name}
+                                  </span>
+                                )}
+                                {r.status === "rejected" && r.decidedBy?.name && (
+                                  <span className="text-[11px] font-semibold text-rose-700">
+                                    Reddeden: {r.decidedBy.name}
+                                  </span>
                                 )}
                               </div>
                             </td>
@@ -631,10 +667,11 @@ export default function LeaveRequestsPage() {
           if (toDelete) {
             try {
               await apiFetch(`/leave-requests/${toDelete.id}`, { method: "DELETE" });
-              toast.reject("Talep silindi");
+              const personName = personnelMap.get(toDelete.personnelId)?.name || "Personel";
+              toast.reject("İzin Talebi Silindi", `${personName} kişisine ait izin kaydı başarıyla silindi.`);
               fetchData();
             } catch (err: any) {
-              toast.error(err.message || "Silme başarısız");
+              toast.error("Silme Başarısız", err.message || "İzin talebi silinirken bir hata oluştu.");
             }
             setToDelete(null);
           }
@@ -651,10 +688,11 @@ export default function LeaveRequestsPage() {
                 method: "PATCH",
                 body: JSON.stringify({ rejection_reason: reason }),
               });
-              toast.reject("Talep reddedildi");
+              const personName = personnelMap.get(toReject.personnelId)?.name || "Personel";
+              toast.reject("İzin Talebi Reddedildi", `${personName} personeline ait izin talebi reddedildi.`);
               fetchData();
             } catch (err: any) {
-              toast.error(err.message || "İşlem başarısız");
+              toast.error("Reddetme Başarısız", err.message || "İzin talebi reddedilirken bir hata oluştu.");
             }
             setToReject(null);
           }
@@ -670,10 +708,11 @@ export default function LeaveRequestsPage() {
           onConfirm={async () => {
             try {
               await apiFetch(`/leave-requests/${toApprove.id}/approve`, { method: "PATCH" });
-              toast.success("Talep onaylandı");
+              const personName = personnelMap.get(toApprove.personnelId)?.name || "Personel";
+              toast.success("İzin Talebi Onaylandı", `${personName} personeline ait izin talebi onaylandı.`);
               fetchData();
             } catch (err: any) {
-              toast.error(err.message || "İşlem başarısız");
+              toast.error("Onaylama Başarısız", err.message || "İzin talebi onaylanırken bir hata oluştu.");
             }
             setToApprove(null);
           }}

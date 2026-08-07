@@ -34,6 +34,7 @@ function calendarDaysUntil(iso: string, today: string): number {
 }
 
 function mapLeave(it: any, personnelId: string): LeaveRequest {
+  const decidedByUser = it.decided_by && typeof it.decided_by === "object" ? it.decided_by : (it.decided_by_user && typeof it.decided_by_user === "object" ? it.decided_by_user : undefined);
   return {
     id: String(it.id),
     personnelId,
@@ -44,6 +45,12 @@ function mapLeave(it: any, personnelId: string): LeaveRequest {
     note: it.note ?? "",
     rejectionReason: it.rejection_reason ?? undefined,
     createdAt: it.created_at ?? "",
+    decidedAt: it.decided_at ?? undefined,
+    decidedBy: decidedByUser && decidedByUser.name ? {
+      id: String(decidedByUser.id),
+      name: decidedByUser.name,
+      role: decidedByUser.role,
+    } : undefined,
     attachmentUrl: it.attachment_url ?? undefined,
     attachmentName: it.attachment_name ?? undefined,
   };
@@ -181,10 +188,22 @@ export function ManagerLeaveDetails() {
                     <td className="py-3 pr-4 font-mono text-xs font-bold text-primary">
                       {workingDayCount(l.startDate, l.endDate)}
                     </td>
-                    <td className="py-3 flex items-center gap-2">
-                      <LeaveStatusBadge status={l.status} />
-                      {l.status === "rejected" && l.rejectionReason && (
-                        <ViewReasonDialog reason={l.rejectionReason} />
+                    <td className="py-3 flex flex-col items-start gap-1">
+                      <div className="flex items-center gap-2">
+                        <LeaveStatusBadge status={l.status} />
+                        {l.status === "rejected" && l.rejectionReason && (
+                          <ViewReasonDialog reason={l.rejectionReason} decidedBy={l.decidedBy} />
+                        )}
+                      </div>
+                      {l.status === "approved" && l.decidedBy?.name && (
+                        <span className="text-[11px] font-semibold text-emerald-700">
+                          Onaylayan: {l.decidedBy.name}
+                        </span>
+                      )}
+                      {l.status === "rejected" && l.decidedBy?.name && (
+                        <span className="text-[11px] font-semibold text-rose-700">
+                          Reddeden: {l.decidedBy.name}
+                        </span>
                       )}
                     </td>
                   </tr>

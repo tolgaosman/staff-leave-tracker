@@ -88,10 +88,10 @@ export function AnnouncementsPanel({
     setDeletingId(id);
     try {
       await apiFetch(`/announcements/${id}`, { method: "DELETE" });
-      toast.reject("Duyuru silindi");
+      toast.reject("Duyuru Silindi", "Seçilen duyuru sistemden kaldırıldı.");
       fetchAnnouncements();
     } catch (err: any) {
-      toast.error(err.message || "Silinemedi");
+      toast.error("Duyuru Silinemedi", err.message || "Duyuru silinirken bir hata oluştu.");
     } finally {
       setDeletingId(null);
     }

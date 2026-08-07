@@ -42,10 +42,10 @@ export default function ForgotPasswordPage() {
       }
 
       setSubmitted(true);
-      toast.success(data.message || "Sıfırlama bağlantısı gönderildi");
+      toast.success("Sıfırlama Bağlantısı Gönderildi", `${email} adresine e-posta iletildi. Lütfen e-posta kutunuzu kontrol edin.`);
     } catch (err: unknown) {
       setSubmitted(true);
-      toast.success("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.");
+      toast.success("Sıfırlama Bağlantısı Gönderildi", `${email} adresine şifre sıfırlama bağlantısı iletildi.`);
     } finally {
       setLoading(false);
     }

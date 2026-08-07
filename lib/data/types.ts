@@ -46,6 +46,11 @@ export type LeaveRequest = {
   /** ISO timestamp of the last approve/reject decision. Drives "fresh event"
       ordering in recent activity & notifications; unset while pending. */
   decidedAt?: string;
+  decidedBy?: {
+    id: string;
+    name: string;
+    role?: string;
+  };
   attachmentUrl?: string;
   attachmentName?: string;
 };

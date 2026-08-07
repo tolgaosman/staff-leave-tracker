@@ -109,6 +109,22 @@ export function CalendarDayDialog({
                         {workingDayCount(leave.startDate, leave.endDate)} iş günü
                       </dd>
                     </div>
+                    {leave.status === "approved" && leave.decidedBy?.name && (
+                      <div className="flex items-center justify-between gap-3">
+                        <dt className={labelClasses}>Onaylayan</dt>
+                        <dd className="font-semibold text-emerald-600 text-xs">
+                          {leave.decidedBy.name}
+                        </dd>
+                      </div>
+                    )}
+                    {leave.status === "rejected" && leave.decidedBy?.name && (
+                      <div className="flex items-center justify-between gap-3">
+                        <dt className={labelClasses}>Reddeden</dt>
+                        <dd className="font-semibold text-rose-600 text-xs">
+                          {leave.decidedBy.name}
+                        </dd>
+                      </div>
+                    )}
                   </dl>
                 </li>
               );

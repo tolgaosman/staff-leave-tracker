@@ -87,16 +87,25 @@ export default function CalendarPage() {
 
         return true;
       })
-      .map((item) => ({
-        id: String(item.id),
-        personnelId: String(item.personnel_id),
-        type: (item.leave_type?.slug as LeaveType) || "annual",
-        startDate: item.start_date ? item.start_date.slice(0, 10) : "",
-        endDate: item.end_date ? item.end_date.slice(0, 10) : "",
-        status: item.status || "pending",
-        note: item.note || "",
-        createdAt: item.created_at || "",
-      }));
+      .map((item) => {
+        const decidedByUser = item.decided_by && typeof item.decided_by === "object" ? item.decided_by : (item.decided_by_user && typeof item.decided_by_user === "object" ? item.decided_by_user : undefined);
+        return {
+          id: String(item.id),
+          personnelId: String(item.personnel_id),
+          type: (item.leave_type?.slug as LeaveType) || "annual",
+          startDate: item.start_date ? item.start_date.slice(0, 10) : "",
+          endDate: item.end_date ? item.end_date.slice(0, 10) : "",
+          status: item.status || "pending",
+          note: item.note || "",
+          createdAt: item.created_at || "",
+          decidedAt: item.decided_at || undefined,
+          decidedBy: decidedByUser && decidedByUser.name ? {
+            id: String(decidedByUser.id),
+            name: decidedByUser.name,
+            role: decidedByUser.role,
+          } : undefined,
+        };
+      });
   }, [requestsList, personnelMap, simulatedRole]);
 
   const renderCells = () => {

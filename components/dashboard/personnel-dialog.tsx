@@ -65,7 +65,7 @@ function PersonnelForm({
           current || (list[0] ? String(list[0].id) : "")
         );
       })
-      .catch(() => toast.error("Departmanlar yüklenemedi"));
+      .catch(() => toast.error("Departmanlar Yüklenemedi", "Departman listesi alınırken bir hata oluştu."));
     // toast kimliği sabit; yalnızca ilk açılışta çalışsın.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -73,7 +73,7 @@ function PersonnelForm({
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!departmentId) {
-      toast.error("Lütfen bir departman seçin");
+      toast.error("Departman Seçilmedi", "Lütfen personelin bağlı olduğu departmanı seçin.");
       return;
     }
     setSaving(true);
@@ -92,7 +92,7 @@ function PersonnelForm({
           method: "PUT",
           body: JSON.stringify(payload),
         });
-        toast.success("Personel güncellendi");
+        toast.success("Personel Güncellendi", `${name.trim()} personeline ait bilgiler başarıyla güncellendi.`);
       } else {
         // Yeni Ekleme (POST /api/personnel)
         await apiFetch("/personnel", {
@@ -102,13 +102,13 @@ function PersonnelForm({
             start_date: new Date().toISOString().slice(0, 10),
           }),
         });
-        toast.success("Personel eklendi");
+        toast.success("Personel Eklendi", `${name.trim()} sisteme yeni personel olarak kaydedildi.`);
       }
       onSaved?.();
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "İşlem başarısız";
-      toast.error(msg);
+      const msg = err instanceof Error ? err.message : "Sunucu ile iletişim kurulurken bir hata oluştu.";
+      toast.error(isEdit ? "Personel Güncellenemedi" : "Personel Eklenemedi", msg);
     } finally {
       setSaving(false);
     }
