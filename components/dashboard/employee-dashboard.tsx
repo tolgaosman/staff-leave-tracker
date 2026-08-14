@@ -386,10 +386,32 @@ export function EmployeeDashboard() {
                   }
                   badge={
                     <span className="inline-flex flex-col items-end gap-1">
-                      <span className="inline-flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 flex-wrap justify-end">
                         <LeaveStatusBadge status={l.status} />
                         {l.status === "rejected" && l.rejectionReason && (
                           <ViewReasonDialog reason={l.rejectionReason} decidedBy={l.decidedBy} />
+                        )}
+                        {l.status === "pending" && (
+                          <span className="inline-flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => { setEditingTarget(l); setRequestOpen(true); }}
+                              title="Talebi düzenle"
+                              className="inline-flex items-center gap-1 rounded-md border border-outline-variant/30 px-2 py-0.5 text-[10px] font-bold text-on-surface-variant transition-colors hover:bg-black/5 cursor-pointer"
+                            >
+                              <CalendarClock className="size-3" />
+                              Düzenle
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCancelTarget(l)}
+                              title="Talebi iptal et"
+                              className="inline-flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive transition-colors hover:bg-destructive/20 cursor-pointer"
+                            >
+                              <X className="size-3" />
+                              İptal Et
+                            </button>
+                          </span>
                         )}
                       </span>
                       {l.status === "approved" && l.decidedBy?.name && (
@@ -401,28 +423,6 @@ export function EmployeeDashboard() {
                         <span className="text-[10px] font-semibold text-rose-700">
                           Reddeden: {l.decidedBy.name}
                         </span>
-                      )}
-                      {l.status === "pending" && (
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => { setEditingTarget(l); setRequestOpen(true); }}
-                            title="Talebi düzenle"
-                            className="inline-flex items-center gap-1 rounded-md border border-outline-variant/30 px-2 py-0.5 text-[10px] font-bold text-on-surface-variant transition-colors hover:bg-black/5 cursor-pointer"
-                          >
-                            <CalendarClock className="size-3" />
-                            Düzenle
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setCancelTarget(l)}
-                            title="Talebi iptal et"
-                            className="inline-flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive transition-colors hover:bg-destructive/20 cursor-pointer"
-                          >
-                            <X className="size-3" />
-                            İptal Et
-                          </button>
-                        </div>
                       )}
                     </span>
                   }
@@ -487,45 +487,47 @@ export function EmployeeDashboard() {
                       <td className="py-3 pr-4 font-mono text-xs font-bold text-primary">
                         {workingDayCount(l.startDate, l.endDate)}
                       </td>
-                      <td className="py-3 flex flex-col items-start gap-1">
-                        <div className="flex items-center gap-2">
-                          <LeaveStatusBadge status={l.status} />
-                          {l.status === "rejected" && l.rejectionReason && (
-                            <ViewReasonDialog reason={l.rejectionReason} decidedBy={l.decidedBy} />
+                      <td className="py-3">
+                        <div className="flex flex-col items-start gap-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <LeaveStatusBadge status={l.status} />
+                            {l.status === "rejected" && l.rejectionReason && (
+                              <ViewReasonDialog reason={l.rejectionReason} decidedBy={l.decidedBy} />
+                            )}
+                            {l.status === "pending" && (
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => { setEditingTarget(l); setRequestOpen(true); }}
+                                  title="Talebi düzenle"
+                                  className="inline-flex items-center gap-1 rounded-md border border-outline-variant/30 px-2 py-0.5 text-[10px] font-bold text-on-surface-variant transition-colors hover:bg-black/5 cursor-pointer"
+                                >
+                                  <CalendarClock className="size-3" />
+                                  Düzenle
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setCancelTarget(l)}
+                                  title="Talebi iptal et"
+                                  className="inline-flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive transition-colors hover:bg-destructive/20 cursor-pointer"
+                                >
+                                  <X className="size-3" />
+                                  İptal Et
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                          {l.status === "approved" && l.decidedBy?.name && (
+                            <span className="text-[11px] font-semibold text-emerald-700">
+                              Onaylayan: {l.decidedBy.name}
+                            </span>
+                          )}
+                          {l.status === "rejected" && l.decidedBy?.name && (
+                            <span className="text-[11px] font-semibold text-rose-700">
+                              Reddeden: {l.decidedBy.name}
+                            </span>
                           )}
                         </div>
-                        {l.status === "approved" && l.decidedBy?.name && (
-                          <span className="text-[11px] font-semibold text-emerald-700">
-                            Onaylayan: {l.decidedBy.name}
-                          </span>
-                        )}
-                        {l.status === "rejected" && l.decidedBy?.name && (
-                          <span className="text-[11px] font-semibold text-rose-700">
-                            Reddeden: {l.decidedBy.name}
-                          </span>
-                        )}
-                        {l.status === "pending" && (
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => { setEditingTarget(l); setRequestOpen(true); }}
-                              title="Talebi düzenle"
-                              className="inline-flex items-center gap-1 rounded-md border border-outline-variant/30 px-2 py-0.5 text-[10px] font-bold text-on-surface-variant transition-colors hover:bg-black/5 cursor-pointer"
-                            >
-                              <CalendarClock className="size-3" />
-                              Düzenle
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setCancelTarget(l)}
-                              title="Talebi iptal et"
-                              className="inline-flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive transition-colors hover:bg-destructive/20 cursor-pointer"
-                            >
-                              <X className="size-3" />
-                              İptal Et
-                            </button>
-                          </div>
-                        )}
                       </td>
                     </tr>
                   ))}
