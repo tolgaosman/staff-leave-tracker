@@ -2,11 +2,11 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://178.105.207.98:8000/api
     ports:
       - "4003:3000"
     environment:
-      # Browser'ın API'ye ulaşabilmesi için backend URL'i (Hetzner IP)
-      - NEXT_PUBLIC_API_URL=http://178.105.207.98:8000
       - DEPLOY_TARGET=hetzner
     depends_on:
       - backend
