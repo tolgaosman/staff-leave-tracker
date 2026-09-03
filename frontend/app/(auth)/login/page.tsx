@@ -126,27 +126,13 @@ export default function LoginPage() {
             <div className="space-y-4">
               
               <div className="group rounded-xl bg-white/70 p-4 border border-white transition-all hover:bg-white hover:shadow-md">
-                <p className="font-bold text-sm text-slate-800 mb-1">Leora Nader <span className="font-medium text-xs text-slate-500">(Bilgi İşlem Müdürü)</span></p>
+                <p className="font-bold text-sm text-slate-800 mb-1">Tolga Osman Falay <span className="font-medium text-xs text-slate-500">(Kurucu / Yazılım Geliştirici)</span></p>
                 <div className="space-y-1 text-xs font-mono text-slate-600 bg-slate-50/50 p-2 rounded-lg border border-slate-100">
-                  <p>E: leora.nader5970@test.com</p>
+                  <p>E: tolgaosmanfly@gmail.com</p>
                   <p>Ş: 12345678</p>
                 </div>
                 <button 
-                  onClick={() => { setEmail('leora.nader5970@test.com'); setPassword('12345678'); }} 
-                  className="mt-3 w-full rounded-lg bg-slate-100 py-2 text-xs font-bold text-slate-700 transition-all hover:bg-accent-cyan hover:text-white"
-                >
-                  Bilgileri Doldur
-                </button>
-              </div>
-
-              <div className="group rounded-xl bg-white/70 p-4 border border-white transition-all hover:bg-white hover:shadow-md">
-                <p className="font-bold text-sm text-slate-800 mb-1">Monroe Stracke <span className="font-medium text-xs text-slate-500">(Bilgi İşlem Uzmanı)</span></p>
-                <div className="space-y-1 text-xs font-mono text-slate-600 bg-slate-50/50 p-2 rounded-lg border border-slate-100">
-                  <p>E: monroe.stracke7386@test.com</p>
-                  <p>Ş: 12345678</p>
-                </div>
-                <button 
-                  onClick={() => { setEmail('monroe.stracke7386@test.com'); setPassword('12345678'); }} 
+                  onClick={() => { setEmail('tolgaosmanfly@gmail.com'); setPassword('12345678'); }} 
                   className="mt-3 w-full rounded-lg bg-slate-100 py-2 text-xs font-bold text-slate-700 transition-all hover:bg-accent-cyan hover:text-white"
                 >
                   Bilgileri Doldur
