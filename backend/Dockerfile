@@ -16,7 +16,7 @@ WORKDIR /app
 
 # Önce sadece bağımlılık manifestlerini kopyala (Docker katman cache'i için)
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+RUN composer install --no-scripts --no-autoloader --prefer-dist
 
 # Uygulama kodunu kopyala ve autoload'u optimize et
 COPY . .
