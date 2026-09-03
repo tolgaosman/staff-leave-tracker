@@ -1,0 +1,22 @@
+.git
+.gitignore
+/vendor
+/node_modules
+/tests
+/.github
+
+# Ortam dosyaları (imaja gizli değer sızmasın) — .env container'a env_file ile verilir
+.env
+.env.*
+!.env.production.example
+
+# Yerel geliştirme sqlite veritabanı ve loglar
+/database/database.sqlite
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+
+# Derleme çıktıları
+/public/build
+/public/hot

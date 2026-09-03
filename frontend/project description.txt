@@ -1,0 +1,47 @@
+Personel İzin Takip Sistemi
+Bir şirket, müşterilerinden ve çalışanlarından gelen teknik destek taleplerini e-posta yerine tek bir sistem üzerinden yönetmek istemektedir.
+Senden, kullanıcıların destek talebi oluşturabileceği, mevcut talepleri görüntüleyebileceği ve taleplerin durumlarını takip edebileceği basit bir Destek Talep Yönetim Sistemi geliştirmeniz istenmektedir.
+Sayfalar
+Dashboard
+•	Toplam Personel 
+•	Bekleyen İzin 
+•	Onaylanan İzin 
+•	Reddedilen İzin 
+________________________________________
+Personel Listesi
+Alanlar
+•	Ad Soyad 
+•	Departman 
+•	Telefon 
+•	Durum 
+İşlemler
+•	Düzenle 
+•	Sil 
+•	Detay 
+________________________________________
+İzin Listesi
+Alanlar
+•	Personel 
+•	Başlangıç 
+•	Bitiş 
+•	İzin Türü 
+•	Durum 
+İşlemler
+•	Ekle 
+•	Güncelle 
+•	Sil 
+________________________________________
+Personel Detayı
+•	Bilgileri 
+•	Kullandığı izinler 
+ 
+
+Veriler
+localStorage
+veya
+JSON dosyası
+kullanılacak.
+
+
+Not: Yazilan Ilgili tekniklerin sizden arastirilip ogrenilmesi istiyorum. Arayüzü siz tasarlayacaksınız. İnternetten ilham alabilir, hazır component kütüphanesı (shadcn/ui) kullanabilirsin; ancak proje boyunca tek bir hazır admin temasını olduğu gibi kullanmayın. Sayfaların düzenini ve bileşen yerleşimini kendiniz oluşturun. Projeye kendın de yukarıdakılerden farklı sey katabilirsin mantıklı olduğu sürece.
+
