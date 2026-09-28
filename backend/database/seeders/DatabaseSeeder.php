@@ -163,9 +163,10 @@ class DatabaseSeeder extends Seeder
         $departments = collect([$software, $hr, $finance, $marketing]);
         $leaveTypes = collect([$annual, $excuse, $sick, $unpaid]);
 
-        for ($i = 0; $i < 75; $i++) {
+        // Daha sağlam ve kalabalık bir dataset için 150 personel üretiyoruz
+        for ($i = 0; $i < 150; $i++) {
             $user = User::factory()->create();
-            $startDate = fake()->dateTimeBetween('-5 years', '-1 month');
+            $startDate = fake()->dateTimeBetween('-7 years', '-1 month');
 
             // Geçen yıldan devreden izin. Yalnızca en az 1 yıllık kıdemi olana
             // verilir — çalışmadığın bir yıldan izin devredemezsin. Üst sınır
