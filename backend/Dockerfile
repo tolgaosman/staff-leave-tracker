@@ -20,8 +20,7 @@ RUN composer install --no-scripts --no-autoloader --prefer-dist
 
 # Uygulama kodunu kopyala ve autoload'u optimize et
 COPY . .
-RUN composer dump-autoload --optimize \
-    && cp -n .env.production.example .env || true
+RUN composer dump-autoload --optimize
 
 EXPOSE 8000
 
