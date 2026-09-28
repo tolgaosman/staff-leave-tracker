@@ -5,7 +5,7 @@ services:
       args:
         NEXT_PUBLIC_API_URL: /api
     ports:
-      - "4004:3000"
+      - "4006:3000"
     environment:
       - DEPLOY_TARGET=hetzner
     depends_on:
@@ -20,7 +20,7 @@ services:
       - .env
     environment:
       # Frontend'in API'ye istek atabilmesi için CORS izni
-      - CORS_ALLOWED_ORIGINS=http://5.75.128.196:4004
+      - CORS_ALLOWED_ORIGINS=http://5.75.128.196:4006
       - APP_URL=http://5.75.128.196:8001
     depends_on:
       db:
