@@ -138,7 +138,7 @@ function PersonnelForm({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label htmlFor="p-name" className={labelClasses}>
               Ad Soyad
@@ -166,7 +166,7 @@ function PersonnelForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label htmlFor="p-dept" className={labelClasses}>
               Departman

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /* md altında tabloların yerini alan kart listesi.
-   Tablolar `hidden md:block` ile gizlenir, aynı veri buraya maplenir. */
+   Tablolar `hidden lg:block` ile gizlenir, aynı veri buraya maplenir. */
 
 export function MobileCardList({
   children,
@@ -13,7 +13,7 @@ export function MobileCardList({
   className?: string;
 }) {
   return (
-    <ul className={cn("space-y-3 md:hidden", className)}>{children}</ul>
+    <ul className={cn("space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:hidden", className)}>{children}</ul>
   );
 }
 
@@ -43,21 +43,21 @@ export function MobileCard({
     // bg-surface-2: hem sayfa zemininde hem de bir glass-panel içinde iç içe
     // kullanıldığında ayırt edilebilir kalır.
     <li className="rounded-xl border border-outline-variant/25 bg-surface-2/50 p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+        <div className="flex min-w-0 flex-1 basis-40 items-center gap-3">
           {leading}
           <div className="min-w-0">
-            <div className="truncate font-sans text-base font-bold text-primary">
+            <div className="break-words font-sans text-base font-bold leading-tight text-primary">
               {title}
             </div>
             {subtitle && (
-              <div className="truncate font-sans text-xs text-on-surface-variant/70">
+              <div className="break-words font-sans text-xs text-on-surface-variant/70">
                 {subtitle}
               </div>
             )}
           </div>
         </div>
-        {badge && <div className="shrink-0">{badge}</div>}
+        {badge && <div className="ml-auto max-w-full">{badge}</div>}
       </div>
 
       {rows.length > 0 && (
@@ -67,7 +67,7 @@ export function MobileCard({
               <dt className="shrink-0 font-label-mono text-[11px] uppercase tracking-wider text-on-surface-variant/70">
                 {row.label}
               </dt>
-              <dd className="min-w-0 text-right font-sans text-sm text-on-surface">
+              <dd className="min-w-0 break-words text-right font-sans text-sm text-on-surface">
                 {row.value}
               </dd>
             </div>

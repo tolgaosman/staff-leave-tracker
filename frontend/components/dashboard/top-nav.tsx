@@ -32,18 +32,18 @@ export function TopNav() {
   }, []);
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-30 hidden h-[72px] items-center justify-between bg-white px-6 border-b border-slate-200 md:flex">
-      <div className="flex flex-1 items-center justify-start">
-        <Link href="/" className="flex items-center transition-opacity hover:opacity-80 pl-12">
+    <header className="fixed left-0 right-0 top-0 z-30 hidden h-[72px] items-center justify-between gap-4 bg-white px-4 border-b border-slate-200 lg:flex xl:px-6">
+      <div className="flex flex-none items-center justify-start">
+        <Link href="/" className="flex items-center transition-opacity hover:opacity-80 xl:pl-12">
           <img
             src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/assets/siteLogo.png`}
             alt="İzin Takip Sistemi Logo"
-            className="h-10 w-auto object-contain"
+            className="h-10 w-auto max-w-none shrink-0 object-contain"
           />
         </Link>
       </div>
 
-      <div className="flex flex-1 items-center justify-center">
+      <div className="flex min-w-0 flex-1 items-center justify-center">
         {/* Horizontal Navigation */}
         <nav className="flex items-center gap-1">
           {visibleItems.map(({ label, icon: Icon, href }) => {
@@ -68,8 +68,8 @@ export function TopNav() {
         </nav>
       </div>
 
-      <div className="flex flex-1 items-center justify-end gap-4">
-        <div className="text-sm font-medium text-slate-500 capitalize mr-4">
+      <div className="flex flex-none items-center justify-end gap-3 xl:gap-4">
+        <div className="hidden text-sm font-medium text-slate-500 capitalize xl:mr-4 xl:block">
           {dateStr}
         </div>
         {(user?.role === 'super_admin' || user?.role === 'manager') && <RoleSwitcher />}

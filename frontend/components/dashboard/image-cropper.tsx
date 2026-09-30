@@ -43,7 +43,7 @@ export function ImageCropper({
     <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm transition-opacity" />
-        <Dialog.Popup className="glass-panel fixed left-1/2 top-1/2 z-[60] flex w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl overflow-hidden shadow-2xl transition-all">
+        <Dialog.Popup className="glass-panel fixed left-1/2 top-1/2 z-[60] max-h-[calc(100dvh-2rem)] flex w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl overflow-hidden shadow-2xl transition-all">
           <div className="p-4 border-b border-outline-variant/20">
             <Dialog.Title className="text-xl font-bold text-on-surface">Resmi Kırp</Dialog.Title>
             <Dialog.Description className="text-sm text-on-surface-variant">
@@ -51,7 +51,7 @@ export function ImageCropper({
             </Dialog.Description>
           </div>
           
-          <div className="relative h-[280px] w-full bg-black sm:h-[400px]">
+          <div className="relative h-[min(280px,40dvh)] w-full bg-black sm:h-[400px]">
             <Cropper
               image={imageSrc}
               crop={crop}

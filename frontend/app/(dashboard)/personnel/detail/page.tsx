@@ -226,7 +226,7 @@ function PersonnelDetail() {
           </MobileCardList>
 
           {/* Masaüstü: tablo */}
-          <div className="hidden overflow-x-auto md:block">
+          <div className="hidden overflow-x-auto lg:block">
             <table className="w-full min-w-[560px] text-left">
               <thead>
                 <tr className="border-b border-white/10 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">

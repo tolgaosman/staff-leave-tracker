@@ -124,7 +124,7 @@ export function AttachmentDialog({
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
-          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 flex h-[90vh] w-[90vw] max-w-5xl -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl border border-white/10 bg-surface-1 shadow-2xl outline-none">
+          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 flex h-[90dvh] w-[95vw] sm:w-[90vw] max-w-5xl -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl border border-white/10 bg-surface-1 shadow-2xl outline-none">
             <div className="flex items-center justify-between border-b border-outline-variant/20 p-4">
               <Dialog.Title className="truncate text-xl font-bold text-on-surface">
                 {label}

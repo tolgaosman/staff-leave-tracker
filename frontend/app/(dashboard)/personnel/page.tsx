@@ -165,7 +165,7 @@ export default function PersonnelPage() {
                   setEditing(null);
                   setDialogOpen(true);
                 }}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent-cyan px-4 py-2 text-base font-bold text-white shadow transition-all hover:opacity-90 active:scale-95 cursor-pointer sm:flex-none"
+                className="flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-accent-cyan px-3 py-2 text-sm font-bold sm:px-4 sm:text-base text-white shadow transition-all hover:opacity-90 active:scale-95 cursor-pointer sm:flex-none"
               >
                 <Plus className="size-5" />
                 <span>Yeni Personel</span>
@@ -310,7 +310,7 @@ export default function PersonnelPage() {
               </MobileCardList>
 
               {/* Masaüstü: tablo */}
-              <div className="glass-panel hidden overflow-hidden rounded-xl md:block">
+              <div className="glass-panel hidden overflow-hidden rounded-xl lg:block">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[800px] border-collapse">
                     <thead>

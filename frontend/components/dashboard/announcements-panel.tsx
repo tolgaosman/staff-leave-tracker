@@ -147,7 +147,7 @@ export function AnnouncementsPanel({
                 <div className="flex flex-col gap-2">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2 pr-8 flex-wrap">
-                      <h3 className="font-bold text-on-surface text-lg leading-tight">{a.title}</h3>
+                      <h3 className="font-bold text-on-surface text-lg leading-tight break-words min-w-0">{a.title}</h3>
                       {isScheduled && (
                         <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600 border border-amber-500/20">
                           <CalendarClock className="size-3" />
@@ -156,7 +156,7 @@ export function AnnouncementsPanel({
                       )}
                     </div>
                     {canManage && (
-                      <div className="absolute right-4 top-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      <div className="absolute right-3 top-3 flex items-center gap-1 transition-all md:right-4 md:top-4 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
                         <button
                           onClick={() => setEditingAnnouncement(a)}
                           className="p-1.5 rounded-lg text-on-surface-variant hover:bg-black/5 hover:text-primary transition-all cursor-pointer"
@@ -204,7 +204,7 @@ export function AnnouncementsPanel({
                   </div>
                 </div>
                 
-                <p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-wrap mt-2 bg-surface-2/50 rounded-lg p-3 border border-outline-variant/20">
+                <p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-wrap break-words mt-2 bg-surface-2/50 rounded-lg p-3 border border-outline-variant/20">
                   {a.body}
                 </p>
               </div>

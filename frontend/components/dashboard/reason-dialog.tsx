@@ -25,7 +25,7 @@ export function ReasonDialog({
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300" />
-          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 flex w-[90vw] max-w-sm -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-2xl border border-white/10 bg-surface-1 p-8 shadow-2xl outline-none">
+          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] overflow-y-auto flex w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-2xl border border-white/10 bg-surface-1 p-6 shadow-2xl outline-none sm:p-8">
             <div className="absolute right-4 top-4">
               <Dialog.Close className="rounded-full p-1.5 text-on-surface-variant hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-colors cursor-pointer">
                 <X className="size-5" />

@@ -24,22 +24,9 @@ function LogoImages() {
       <img
         src={`${basePath}/assets/siteLogo.png`}
         alt="İzin Takip Sistemi Logo"
-        className="h-8 w-8 shrink-0 object-contain"
+        className="h-9 w-auto max-w-[140px] shrink-0 object-contain"
       />
     </>
-  );
-}
-
-function BrandText({ className }: { className?: string }) {
-  return (
-    <span
-      className={cn(
-        "truncate text-sm font-semibold leading-tight text-slate-900 tracking-tight",
-        className
-      )}
-    >
-      İzin Takip
-    </span>
   );
 }
 
@@ -55,7 +42,7 @@ export function MobileTopBar() {
   const showDrawer = visibleItems.length > 1;
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between gap-2 border-b border-slate-200 bg-white px-3 md:hidden">
+    <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between gap-2 border-b border-slate-200 bg-white px-3 lg:hidden">
       <div className="flex min-w-0 items-center gap-1">
         {showDrawer && (
           <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -71,14 +58,11 @@ export function MobileTopBar() {
               <Dialog.Popup className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col bg-[#0F172A] p-5 shadow-2xl outline-none transition-transform duration-300 data-[ending-style]:-translate-x-full data-[starting-style]:-translate-x-full">
                 <div className="mb-8 flex items-center justify-between gap-2">
                   <Dialog.Title className="flex min-w-0 items-center gap-2">
-                    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#7b1e2b]">
-                      <img
-                        src={`${basePath}/assets/siteLogo.png`}
-                        alt="İzin Takip"
-                        className="h-4 w-4 object-contain brightness-0 invert"
-                      />
-                    </div>
-                    <span className="text-sm font-semibold text-white tracking-tight">İzin Takip</span>
+                    <img
+                      src={`${basePath}/assets/siteLogo.png`}
+                      alt="İzin Takip"
+                      className="h-9 w-auto max-w-[160px] object-contain brightness-0 invert"
+                    />
                   </Dialog.Title>
                   <Dialog.Close
                     aria-label="Menüyü kapat"
@@ -128,7 +112,7 @@ export function MobileTopBar() {
           aria-label="Genel Bakış"
         >
           <LogoImages />
-          {!showDrawer && <BrandText />}
+          
         </Link>
       </div>
 

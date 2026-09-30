@@ -60,7 +60,7 @@ export function StatCard({
       <div className="flex flex-1 flex-col justify-between p-4 sm:p-5">
         {/* Header */}
         <div className="mb-3 flex items-start justify-between gap-2">
-          <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+          <span className="min-w-0 break-words text-[11px] font-semibold uppercase tracking-wider text-slate-500 sm:text-xs sm:tracking-widest">
             {label}
           </span>
           <Icon className={cn("mt-0.5 size-4 shrink-0", highlight ? "text-red-400" : accentIcon[accent])} />

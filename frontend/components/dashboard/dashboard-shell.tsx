@@ -16,7 +16,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <main
         className={cn(
-          "relative z-10 min-h-screen px-4 pb-10 pt-20 sm:px-4 md:px-6 lg:px-10 xl:px-16 2xl:px-20 md:pt-24 max-w-[1920px] mx-auto"
+          "relative z-10 min-h-screen px-4 pb-10 pt-20 sm:px-4 md:px-6 lg:px-10 xl:px-16 2xl:px-20 lg:pt-24 max-w-[1920px] mx-auto"
         )}
       >
         <div className="space-y-5">{children}</div>

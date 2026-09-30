@@ -61,7 +61,7 @@ export function ConflictWarningDialog({ leaveRequestId, onConfirm, onCancel, ope
     <Dialog.Root open={open} onOpenChange={(o) => { if (!o) onCancel(); }}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
-        <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 flex w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col rounded-2xl border border-white/10 bg-surface-1 p-6 shadow-2xl outline-none">
+        <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] overflow-y-auto flex w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col rounded-2xl border border-white/10 bg-surface-1 p-6 shadow-2xl outline-none">
           <div className="absolute right-4 top-4">
             <Dialog.Close
               onClick={onCancel}

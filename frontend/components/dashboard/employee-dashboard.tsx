@@ -292,7 +292,7 @@ export function EmployeeDashboard() {
         </div>
         <button
           onClick={() => setRequestOpen(true)}
-          className="flex items-center justify-center gap-2 rounded-lg bg-accent-cyan px-4 py-2 text-base font-bold text-white shadow transition-all hover:bg-accent-cyan/90 active:scale-95 cursor-pointer"
+          className="flex items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-accent-cyan px-4 py-2.5 text-base font-bold text-white shadow transition-all hover:bg-accent-cyan/90 active:scale-95 cursor-pointer"
         >
           <CalendarPlus className="size-5" />
           Yeni İzin Talebi
@@ -449,7 +449,7 @@ export function EmployeeDashboard() {
             </MobileCardList>
 
             {/* Masaüstü: tablo */}
-            <div className="hidden overflow-x-auto md:block">
+            <div className="hidden overflow-x-auto lg:block">
               <table className="w-full min-w-[520px] text-left">
                 <thead>
                   <tr className="border-b border-outline-variant/20 font-mono text-xs uppercase tracking-wider text-on-surface-variant/70">

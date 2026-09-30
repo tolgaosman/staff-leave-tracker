@@ -172,7 +172,7 @@ export function OnLeaveTable({
       </MobileCardList>
 
       {/* Masaüstü: tablo */}
-      <div className="hidden overflow-x-auto md:block">
+      <div className="hidden overflow-x-auto lg:block">
         <table className="w-full min-w-[900px] text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">

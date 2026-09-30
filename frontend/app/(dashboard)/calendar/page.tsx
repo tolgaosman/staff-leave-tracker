@@ -139,11 +139,11 @@ export default function CalendarPage() {
           >
             <div className="flex items-center justify-between font-mono text-xs font-bold text-black sm:text-sm">
               <span>{day}</span>
-              <span className="inline-flex rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-black sm:hidden">
-                Tatil
+              <span className="text-[11px] leading-none sm:hidden" aria-label={`Tatil: ${holidayName}`}>
+                🚩
               </span>
             </div>
-            <div className="mt-1.5">
+            <div className="mt-1.5 hidden sm:block">
               <div
                 className="truncate rounded-md border border-amber-500/30 bg-amber-500/15 px-2 py-1 font-sans text-[10px] sm:text-[11px] font-bold text-black shadow-sm"
                 title={`Özel Gün / Resmî Tatil: ${holidayName}`}
@@ -256,9 +256,9 @@ export default function CalendarPage() {
           <p className="font-sans text-base text-on-surface-variant mt-2">
             Personel izinlerinin aylık görünümü.
           </p>
-          <div className="mt-3 flex items-center gap-4 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">
             <span className="flex items-center gap-1.5">
-              <span className="size-3 rounded-sm bg-accent/50" />
+              <span className="size-3 rounded-sm border border-[#e8c5ca] bg-accent" />
               Onaylı
             </span>
             <span className="flex items-center gap-1.5">
@@ -292,6 +292,28 @@ export default function CalendarPage() {
           {renderCells()}
         </div>
       </div>
+
+      {(() => {
+        const y = currentDate.getFullYear();
+        const m = String(currentDate.getMonth() + 1).padStart(2, "0");
+        const monthHolidays = Array.from({ length: daysInMonth }, (_, i) => {
+          const name = getPublicHolidayName(`${y}-${m}-${String(i + 1).padStart(2, "0")}`);
+          return name ? { day: i + 1, name } : null;
+        }).filter((h): h is { day: number; name: string } => h !== null);
+        if (monthHolidays.length === 0) return null;
+        return (
+          <ul className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 sm:hidden">
+            {monthHolidays.map((h) => (
+              <li key={h.day} className="flex items-start gap-2 text-sm font-semibold text-black">
+                <span aria-hidden>🚩</span>
+                <span className="min-w-0 break-words">
+                  {h.day} {monthNames[currentDate.getMonth()]} — {h.name}
+                </span>
+              </li>
+            ))}
+          </ul>
+        );
+      })()}
 
       <CalendarDayDialog
         open={selected !== null}

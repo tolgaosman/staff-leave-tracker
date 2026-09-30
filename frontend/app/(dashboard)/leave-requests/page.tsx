@@ -259,7 +259,7 @@ export default function LeaveRequestsPage() {
                 setEditing(null);
                 setDialogOpen(true);
               }}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent-cyan px-4 py-2 text-base font-bold text-white shadow transition-all hover:opacity-90 active:scale-95 cursor-pointer sm:flex-none"
+              className="flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-accent-cyan px-3 py-2 text-sm font-bold sm:px-4 sm:text-base text-white shadow transition-all hover:opacity-90 active:scale-95 cursor-pointer sm:flex-none"
             >
               <Plus className="size-5" />
               <span>{hasAccess ? "Yeni İzin Oluştur" : "Yeni İzin Talebi"}</span>
@@ -288,7 +288,7 @@ export default function LeaveRequestsPage() {
                 />
               </div>
 
-              <div className="col-span-1 min-w-[140px]">
+              <div className="col-span-1 sm:min-w-[140px]">
                 <CustomSelect
                   ariaLabel="Dönem"
                   value={filters.period}
@@ -307,7 +307,7 @@ export default function LeaveRequestsPage() {
               </div>
 
               {role === "super_admin" && (
-                <div className="col-span-1 min-w-[160px]">
+                <div className="col-span-1 sm:min-w-[160px]">
                   <CustomSelect
                     ariaLabel="Departman"
                     value={filters.department}
@@ -325,7 +325,7 @@ export default function LeaveRequestsPage() {
                 </div>
               )}
 
-              <div className="col-span-1 min-w-[150px]">
+              <div className={`${role === "super_admin" ? "col-span-2" : "col-span-1"} sm:col-span-1 sm:min-w-[150px]`}>
                 <CustomSelect
                   ariaLabel="İzin Türü"
                   value={filters.type}
@@ -485,7 +485,7 @@ export default function LeaveRequestsPage() {
               </MobileCardList>
 
               {/* Masaüstü: tablo */}
-              <div className="glass-panel hidden overflow-hidden rounded-xl md:block">
+              <div className="glass-panel hidden overflow-hidden rounded-xl lg:block">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[800px] text-left border-collapse">
                     <thead>
